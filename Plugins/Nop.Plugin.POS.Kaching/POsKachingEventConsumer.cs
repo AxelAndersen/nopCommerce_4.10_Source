@@ -1,4 +1,5 @@
-﻿using Nop.Core.Domain.Catalog;
+﻿using Newtonsoft.Json;
+using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Media;
 using Nop.Core.Events;
 using Nop.Plugin.POS.Kaching.Models;
@@ -13,7 +14,7 @@ using System.Xml;
 
 namespace Nop.Plugin.POS.Kaching
 {
-    public class POSKachingEventConsumer : IConsumer<EntityUpdatedEvent<Core.Domain.Catalog.Product>> //, IConsumer<EntityInsertedEvent<Product>>
+    public class POSKachingEventConsumer : IConsumer<EntityUpdatedEvent<Core.Domain.Catalog.Product>>
     {
         private readonly ILogger _logger;
         private readonly IProductService _productService;
@@ -75,34 +76,32 @@ namespace Nop.Plugin.POS.Kaching
             List<Variant> variants = new List<Variant>();
             List<Dimension> dimensions = GetDimensions(product, ref variants);
 
-            //if (variants.Count == 1)
-            //{
-            //    kaChingProduct.Product.Barcode = variants[0].Barcode;
-            //}
-            //else if (variants.Count > 0)
-            //{
-            //    kaChingProduct.Product.Variants = variants.ToArray();
-            //    kaChingProduct.Product.Dimensions = dimensions.ToArray();
-            //}
+            if (variants.Count == 1)
+            {
+                kaChingProduct.Product.Barcode = variants[0].Barcode;
+            }
+            else if (variants.Count > 0)
+            {
+                kaChingProduct.Product.Variants = variants.ToArray();
+                kaChingProduct.Product.Dimensions = dimensions.ToArray();
+            }
 
-            //kaChingProduct.Metadata = new Metadata();
-            //kaChingProduct.Metadata.Channels = new Channels();
-            //kaChingProduct.Metadata.Markets = new Markets();
-            //kaChingProduct.Metadata.Channels.Pos = true;
-            //kaChingProduct.Metadata.Channels.Online = true;
-            //kaChingProduct.Metadata.Markets.Dk = true;
+            kaChingProduct.Metadata = new Metadata();
+            kaChingProduct.Metadata.Channels = new Channels();
+            kaChingProduct.Metadata.Markets = new Markets();
+            kaChingProduct.Metadata.Channels.Pos = true;
+            kaChingProduct.Metadata.Channels.Online = true;
+            kaChingProduct.Metadata.Markets.Dk = true;
 
             //kaChingProduct.Product.Tags = SetTags(product);
 
-            //string output = JsonConvert.SerializeObject(kaChingProduct, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore });
-            //return output;
-
-            return "";
+            string output = JsonConvert.SerializeObject(kaChingProduct, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore });
+            return output;            
         }
 
         private List<Dimension> GetDimensions(Core.Domain.Catalog.Product product, ref List<Variant> variants)
         {
-            List<Dimension> dimensions = null;
+            List<Dimension> dimensions = new List<Dimension>();
 
 
             var combinationValues = _productAttributeService.GetAllProductAttributeCombinations(product.Id);
@@ -114,38 +113,70 @@ namespace Nop.Plugin.POS.Kaching
 
             foreach (var combinationValue in combinationValues)
             {
-
-                _logger.Warning("combinationValue: " + combinationValue.Gtin);
-
-
-                variant = new Variant();
-                variant.Barcode = combinationValue.Gtin;
-                variant.Id = combinationValue.Id.ToString();
-
-                var pictureUrl = _pictureService.GetPictureUrl(combinationValue.PictureId);
-                variant.ImageUrl = pictureUrl;
-                variant.DimensionValues = new DimensionValues();
+                _logger.Warning("combinationValue: " + combinationValue.Gtin);               
 
                 XmlDocument attributesXml = new XmlDocument();
                 attributesXml.LoadXml(combinationValue.AttributesXml);
-                foreach(XmlNode node in attributesXml.DocumentElement)
+
+                Value colorValue = null, sizeValue = null;
+
+                foreach (XmlNode node in attributesXml.DocumentElement)
                 {
                     Dimension colorDimension = new Dimension();
                     Dimension sizeDimension = new Dimension();
-                    if (Convert.ToInt32(node.FirstChild.FirstChild.InnerText) == colorAttributeId)
+                    List<Value> colorValues = new List<Value>();
+                    List<Value> sizeValues = new List<Value>();
+
+                    var attributeId = Convert.ToInt32(node.Attributes["ID"].Value);
+                    var attributeValueId = Convert.ToInt32(node.FirstChild.FirstChild.InnerText);
+                    var attributeValue = _productAttributeService.GetProductAttributeValueById(attributeValueId);
+
+                    var mapping = _productAttributeService.GetProductAttributeMappingById(attributeId);
+                    
+
+                    if (mapping.ProductAttributeId == colorAttributeId)
                     {                        
                         colorDimension.Id = "color";
                         colorDimension.Name = "Color";
+
+                        colorValue = new Value();
+                        colorValue.Id = attributeValue.Id.ToString();
+                        colorValue.ImageUrl = _pictureService.GetPictureUrl(attributeValue.PictureId);
+                        colorValue.Name = attributeValue.Name;
+
+                        colorValues.Add(colorValue);
+
+                        colorDimension.Values = colorValues.ToArray();
+                        dimensions.Add(colorDimension);
                     }
-                    else if(Convert.ToInt32(node.FirstChild.FirstChild.InnerText) == sizeAttributeId)
+                    else if(mapping.ProductAttributeId == sizeAttributeId)
                     {
                         sizeDimension.Id = "size";
                         sizeDimension.Name = "Size";
-                    }
-                }
-               
-                variants.Add(variant);
 
+                        sizeValue = new Value();
+                        sizeValue.Id = attributeValue.Id.ToString();                        
+                        sizeValue.Name = attributeValue.Name;
+
+                        sizeValues.Add(sizeValue);
+
+                        sizeDimension.Values = sizeValues.ToArray();
+                        dimensions.Add(sizeDimension);
+                    }
+
+                    variant = new Variant();
+                    variant.Barcode = combinationValue.Gtin;
+                    variant.Id = combinationValue.Id.ToString();
+
+                    var pictureUrl = _pictureService.GetPictureUrl(combinationValue.PictureId);
+                    variant.ImageUrl = pictureUrl;
+                    variant.DimensionValues = new DimensionValues();
+
+                    variant.DimensionValues.Color = colorValue != null ? colorValue.Id : "0";
+                    variant.DimensionValues.Size = sizeValue != null ? sizeValue.Id : "0";
+
+                    variants.Add(variant);
+                }               
             }
 
             //product.

@@ -17,6 +17,7 @@ namespace Nop.Plugin.POS.Kaching
         /// <summary>
         /// Gets a configuration page URL
         /// </summary>
+        /// 
         public override string GetConfigurationPageUrl()
         {
             return $"{_webHelper.GetStoreLocation()}Admin/POSKaching/Configure";
