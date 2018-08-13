@@ -1,0 +1,25 @@
+﻿@model Nop.Plugin.POS.Kaching.Models.KachingConfigurationModel
+@{
+    Layout = "_ConfigurePlugin";
+}
+@inject Nop.Core.IWebHelper webHelper
+
+<form asp-controller="POSKaching" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <p>POS Kaching settings</p>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-editor asp-for="POSKaChingHost" />
+                        <span asp-validation-for="POSKaChingHost"></span>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="POSKaChingId" />
+                        <span asp-validation-for="POSKaChingId"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
