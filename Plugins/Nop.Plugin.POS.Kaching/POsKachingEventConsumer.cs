@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
+using Nop.Core.Configuration;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Media;
 using Nop.Core.Events;
 using Nop.Plugin.POS.Kaching.Models;
 using Nop.Services.Catalog;
+using Nop.Services.Configuration;
 using Nop.Services.Events;
 using Nop.Services.Logging;
 using Nop.Services.Media;
@@ -20,16 +22,20 @@ namespace Nop.Plugin.POS.Kaching
         private readonly IProductService _productService;
         private readonly IPictureService _pictureService;
         private readonly IProductAttributeService _productAttributeService;
+        private readonly ISettingService _settingService;
+        private readonly POSKachingSettings _kachingSettings;
 
         private readonly MediaSettings _mediaSettings;
 
 
-        public POSKachingEventConsumer(ILogger logger, IProductService productService, IPictureService pictureService, IProductAttributeService productAttributeService)
+        public POSKachingEventConsumer(ILogger logger, IProductService productService, IPictureService pictureService, IProductAttributeService productAttributeService, ISettingService settingService, POSKachingSettings kachingSettings)
         {
             this._logger = logger;
             this._productService = productService;
             this._pictureService = pictureService;
             this._productAttributeService = productAttributeService;
+            this._settingService = settingService;
+            this._kachingSettings = kachingSettings;
         }
 
         public void HandleEvent(EntityUpdatedEvent<Core.Domain.Catalog.Product> eventMessage)
@@ -43,6 +49,8 @@ namespace Nop.Plugin.POS.Kaching
                 product = GetProduct(eventMessage);
 
                 var json = BuildJSONString(product);
+                POSKachingService service = new POSKachingService(_kachingSettings);
+                service.SaveProduct(json);
             }
             catch (Exception ex)
             {
