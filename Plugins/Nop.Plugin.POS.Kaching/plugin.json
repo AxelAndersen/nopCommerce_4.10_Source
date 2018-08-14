@@ -1,6 +1,6 @@
 ﻿{
-  "Group": "POS",
-  "FriendlyName": "Point Of Sale",
+  "Group": "Kaching",
+  "FriendlyName": "Point Of Sale (Kaching)",
   "SystemName": "POS.Kaching",
   "Version": "0.1",
   "SupportedVersions": [ "4.10" ],
