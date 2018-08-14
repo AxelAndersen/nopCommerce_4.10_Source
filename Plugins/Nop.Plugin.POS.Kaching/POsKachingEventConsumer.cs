@@ -35,20 +35,31 @@ namespace Nop.Plugin.POS.Kaching
         public void HandleEvent(EntityUpdatedEvent<Core.Domain.Catalog.Product> eventMessage)
         {
             _logger.Information("Handling product update in POS Kaching Plugin");
-            _logger.Information("Product Id: " + eventMessage.Entity.Id);
 
-            var product = _productService.GetProductById(eventMessage.Entity.Id);
+            Core.Domain.Catalog.Product product = null;
+
+            try
+            {
+                product = GetProduct(eventMessage);
+
+                var json = BuildJSONString(product);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("HandleEvent POS Kaching", ex);
+            }
+        }
+
+        private Core.Domain.Catalog.Product GetProduct(EntityUpdatedEvent<Core.Domain.Catalog.Product> eventMessage)
+        {
+            Core.Domain.Catalog.Product product = _productService.GetProductById(eventMessage.Entity.Id);
+
             if (product == null || product.Deleted)
             {
-                _logger.Error("No product found with id: " + eventMessage.Entity.Id);
-            }
-            else
-            {
-                var message = $"Product {product.Name} Found";
-                _logger.Warning(message);
+                throw new ArgumentException("No Product active found with id: " + eventMessage.Entity.Id);
             }
 
-            var prod = BuildJSONString(product);
+            return product;
         }
 
         private string BuildJSONString(Core.Domain.Catalog.Product product)
@@ -69,9 +80,7 @@ namespace Nop.Plugin.POS.Kaching
                 kaChingProduct.Product.ImageUrl = pictureUrl;
 
                 break;
-            }
-
-            _logger.Warning("kaChingProduct.Product.ImageUrl: " + kaChingProduct.Product.ImageUrl);
+            }            
 
             List<Variant> variants = new List<Variant>();
             List<Dimension> dimensions = GetDimensions(product, ref variants);
@@ -93,17 +102,42 @@ namespace Nop.Plugin.POS.Kaching
             kaChingProduct.Metadata.Channels.Online = true;
             kaChingProduct.Metadata.Markets.Dk = true;
 
-            //kaChingProduct.Product.Tags = SetTags(product);
+            kaChingProduct.Product.Tags = SetTags(product);
 
             string output = JsonConvert.SerializeObject(kaChingProduct, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore });
             return output;            
         }
 
+        private Tags SetTags(Core.Domain.Catalog.Product product)
+        {
+            Tags tags = new Tags();
+
+            if (product.ProductCategories != null && product.ProductCategories.Count > 0)
+            {
+                foreach (ProductCategory cat in product.ProductCategories)
+                {                    
+                    switch (cat.Category?.Name)
+                    {
+                        case "Mens clothing": tags.Herretoj = true; break;
+                        case "Womens clothing": tags.Dametoj = true; break;
+                        case "Child wear": tags.Bornetoj = true; break;
+                        case "Back packs": tags.Rygsaekke = true; break;
+                        case "Sleeping bags": tags.Soveposer = true; break;
+                        case "Tents": tags.Telte = true; break;
+                        case "Cooking": tags.Kogegrej = true; break;
+                        case "Travel accessories": tags.Tilbehor = true; break;
+                        case "Footwear": tags.Fodtoj = true; break;
+                        default: tags.Diverse = true; break;
+                    }
+                }
+            }
+           
+            return tags;
+        }
+
         private List<Dimension> GetDimensions(Core.Domain.Catalog.Product product, ref List<Variant> variants)
         {
             List<Dimension> dimensions = new List<Dimension>();
-
-
             var combinationValues = _productAttributeService.GetAllProductAttributeCombinations(product.Id);
 
             int colorAttributeId = 0, sizeAttributeId = 0;
@@ -113,8 +147,6 @@ namespace Nop.Plugin.POS.Kaching
 
             foreach (var combinationValue in combinationValues)
             {
-                _logger.Warning("combinationValue: " + combinationValue.Gtin);               
-
                 XmlDocument attributesXml = new XmlDocument();
                 attributesXml.LoadXml(combinationValue.AttributesXml);
 
@@ -132,7 +164,15 @@ namespace Nop.Plugin.POS.Kaching
                     var attributeValue = _productAttributeService.GetProductAttributeValueById(attributeValueId);
 
                     var mapping = _productAttributeService.GetProductAttributeMappingById(attributeId);
-                    
+                    string imageUrl = "";
+                    if (attributeValue.PictureId > 0)
+                    {
+                        imageUrl = _pictureService.GetPictureUrl(attributeValue.PictureId);
+                    }
+                    else if(product.ProductPictures != null && product.ProductPictures.Count > 0)
+                    {
+                        imageUrl = _pictureService.GetPictureUrl(product.ProductPictures.First().PictureId);
+                    }
 
                     if (mapping.ProductAttributeId == colorAttributeId)
                     {                        
@@ -141,7 +181,7 @@ namespace Nop.Plugin.POS.Kaching
 
                         colorValue = new Value();
                         colorValue.Id = attributeValue.Id.ToString();
-                        colorValue.ImageUrl = _pictureService.GetPictureUrl(attributeValue.PictureId);
+                        colorValue.ImageUrl = imageUrl;
                         colorValue.Name = attributeValue.Name;
 
                         colorValues.Add(colorValue);
@@ -166,10 +206,8 @@ namespace Nop.Plugin.POS.Kaching
 
                     variant = new Variant();
                     variant.Barcode = combinationValue.Gtin;
-                    variant.Id = combinationValue.Id.ToString();
-
-                    var pictureUrl = _pictureService.GetPictureUrl(combinationValue.PictureId);
-                    variant.ImageUrl = pictureUrl;
+                    variant.Id = combinationValue.Id.ToString();                    
+                    variant.ImageUrl = imageUrl;
                     variant.DimensionValues = new DimensionValues();
 
                     variant.DimensionValues.Color = colorValue != null ? colorValue.Id : "0";
@@ -178,123 +216,7 @@ namespace Nop.Plugin.POS.Kaching
                     variants.Add(variant);
                 }               
             }
-
-            //product.
-            //    dimensions = new List<Dimension>();
-            //List<ProductImage> productImages = ProductImage.FetchAllProductImages(productId);
-            //List<Color> colors = Color.FetchAllColorsForProduct(productId, "");
-            //List<Size> sizes = Size.FetchAllSizesForProduct(productId);
-
-            //Dimension colorDimension = null;
-            //bool hasColors = colors.Count > 0;
-            //bool hasSizes = sizes.Count > 0;
-
-            //if (hasColors)
-            //{
-            //    colorDimension = new Dimension();
-            //    colorDimension.Id = "color";
-            //    colorDimension.Name = "Color";
-            //}
-
-            //Dimension sizeDimension = null;
-            //if (hasSizes)
-            //{
-            //    sizeDimension = new Dimension();
-            //    sizeDimension.Id = "size";
-            //    sizeDimension.Name = "Size";
-            //}
-
-            //List<Value> colorValues = new List<Value>();
-            //List<Value> sizeValues = new List<Value>();
-            //Value colorValue = null, sizeValue = null;
-            //Variant variant = null;
-            //List<string> usedColorIds = new List<string>();
-            //List<string> usedSizeIds = new List<string>();
-            //foreach (Product_Size_Color psc in pscs)
-            //{
-            //    string info = "Error in InCollection";
-            //    try
-            //    {
-            //        ProductImage img = productImages.Where(i => i.ColorId == psc.ColorId).FirstOrDefault();
-            //        if (img == null)
-            //        {
-            //            continue;
-            //        }
-
-            //        string imageUrl = Utils.ImageServerUrl + "Huge/" + img.ImageName;
-
-            //        if (psc.InCollection)
-            //        {
-            //            if (hasColors)
-            //            {
-            //                info = "Error in building colorvalue";
-            //                colorValue = new Value();
-            //                colorValue.Id = psc.ColorId.ToString();
-            //                colorValue.ImageUrl = imageUrl;
-            //                colorValue.Name = colors.Where(c => c.Id == psc.ColorId).Select(c => c.DanishName).FirstOrDefault();
-
-            //                if (!usedColorIds.Contains(colorValue.Id))
-            //                {
-            //                    colorValues.Add(colorValue);
-            //                    usedColorIds.Add(colorValue.Id);
-            //                }
-            //            }
-
-            //            if (hasSizes)
-            //            {
-            //                if (psc.SizeId == 0)
-            //                {
-            //                    continue;
-            //                }
-
-            //                info = "Error in building sizevalue";
-            //                sizeValue = new Value();
-            //                sizeValue.Id = psc.SizeId.ToString();
-            //                sizeValue.Name = sizes.Where(s => s.Id == psc.SizeId).Select(s => s.DanishName).FirstOrDefault();
-
-            //                if (!usedSizeIds.Contains(sizeValue.Id))
-            //                {
-            //                    sizeValues.Add(sizeValue);
-            //                    usedSizeIds.Add(sizeValue.Id);
-            //                }
-            //            }
-
-            //            if (hasColors || hasSizes)
-            //            {
-            //                info = "Error in building either colorvalue or sizevalue";
-            //                variant = new Variant();
-            //                variant.Barcode = psc.EAN;
-            //                variant.Id = psc.ProductId + "-" + psc.ColorId + "-" + psc.SizeId;
-            //                variant.ImageUrl = imageUrl;
-            //                variant.DimensionValues = new DimensionValues();
-            //                variant.DimensionValues.Color = hasColors ? colorValue.Id : null;
-            //                variant.DimensionValues.Size = hasSizes ? sizeValue.Id : null;
-
-            //                variants.Add(variant);
-            //            }
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Exception newEx = new Exception(info, ex);
-            //        ErrorLogging.SaveException(newEx, LoggingEnums.LogArea.AdminPOS);
-            //        WebShopMail.SendErrorMail(newEx.Message, newEx.ToString());
-            //    }
-
-
-            //    if (hasColors)
-            //    {
-            //        colorDimension.Values = colorValues.ToArray();
-            //        dimensions.Add(colorDimension);
-            //    }
-
-            //    if (hasSizes)
-            //    {
-            //        sizeDimension.Values = sizeValues.ToArray();
-            //        dimensions.Add(sizeDimension);
-            //    }
-            //}
-
+            
             return dimensions;
         }
 
@@ -312,11 +234,5 @@ namespace Nop.Plugin.POS.Kaching
                 }
             }
         }
-
-        //public void HandleEvent(EntityInsertedEvent<Product> eventMessage)
-        //{
-        //    _logger.Information("Handling product insert in POS Kaching Plugin");
-        //    throw new NotImplementedException();
-        //}
     }
 }
