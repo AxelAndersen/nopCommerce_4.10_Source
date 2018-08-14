@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nop.Core;
 using Nop.Plugin.POS.Kaching.Models;
+using Nop.Services.Catalog;
 using Nop.Services.Configuration;
+using Nop.Services.Logging;
+using Nop.Services.Media;
 using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework;
-using Nop.Web.Framework.Controllers;
 using Nop.Web.Framework.Mvc.Filters;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Nop.Plugin.POS.Kaching.Controller
 {
@@ -15,13 +16,21 @@ namespace Nop.Plugin.POS.Kaching.Controller
     [Area(AreaNames.Admin)]
     public class POSKachingController : BaseAdminController
     {
+        private readonly ILogger _logger;
         private readonly POSKachingSettings _kachingSettings;
         private readonly ISettingService _settingService;
+        private readonly IProductService _productService;
+        private readonly IPictureService _pictureService;
+        private readonly IProductAttributeService _productAttributeService;
 
-        public POSKachingController(POSKachingSettings kachingSettings, ISettingService settingService)
+        public POSKachingController(ILogger logger, POSKachingSettings kachingSettings, ISettingService settingService, IPictureService pictureService, IProductAttributeService productAttributeService, IProductService productService)
         {
-            _kachingSettings = kachingSettings;
-            _settingService = settingService;
+            this._logger = logger;
+            this._kachingSettings = kachingSettings;
+            this._settingService = settingService;
+            this._productService = productService;
+            this._pictureService = pictureService;
+            this._productAttributeService = productAttributeService;
         }
 
         [AuthorizeAdmin]
@@ -59,5 +68,31 @@ namespace Nop.Plugin.POS.Kaching.Controller
 
             return Configure();
         }
+
+        [HttpPost]
+        [AuthorizeAdmin]
+        [AdminAntiForgery]
+        [Area(AreaNames.Admin)]
+        public IActionResult SendAllProducts()
+        {
+            IPagedList<Core.Domain.Catalog.Product> products = _productService.SearchProducts();
+
+            foreach(Core.Domain.Catalog.Product product in products)
+            {
+                try
+                {
+                    POSKachingService service = new POSKachingService(_kachingSettings, _pictureService, _productAttributeService);
+                    var json = service.BuildJSONString(product);
+                    
+                    service.SaveProduct(json);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error("HandleEvent POS Kaching", ex);
+                }
+            }
+
+            return Configure();
+        }        
     }
 }
