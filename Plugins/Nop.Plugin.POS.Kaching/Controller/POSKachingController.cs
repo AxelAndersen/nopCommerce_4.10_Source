@@ -37,21 +37,17 @@ namespace Nop.Plugin.POS.Kaching.Controller
         [Area(AreaNames.Admin)]
         public IActionResult Configure()
         {
-            KachingConfigurationModel model = GetBaseModel();
-
-            return View("~/Plugins/Nop.Plugin.POS.Kaching/Views/Configure.cshtml", model);
-        }
-
-        private KachingConfigurationModel GetBaseModel()
-        {
-            return new KachingConfigurationModel
+            KachingConfigurationModel model = null;
+            try
             {
-                POSKaChingHost = _kachingSettings.POSKaChingHost,
-                POSKaChingId = _kachingSettings.POSKaChingId,
-                POSKaChingAccountToken = _kachingSettings.POSKaChingAccountToken,
-                POSKaChingAPIToken = _kachingSettings.POSKaChingAPIToken,
-                POSKaChingImportQueueName = _kachingSettings.POSKaChingImportQueueName
-            };
+                model = GetBaseModel();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Configure POS Kaching", ex);
+                model.ErrorMessage += "<br />" + ex.Message;
+            }
+            return View("~/Plugins/Nop.Plugin.POS.Kaching/Views/Configure.cshtml", model);
         }
 
         [HttpPost]
@@ -63,14 +59,21 @@ namespace Nop.Plugin.POS.Kaching.Controller
             if (!ModelState.IsValid)
                 return Configure();
 
-            _kachingSettings.POSKaChingHost = model.POSKaChingHost;
-            _kachingSettings.POSKaChingId = model.POSKaChingId;
-            _kachingSettings.POSKaChingAccountToken = model.POSKaChingAccountToken;
-            _kachingSettings.POSKaChingAPIToken = model.POSKaChingAPIToken;
-            _kachingSettings.POSKaChingImportQueueName = model.POSKaChingImportQueueName;
+            try
+            {
+                _kachingSettings.POSKaChingHost = model.POSKaChingHost;
+                _kachingSettings.POSKaChingId = model.POSKaChingId;
+                _kachingSettings.POSKaChingAccountToken = model.POSKaChingAccountToken;
+                _kachingSettings.POSKaChingAPIToken = model.POSKaChingAPIToken;
+                _kachingSettings.POSKaChingImportQueueName = model.POSKaChingImportQueueName;
 
-            _settingService.SaveSetting(_kachingSettings);
-
+                _settingService.SaveSetting(_kachingSettings);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Configure POS Kaching", ex);
+                model.ErrorMessage += "<br />" + ex.Message;
+            }
             return Configure();
         }
 
@@ -96,8 +99,8 @@ namespace Nop.Plugin.POS.Kaching.Controller
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error("HandleEvent POS Kaching", ex);
-                    model.ErrorMessage = ex.ToString();
+                    _logger.Error("Configure POS Kaching", ex);
+                    model.ErrorMessage += "<br />" + ex.Message;
                 }
             }
 
@@ -106,7 +109,7 @@ namespace Nop.Plugin.POS.Kaching.Controller
                 model.ProductsTransferred = "Products transferred: " + count;
             }
 
-            return View("Configure", model);
+            return View("~/Plugins/Nop.Plugin.POS.Kaching/Views/Configure.cshtml", model);
         }
 
         [HttpPost]
@@ -115,12 +118,12 @@ namespace Nop.Plugin.POS.Kaching.Controller
         [Area(AreaNames.Admin)]
         public IActionResult TestConnection()
         {
-
             KachingConfigurationModel model = GetBaseModel();
 
             try
             {
                 POSKachingService service = new POSKachingService(_kachingSettings, _pictureService, _productAttributeService);
+                
                 if(service.TestConnection)
                 {
                     model.KachingAliveValue = "Kaching is alive";
@@ -133,9 +136,22 @@ namespace Nop.Plugin.POS.Kaching.Controller
             catch (Exception ex)
             {
                 _logger.Error("HandleEvent POS Kaching", ex);
+                model.ErrorMessage = ex.Message;
             }
             
             return View("~/Plugins/Nop.Plugin.POS.Kaching/Views/Configure.cshtml", model);
+        }
+
+        private KachingConfigurationModel GetBaseModel()
+        {
+            return new KachingConfigurationModel
+            {
+                POSKaChingHost = _kachingSettings.POSKaChingHost,
+                POSKaChingId = _kachingSettings.POSKaChingId,
+                POSKaChingAccountToken = _kachingSettings.POSKaChingAccountToken,
+                POSKaChingAPIToken = _kachingSettings.POSKaChingAPIToken,
+                POSKaChingImportQueueName = _kachingSettings.POSKaChingImportQueueName
+            };
         }
     }
 }
