@@ -2,6 +2,7 @@
 using Nop.Core.Plugins;
 using Nop.Services.Common;
 using Nop.Services.Configuration;
+using Nop.Services.Localization;
 using System;
 
 namespace Nop.Plugin.POS.Kaching
@@ -10,11 +11,13 @@ namespace Nop.Plugin.POS.Kaching
     {
         private readonly IWebHelper _webHelper;
         private readonly ISettingService _settingService;
+        private readonly ILocalizationService _localizationService;
 
-        public KachingPlugin(IWebHelper webHelper, ISettingService settingService)
+        public KachingPlugin(IWebHelper webHelper, ISettingService settingService, ILocalizationService localizationService)
         {
             this._webHelper = webHelper;
             this._settingService = settingService;
+            this._localizationService = localizationService;
         }
 
         /// <summary>
@@ -33,6 +36,13 @@ namespace Nop.Plugin.POS.Kaching
         {
             //settings
             _settingService.SaveSetting(new POSKachingSettings());
+
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.POS.Kaching.KaChingHost", "Kaching host");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.POS.Kaching.POSKaChingId", "Kaching Id");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.POS.Kaching.POSKaChingAccountToken", "Kaching Account Token");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.POS.Kaching.POSKaChingAPIToken", "Kaching API Token");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.POS.Kaching.POSKaChingImportQueueName", "Kaching ImportQueue name");            
+
 
             base.Install();
         }

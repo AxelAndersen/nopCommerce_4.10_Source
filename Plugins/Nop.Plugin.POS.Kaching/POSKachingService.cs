@@ -19,6 +19,14 @@ namespace Nop.Plugin.POS.Kaching
         private readonly IPictureService _pictureService;
         private readonly IProductAttributeService _productAttributeService;
 
+        public bool TestConnection
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         public POSKachingService(POSKachingSettings kachingSettings, IPictureService pictureService, IProductAttributeService productAttributeService)
         {           
             this._posKachingSettings = kachingSettings;

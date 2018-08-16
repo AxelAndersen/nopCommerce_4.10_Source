@@ -37,7 +37,14 @@ namespace Nop.Plugin.POS.Kaching.Controller
         [Area(AreaNames.Admin)]
         public IActionResult Configure()
         {
-            var model = new KachingConfigurationModel
+            KachingConfigurationModel model = GetBaseModel();
+
+            return View("~/Plugins/Nop.Plugin.POS.Kaching/Views/Configure.cshtml", model);
+        }
+
+        private KachingConfigurationModel GetBaseModel()
+        {
+            return new KachingConfigurationModel
             {
                 POSKaChingHost = _kachingSettings.POSKaChingHost,
                 POSKaChingId = _kachingSettings.POSKaChingId,
@@ -45,8 +52,6 @@ namespace Nop.Plugin.POS.Kaching.Controller
                 POSKaChingAPIToken = _kachingSettings.POSKaChingAPIToken,
                 POSKaChingImportQueueName = _kachingSettings.POSKaChingImportQueueName
             };
-
-            return View("~/Plugins/Nop.Plugin.POS.Kaching/Views/Configure.cshtml", model);
         }
 
         [HttpPost]
@@ -54,7 +59,7 @@ namespace Nop.Plugin.POS.Kaching.Controller
         [AdminAntiForgery]
         [Area(AreaNames.Admin)]
         public IActionResult Configure(KachingConfigurationModel model)
-        {            
+        {
             if (!ModelState.IsValid)
                 return Configure();
 
@@ -63,7 +68,7 @@ namespace Nop.Plugin.POS.Kaching.Controller
             _kachingSettings.POSKaChingAccountToken = model.POSKaChingAccountToken;
             _kachingSettings.POSKaChingAPIToken = model.POSKaChingAPIToken;
             _kachingSettings.POSKaChingImportQueueName = model.POSKaChingImportQueueName;
-            
+
             _settingService.SaveSetting(_kachingSettings);
 
             return Configure();
@@ -75,24 +80,62 @@ namespace Nop.Plugin.POS.Kaching.Controller
         [Area(AreaNames.Admin)]
         public IActionResult SendAllProducts()
         {
-            IPagedList<Core.Domain.Catalog.Product> products = _productService.SearchProducts();
+            KachingConfigurationModel model = GetBaseModel();
 
-            foreach(Core.Domain.Catalog.Product product in products)
+            IPagedList<Core.Domain.Catalog.Product> products = _productService.SearchProducts();                      
+            int count = 0;
+            foreach (Core.Domain.Catalog.Product product in products)
             {
                 try
                 {
                     POSKachingService service = new POSKachingService(_kachingSettings, _pictureService, _productAttributeService);
                     var json = service.BuildJSONString(product);
-                    
+
                     service.SaveProduct(json);
+                    count++;
                 }
                 catch (Exception ex)
                 {
                     _logger.Error("HandleEvent POS Kaching", ex);
+                    model.ErrorMessage = ex.ToString();
                 }
             }
 
-            return Configure();
-        }        
+            if (count > 0)
+            {
+                model.ProductsTransferred = "Products transferred: " + count;
+            }
+
+            return View("Configure", model);
+        }
+
+        [HttpPost]
+        [AuthorizeAdmin]
+        [AdminAntiForgery]
+        [Area(AreaNames.Admin)]
+        public IActionResult TestConnection()
+        {
+
+            KachingConfigurationModel model = GetBaseModel();
+
+            try
+            {
+                POSKachingService service = new POSKachingService(_kachingSettings, _pictureService, _productAttributeService);
+                if(service.TestConnection)
+                {
+                    model.KachingAliveValue = "Kaching is alive";
+                }
+                else
+                {
+                    model.KachingAliveValue = "Kaching is dead";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("HandleEvent POS Kaching", ex);
+            }
+            
+            return View("~/Plugins/Nop.Plugin.POS.Kaching/Views/Configure.cshtml", model);
+        }
     }
 }
