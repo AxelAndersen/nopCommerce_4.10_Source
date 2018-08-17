@@ -27,6 +27,7 @@ namespace Nop.Plugin.POS.Kaching.Models
         [Display(Name ="Kaching alive")]
         public string KachingAlive { get; set; }
         public string KachingAliveValue { get; set; }
+        public string KachingIsDead { get; set; }
         public string ProductsTransferred { get; set; }
         public string ErrorMessage { get; set; }
     }

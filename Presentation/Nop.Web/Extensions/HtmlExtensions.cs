@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core;
@@ -271,6 +273,14 @@ namespace Nop.Web.Extensions
                 return localizationService.GetLocalized(topic, x => x.Title);
             });
             return cachedTitle;
+        }
+
+        public static string StripHTML(this string input)
+        {
+            string stripped = Regex.Replace(input, "<.*?>", String.Empty);
+            stripped = stripped.Replace("[b]", "").Replace("[/b]", "").Replace("[br]", ",").Replace("[br/]", ",");
+
+            return stripped.Trim();
         }
     }
 }

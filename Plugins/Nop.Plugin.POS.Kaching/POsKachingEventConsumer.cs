@@ -40,7 +40,7 @@ namespace Nop.Plugin.POS.Kaching
             try
             {
                 product = GetProduct(eventMessage);
-                POSKachingService service = new POSKachingService(_kachingSettings, _pictureService, _productAttributeService);
+                POSKachingService service = new POSKachingService(_logger, _kachingSettings, _settingService, _pictureService, _productAttributeService);
                 var json = service.BuildJSONString(product);
                 
                 service.SaveProduct(json);

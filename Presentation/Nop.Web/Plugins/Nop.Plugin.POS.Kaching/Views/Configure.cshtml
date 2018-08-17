@@ -94,9 +94,12 @@
                     <div class="col-md-9 col-md-offset-3">
                         <input type="submit" name="TestConnection" class="btn bg-primary" value="Test connection" />
                     </div>
-                    <div  class="col-md-9 col-md-offset-3 field-validation-error">
+                    <div  class="col-md-9 col-md-offset-3" style="color:green;">
                         @(Model.KachingAliveValue)
-                    </div>                    
+                    </div>
+                    <div class="col-md-9 col-md-offset-3 field-validation-error">
+                        @(Model.KachingIsDead)
+                    </div>
                 </div>
             </div>
         </div>

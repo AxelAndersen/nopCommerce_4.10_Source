@@ -91,7 +91,7 @@ namespace Nop.Plugin.POS.Kaching.Controller
             {
                 try
                 {
-                    POSKachingService service = new POSKachingService(_kachingSettings, _pictureService, _productAttributeService);
+                    POSKachingService service = new POSKachingService(_logger, _kachingSettings, _settingService, _pictureService, _productAttributeService);
                     var json = service.BuildJSONString(product);
 
                     service.SaveProduct(json);
@@ -122,15 +122,15 @@ namespace Nop.Plugin.POS.Kaching.Controller
 
             try
             {
-                POSKachingService service = new POSKachingService(_kachingSettings, _pictureService, _productAttributeService);
+                POSKachingService service = new POSKachingService(_logger, _kachingSettings, _settingService, _pictureService, _productAttributeService);
                 
-                if(service.TestConnection)
+                if(service.TestConnection())
                 {
                     model.KachingAliveValue = "Kaching is alive";
                 }
                 else
                 {
-                    model.KachingAliveValue = "Kaching is dead";
+                    model.KachingIsDead = "Kaching is dead";
                 }
             }
             catch (Exception ex)

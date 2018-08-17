@@ -4,51 +4,79 @@ using Nop.Core.Domain.Catalog;
 using Nop.Plugin.POS.Kaching.Models;
 using Nop.Services.Catalog;
 using Nop.Services.Configuration;
+using Nop.Services.Logging;
 using Nop.Services.Media;
+using Nop.Web.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Xml;
 
 namespace Nop.Plugin.POS.Kaching
 {
     public class POSKachingService
-    {       
-        private POSKachingSettings _posKachingSettings;
+    {
+        private readonly ILogger _logger;
+        private POSKachingSettings _kachingSettings;
         private readonly IPictureService _pictureService;
         private readonly IProductAttributeService _productAttributeService;
+        private readonly ISettingService _settingService;
+        
+        /// Result for test: https://us-central1-ka-ching-base-test.cloudfunctions.net/imports/product?account=-LBPew-z0swWOy1bacZZ&accountkey=55da0abc-e877-4fd0-8612-6c96ac3c78fd&apikey=0690a383-68e0-4716-b27d-726987b6d31f&integration=friliv
+        private static string _apiUrl = "https://[Host]/imports/product?account=[Id]&accountkey=[AccountToken]&apikey=[APIToken]&integration=[ImportQueueName]";
+        private static string _pingUrl = "https://[Host]/info";
 
-        public bool TestConnection
+        public POSKachingService(ILogger logger, POSKachingSettings kachingSettings, ISettingService settingService, IPictureService pictureService, IProductAttributeService productAttributeService)
         {
-            get
-            {
-                return false;
-            }
-        }
-
-        public POSKachingService(POSKachingSettings kachingSettings, IPictureService pictureService, IProductAttributeService productAttributeService)
-        {           
-            this._posKachingSettings = kachingSettings;
+            this._logger = logger;
+            this._kachingSettings = kachingSettings;
             this._pictureService = pictureService;
+            this._settingService = settingService;
             this._productAttributeService = productAttributeService;
+
+            _apiUrl = _apiUrl.Replace("[Host]", this._kachingSettings.POSKaChingHost)
+                            .Replace("[Id]", this._kachingSettings.POSKaChingId)
+                            .Replace("[AccountToken]", this._kachingSettings.POSKaChingAccountToken)
+                            .Replace("[APIToken]", this._kachingSettings.POSKaChingAPIToken)
+                            .Replace("[ImportQueueName]", this._kachingSettings.POSKaChingImportQueueName);
+
+            _pingUrl = _pingUrl.Replace("[Host]", this._kachingSettings.POSKaChingHost); 
         }
 
         public void SaveProduct(string json)
         {
-            //var test = _settingService.GetSettingByKey<POSKachingSettings>("Test");
+            string result = "";
+            using (var client = new WebClient())
+            {
+                client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                client.Encoding = Encoding.UTF8;
 
-            var posKaChingAccountToken = _posKachingSettings.POSKaChingAccountToken;
+                try
+                {
+                    result = client.UploadString(_apiUrl, "POST", json);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex.Message, ex);
+                }
+            }            
+        }
 
-            var test = "";
-            //if(string.IsNullOrEmpty(posKaChingAccountToken.Value))
-            //{
-            //    _posKachingSettings.POSKaChingAccountToken = "dd";
-            //    _settingService.SetSetting("POSKaChingAccountToken", _posKachingSettings.POSKaChingAccountToken);
-            //}
-            
+        public bool TestConnection()
+        {
+            bool alive = false;           
 
-            
+            using (var client = new WebClient())
+            {
+                using (client.OpenRead(_pingUrl))
+                {
+                    alive = true;
+                }
+            }
+
+            return alive;            
         }
 
         public string BuildJSONString(Core.Domain.Catalog.Product product)
@@ -60,7 +88,7 @@ namespace Nop.Plugin.POS.Kaching
             kaChingProduct.Product.Name = new Description();
             kaChingProduct.Product.Name.Da = kaChingProduct.Product.Name.En = product.Name;
             kaChingProduct.Product.Description = new Description();
-            kaChingProduct.Product.Description.Da = kaChingProduct.Product.Description.En = product.FullDescription;
+            kaChingProduct.Product.Description.Da = kaChingProduct.Product.Description.En = product.FullDescription.StripHTML();
             kaChingProduct.Product.RetailPrice = (long)product.Price;
 
             foreach (var pp in product.ProductPictures)
