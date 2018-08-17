@@ -274,13 +274,5 @@ namespace Nop.Web.Extensions
             });
             return cachedTitle;
         }
-
-        public static string StripHTML(this string input)
-        {
-            string stripped = Regex.Replace(input, "<.*?>", String.Empty);
-            stripped = stripped.Replace("[b]", "").Replace("[/b]", "").Replace("[br]", ",").Replace("[br/]", ",");
-
-            return stripped.Trim();
-        }
     }
 }

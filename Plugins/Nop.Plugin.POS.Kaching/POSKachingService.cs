@@ -1,12 +1,11 @@
 ﻿using Newtonsoft.Json;
-using Nop.Core.Configuration;
 using Nop.Core.Domain.Catalog;
+using Nop.Plugin.POS.Kaching.Extensions;
 using Nop.Plugin.POS.Kaching.Models;
 using Nop.Services.Catalog;
 using Nop.Services.Configuration;
 using Nop.Services.Logging;
 using Nop.Services.Media;
-using Nop.Web.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
