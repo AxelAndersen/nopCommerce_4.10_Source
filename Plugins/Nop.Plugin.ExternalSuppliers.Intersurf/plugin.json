@@ -1,0 +1,11 @@
+﻿{
+  "Group": "External suppliers",
+  "FriendlyName": "Intersurf",
+  "SystemName": "ExternalSuppliers.Intersurf",
+  "Version": "0.1",
+  "SupportedVersions": [ "4.10" ],
+  "Author": "Axel Andersen [Andersen Outdoor ApS]",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.ExternalSuppliers.Intersurf.dll",
+  "Description": "This plugin will keep Intersurf products up to date"
+}

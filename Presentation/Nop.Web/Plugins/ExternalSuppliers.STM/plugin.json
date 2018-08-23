@@ -1,0 +1,11 @@
+﻿{
+  "Group": "External suppliers",
+  "FriendlyName": "STM",
+  "SystemName": "ExternalSuppliers.STM",
+  "Version": "0.1",
+  "SupportedVersions": [ "4.10" ],
+  "Author": "Axel Andersen [Andersen Outdoor ApS]",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.ExternalSuppliers.STM.dll",
+  "Description": "This plugin will keep STM products up to date"
+}

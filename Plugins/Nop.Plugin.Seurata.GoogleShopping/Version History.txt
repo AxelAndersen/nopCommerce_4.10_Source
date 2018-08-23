@@ -1,0 +1,5 @@
+﻿Version 1.0.1
+- Minor fixes related to refresh on publish.
+
+Version 1.0.0
+- This plugin helps nop products get into your Google Merchant account.

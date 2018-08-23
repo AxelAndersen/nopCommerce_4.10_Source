@@ -1,0 +1,115 @@
+﻿@using Nop.Core.Domain.Common
+@inject AdminAreaSettings adminAreaSettings
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+}
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="error-shopping-products-grid"></div>
+
+                    <script>
+                            $(document).ready(function() {
+                                $("#error-shopping-products-grid").kendoGrid({
+                                    dataSource: {
+                                        type: "json",
+                                        transport: {
+                                            read: {
+                                                url: "@Html.Raw(Url.Action("ErrorGoogleShoppingProductList", "SeurataGoogleShopping"))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: additionalData
+                                            }
+                                        },
+                                        schema: {
+                                            data: "Data",
+                                            total: "Total",
+                                            errors: "Errors"
+                                        },
+                                        error: function(e) {
+                                            display_kendoui_grid_error(e);
+                                            // Cancel the changes
+                                            this.cancelChanges();
+                                        },
+                                        pageSize: @(defaultGridPageSize),
+                                        serverPaging: true,
+                                        serverFiltering: true,
+                                        serverSorting: true
+                                    },
+                                    pageable: {
+                                        refresh: true,
+                                        pageSizes: [@(gridPageSizes)],
+                                        @await Html.PartialAsync("~/Areas/Admin/Views/Shared/_GridPagerMessages.cshtml")
+                                    },
+                                    editable: {
+                                        confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                        mode: "inline"
+                                    },
+                                    scrollable: false,
+                                    dataBound: onDataBound,
+                                    columns: [{
+                                        field: "Id",
+                                        headerTemplate: "<input id='mastercheckboxerror' type='checkbox'/>",
+                                        headerAttributes: { style: "text-align:center" },
+                                        attributes: { style: "text-align:center" },
+                                        template: "<input type='checkbox' value='#=Id#' class='checkboxGroupsError'/>",
+                                        width: 50,
+                                        sortable: false,
+                                        filterable: false
+                                    },
+                                       {
+                                            field: "ImageUrl",
+                                            title: "@T("Plugins.Seurata.GoogleShopping.Products.Fields.ImageUrl")",
+                                            template: '<img src="#=ImageUrl#" width="75" height="75"/>',
+                                            width: 100,
+                                            sortable: false,
+                                            filterable: false
+                                        },
+                                       {
+                                            field: "Name",
+                                            title: "@T("Plugins.Seurata.GoogleShopping.Products.Fields.Name")",
+                                            template: '<a href="Edit/#=Id#">#= Name # </a> <br/> <span style="margin-top: 5px; display: inline-block; ' +
+                                            '# if(StockAvailabilityStatusId == 1) {# background: \\#d6e4e4;color:black  #} #' +
+                                            '# if(StockAvailabilityStatusId == 5) {# background: \\#f1f1f1;color:\\#999999 #} #' +
+                                            '# if(StockAvailabilityStatusId == 10) {# background: \\#f1f1f1;color:\\#999999 #} #' +
+                                            '" class="grid-report-item">#=StockAvailabilityStatus#</span>',
+                                            width: 250
+                                        },
+                                        {
+                                            field: "Sku",
+                                            title: "@T("Plugins.Seurata.GoogleShopping.Products.Fields.Sku")",
+                                            width: 100
+                                        },
+                                        {
+                                            field: "ErrorList",
+                                            title: "Errors",
+                                            template: '<a href="javascript:void(0)" onclick="OpenModalPopup(\'#=GoogleProductId#\')">View Errors</a>',
+                                            width: 300
+                                        },
+                                        {
+                                            field: "Id",
+                                            title: "@T("Admin.Common.Edit")",
+                                            width: 100,
+                                            headerAttributes: { style: "text-align:center" },
+                                            attributes: { style: "text-align:center" },
+                                            template: '<a class="btn btn-default" href="Edit/#=Id#"><i class="fa fa-pencil"></i>@T("Admin.Common.Edit")</a>',
+                                            sortable: false,
+                                            filterable: false
+                                        }
+                                    ]
+                                });
+                            });
+                    </script>
+                    <br />
+                    <div class="text-center"><a href="https://www.seurata.com/" target="_blank"><img alt="https://www.seurata.com" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIwAAAAZCAYAAADja8bOAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2xpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTM4IDc5LjE1OTgyNCwgMjAxNi8wOS8xNC0wMTowOTowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDphMjJmMmRmYi1mNzA5LTQyMzgtOTlhZS1hMjlhNzZjODgxZWUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MjA4RTA5NzAwOEM3MTFFOEE4MkFDRTRBMTUyOUFFMzUiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MjA4RTA5NkYwOEM3MTFFOEE4MkFDRTRBMTUyOUFFMzUiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBXaW5kb3dzIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6Qjg0REJCNDEyNzlERTcxMTg0M0FFOTQ1QzQ2QjdFQTQiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6YTIyZjJkZmItZjcwOS00MjM4LTk5YWUtYTI5YTc2Yzg4MWVlIi8+IDwvcmRmOkRl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"></a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

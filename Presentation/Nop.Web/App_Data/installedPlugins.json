@@ -13,5 +13,8 @@
   "Tax.FixedOrByCountryStateZip",
   "Widgets.GoogleAnalytics",
   "Widgets.NivoSlider",
-  "POS.Kaching"
+  "POS.Kaching",
+  "Nop.Plugin.Seurata.GoogleShopping",
+  "ExternalSuppliers.STM",
+  "ExternalSuppliers.Intersurf"
 ]

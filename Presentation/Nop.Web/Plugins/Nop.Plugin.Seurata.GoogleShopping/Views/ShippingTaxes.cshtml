@@ -1,0 +1,474 @@
+﻿@model ShippingTaxesModel
+@using Nop.Plugin.Seurata.GoogleShopping.Models;
+@using Nop.Plugin.Seurata.GoogleShopping.Constants;
+@using Nop.Web.Framework.UI
+@{
+    Layout = ViewNames.AdminLayout;
+    Html.AddCssFileParts(ViewNames.GoogleShoppingStyles);
+    Html.SetActiveMenuItemSystemName("Seurata.GoogleShopping.Setting.TaxShipping");
+}
+
+<div class="content-header clearfix">
+    @await Component.InvokeAsync("StoreScopeConfiguration")
+</div>
+
+@{ int mainData = 0; int carrierData = 0; int i = 0; int j = 0; }
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                @if (!string.IsNullOrEmpty(Model.AccountConfigured))
+                {
+                    <div class="panel-body">
+                        <h2>@Model.AccountConfigured</h2>
+                    </div>
+                }
+                else
+                {
+                    <div class="panel-body">
+                        <h2>Tax Rate(s)</h2>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Country</th>
+                                    <th>Rate Percent</th>
+                                    <th>Shipping Taxable ?</th>
+                                    <th>Use Global Ship Rate ?</th>
+                                </tr>
+                                @if (Model.TaxData != null && Model.TaxData.Count > 0)
+                                {
+                                    foreach (var data in Model.TaxData)
+                                    {
+                                        <tr>
+                                            <td>@data.Country</td>
+                                            @if (!string.IsNullOrEmpty(data.RatePercent))
+                                            {
+                                                <td>@data.RatePercent %</td>
+                                            }
+                                            else
+                                            {
+                                                <td></td>
+                                            }
+                                            @if (data.ShippingTaxed != null)
+                                            {
+                                                <td>@((bool)data.ShippingTaxed ? "Yes" : "No")</td>
+                                            }
+                                            else
+                                            {
+                                                <td></td>
+                                            }
+                                            @if (data.UseGlobalRate != null)
+                                            {
+                                                <td>@((bool)data.UseGlobalRate ? "Yes" : "No")</td>
+                                            }
+                                            else
+                                            {
+                                                <td></td>
+                                            }
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    @:
+                                    <tr><td><span style="color:red">Configure Tax in your merchant center account. <a href="@Model.TaxConfigureLink" target="_blank">Visit Merchant Center</a></span></td></tr>
+                                }
+                            </table>
+                        </div>
+
+                        <h2>Shipping Rate(s)</h2>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Delivery Country</th>
+                                    <th>Currency</th>
+                                    <th>Min Delivery Time</th>
+                                    <th>Max Delivery Time</th>
+                                    <th>Status</th>
+                                    <th>Rate Table</th>
+                                </tr>
+                                @if (Model.ShippingData != null && Model.ShippingData.Count > 0)
+                                {
+                                    foreach (var data in Model.ShippingData)
+                                    {
+                                        <tr>
+                                            <td>@data.Name</td>
+                                            <td>@data.DeliveryCountry</td>
+                                            <td>@data.Currency</td>
+                                            @if (data.DeliveryTime != null)
+                                            {
+                                                <td>@data.DeliveryTime.MinTransitTimeInDays</td>
+                                                <td>@data.DeliveryTime.MaxTransitTimeInDays</td>
+                                            }
+                                            else
+                                            {
+                                                <td></td>
+                                                <td></td>
+                                            }
+                                            <td>@((bool)data.Active ? Html.Raw("<span style='color:green'>Active</span>") : Html.Raw("<span style='color:red'>In-Active</span>"))</td>
+                                            <td><a href="javascript:void(0)" onclick="getShipData('shipData_@mainData')">View</a></td>
+                                        </tr>
+                                        <tr style="display:none">
+                                            <td>
+                                                <div id="shipData_@mainData" style="display:none">
+                                                    @foreach (var rg in data.RateGroups)
+                                                    {
+                                                        <table class="table">
+                                                            @if (rg.MainTable != null)
+                                                            {
+                                                                if (rg.MainTable.Rows != null)
+                                                                {
+                                                                    { i = 0; }
+                                                                    foreach (var mtrows in rg.MainTable.Rows)
+                                                                    {
+                                                                        <tr>
+                                                                            <td>
+                                                                                <table class="table table-bordered">
+                                                                                    @{j = 0;}
+                                                                                    <tr>
+                                                                                        @if (rg.MainTable.RowHeaders != null)
+                                                                                        {
+                                                                                            if (rg.MainTable.RowHeaders.Prices != null && i < rg.MainTable.RowHeaders.Prices.Count && rg.MainTable.RowHeaders.Prices[i] != null)
+                                                                                            {
+                                                                                                <th>Order Price</th>
+                                                                                            }
+                                                                                            if (rg.MainTable.RowHeaders.Weights != null && i < rg.MainTable.RowHeaders.Weights.Count && rg.MainTable.RowHeaders.Weights[i] != null)
+                                                                                            {
+                                                                                                <th>Order Weight</th>
+                                                                                            }
+                                                                                            if (rg.MainTable.RowHeaders.NumberOfItems != null && i < rg.MainTable.RowHeaders.NumberOfItems.Count && rg.MainTable.RowHeaders.NumberOfItems[i] != null)
+                                                                                            {
+                                                                                                <th>Number of Items</th>
+                                                                                            }
+                                                                                            if (rg.MainTable.RowHeaders.PostalCodeGroupNames != null && i < rg.MainTable.RowHeaders.PostalCodeGroupNames.Count && !string.IsNullOrEmpty(rg.MainTable.RowHeaders.PostalCodeGroupNames[i]))
+                                                                                            {
+                                                                                                <th>Postal Code Group Name</th>
+                                                                                            }
+                                                                                            if (rg.MainTable.RowHeaders.Locations != null && i < rg.MainTable.RowHeaders.Locations.Count && rg.MainTable.RowHeaders.Locations[i] != null)
+                                                                                            {
+                                                                                                <th>Location Id(s)</th>
+                                                                                            }
+                                                                                        }
+                                                                                        @if (rg.MainTable.ColumnHeaders != null)
+                                                                                        {
+                                                                                            if (rg.MainTable.ColumnHeaders.Prices != null && j < rg.MainTable.ColumnHeaders.Prices.Count && rg.MainTable.ColumnHeaders.Prices[j] != null)
+                                                                                            {
+                                                                                                <th>Order Price</th>
+                                                                                            }
+                                                                                            if (rg.MainTable.ColumnHeaders.Weights != null && j < rg.MainTable.ColumnHeaders.Weights.Count && rg.MainTable.ColumnHeaders.Weights[j] != null)
+                                                                                            {
+                                                                                                <th>Order Weight</th>
+                                                                                            }
+                                                                                            if (rg.MainTable.ColumnHeaders.NumberOfItems != null && j < rg.MainTable.ColumnHeaders.NumberOfItems.Count && rg.MainTable.ColumnHeaders.NumberOfItems[j] != null)
+                                                                                            {
+                                                                                                <th>Number of Items</th>
+                                                                                            }
+                                                                                            if (rg.MainTable.ColumnHeaders.PostalCodeGroupNames != null && j < rg.MainTable.ColumnHeaders.PostalCodeGroupNames.Count && !string.IsNullOrEmpty(rg.MainTable.ColumnHeaders.PostalCodeGroupNames[j]))
+                                                                                            {
+                                                                                                <th>Postal Code Group Name</th>
+                                                                                            }
+                                                                                            if (rg.MainTable.ColumnHeaders.Locations != null && j < rg.MainTable.ColumnHeaders.Locations.Count && rg.MainTable.ColumnHeaders.Locations[j] != null)
+                                                                                            {
+                                                                                                <th>Location Id(s)</th>
+                                                                                            }
+                                                                                        }
+                                                                                        <th>Carrier Rate Name</th>
+                                                                                        <th>Shipping</th>
+                                                                                        <th>Price Percentage</th>
+                                                                                        <th>Sub Table Name</th>
+                                                                                        <th>Amount</th>
+                                                                                        @if (rg.ApplicableShippingLabels != null)
+                                                                                        {
+                                                                                            <th>Shipping Label(s)</th>
+                                                                                        }
+                                                                                    </tr>
+                                                                                    @foreach (var cells in mtrows.Cells)
+                                                                                    {
+                                                                                        <tr>
+                                                                                            @if (rg.MainTable.RowHeaders != null)
+                                                                                            {
+                                                                                                if (rg.MainTable.RowHeaders.Prices != null && i < rg.MainTable.RowHeaders.Prices.Count && rg.MainTable.RowHeaders.Prices[i] != null)
+                                                                                                {
+                                                                                                    if (i == 0 && j == 0)
+                                                                                                    {
+                                                                                                        <td rowspan="@(rg.MainTable.RowHeaders.Prices.Count + 1)">0.01 @rg.MainTable.RowHeaders.Prices[i].Currency to @rg.MainTable.RowHeaders.Prices[i].Value @rg.MainTable.RowHeaders.Prices[i].Currency</td>
+                                                                                                    }
+                                                                                                    else if (j == 0)
+                                                                                                    {
+                                                                                                        if (rg.MainTable.RowHeaders.Prices[i].Value.Equals("infinity"))
+                                                                                                        {
+                                                                                                            <td rowspan="@(rg.MainTable.RowHeaders.Prices.Count + 1)">@(Convert.ToDouble(rg.MainTable.RowHeaders.Prices[i - 1].Value) + 0.01) @rg.MainTable.RowHeaders.Prices[i].Currency or more</td>
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            <td rowspan="@(rg.MainTable.RowHeaders.Prices.Count + 1)">@(Convert.ToDouble(rg.MainTable.RowHeaders.Prices[i - 1].Value) + 0.01) @rg.MainTable.RowHeaders.Prices[i].Currency to @rg.MainTable.RowHeaders.Prices[i].Value @rg.MainTable.RowHeaders.Prices[i].Currency</td>
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                                if (rg.MainTable.RowHeaders.Weights != null && i < rg.MainTable.RowHeaders.Weights.Count && rg.MainTable.RowHeaders.Weights[i] != null)
+                                                                                                {
+                                                                                                    if (i == 0)
+                                                                                                    {
+                                                                                                        <td>0.0001 @rg.MainTable.RowHeaders.Weights[i].Unit to @rg.MainTable.RowHeaders.Weights[i].Value @rg.MainTable.RowHeaders.Weights[i].Unit</td>
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        if (rg.MainTable.RowHeaders.Weights[i].Value.Equals("infinity"))
+                                                                                                        {
+                                                                                                            <td>@(Convert.ToDouble(rg.MainTable.RowHeaders.Weights[i - 1].Value) + 0.0001) @rg.MainTable.RowHeaders.Weights[i].Unit or heavier</td>
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            <td>@(Convert.ToDouble(rg.MainTable.RowHeaders.Weights[i - 1].Value) + 0.0001) @rg.MainTable.RowHeaders.Weights[i].Unit to @rg.MainTable.RowHeaders.Weights[i].Value @rg.MainTable.RowHeaders.Weights[i].Unit</td>
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                                if (rg.MainTable.RowHeaders.NumberOfItems != null && i < rg.MainTable.RowHeaders.NumberOfItems.Count && !string.IsNullOrEmpty(rg.MainTable.RowHeaders.NumberOfItems[i]))
+                                                                                                {
+                                                                                                    if (i == 0)
+                                                                                                    {
+                                                                                                        <td>1 to @rg.MainTable.RowHeaders.NumberOfItems[i]</td>
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        if (rg.MainTable.RowHeaders.NumberOfItems[i].Equals("infinity"))
+                                                                                                        {
+                                                                                                            <td>@(Convert.ToInt32(rg.MainTable.RowHeaders.NumberOfItems[i - 1]) + 1) or more items</td>
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            <td>@(Convert.ToInt32(rg.MainTable.RowHeaders.NumberOfItems[i - 1]) + 1) to @rg.MainTable.RowHeaders.NumberOfItems[i]</td>
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                                if (rg.MainTable.RowHeaders.PostalCodeGroupNames != null && i < rg.MainTable.RowHeaders.PostalCodeGroupNames.Count && !string.IsNullOrEmpty(rg.MainTable.RowHeaders.PostalCodeGroupNames[i]))
+                                                                                                {
+                                                                                                    <td>@rg.MainTable.RowHeaders.PostalCodeGroupNames[i]</td>
+                                                                                                }
+                                                                                                if (rg.MainTable.RowHeaders.Locations != null && i < rg.MainTable.RowHeaders.Locations.Count && rg.MainTable.RowHeaders.Locations[i] != null)
+                                                                                                {
+                                                                                                    <td>@(string.Join(", ", rg.MainTable.RowHeaders.Locations[i].LocationIds))</td>
+                                                                                                }
+                                                                                            }
+                                                                                            @if (rg.MainTable.ColumnHeaders != null)
+                                                                                            {
+                                                                                                if (rg.MainTable.ColumnHeaders.Prices != null && j < rg.MainTable.ColumnHeaders.Prices.Count && rg.MainTable.ColumnHeaders.Prices[j] != null)
+                                                                                                {
+                                                                                                    if (j == 0)
+                                                                                                    {
+                                                                                                        <td>0.01 @rg.MainTable.ColumnHeaders.Prices[j].Currency to @rg.MainTable.ColumnHeaders.Prices[j].Value @rg.MainTable.ColumnHeaders.Prices[j].Currency</td>
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        if (rg.MainTable.RowHeaders.Prices[j].Value.Equals("infinity"))
+                                                                                                        {
+                                                                                                            <td>@(Convert.ToDouble(rg.MainTable.ColumnHeaders.Prices[j - 1].Value) + 0.01) @rg.MainTable.RowHeaders.Prices[j].Currency or more</td>
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            <td>@(Convert.ToDouble(rg.MainTable.ColumnHeaders.Prices[j - 1].Value) + 0.01) @rg.MainTable.RowHeaders.Prices[j].Currency to @rg.MainTable.RowHeaders.Prices[j].Value @rg.MainTable.RowHeaders.Prices[j].Currency</td>
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                                if (rg.MainTable.ColumnHeaders.Weights != null && j < rg.MainTable.ColumnHeaders.Weights.Count && rg.MainTable.ColumnHeaders.Weights[j] != null)
+                                                                                                {
+                                                                                                    if (j == 0)
+                                                                                                    {
+                                                                                                        <td>0.0001 @rg.MainTable.ColumnHeaders.Weights[j].Unit to @rg.MainTable.ColumnHeaders.Weights[j].Value @rg.MainTable.ColumnHeaders.Weights[j].Unit</td>
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        if (rg.MainTable.ColumnHeaders.Weights[j].Value.Equals("infinity"))
+                                                                                                        {
+                                                                                                            <td>@(Convert.ToDouble(rg.MainTable.ColumnHeaders.Weights[j - 1].Value) + 0.0001) @rg.MainTable.ColumnHeaders.Weights[j].Unit or heavier</td>
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            <td>@(Convert.ToDouble(rg.MainTable.ColumnHeaders.Weights[j - 1].Value) + 0.0001) @rg.MainTable.ColumnHeaders.Weights[j].Unit to @rg.MainTable.ColumnHeaders.Weights[j].Value @rg.MainTable.ColumnHeaders.Weights[j].Unit</td>
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                                if (rg.MainTable.ColumnHeaders.NumberOfItems != null && j < rg.MainTable.ColumnHeaders.NumberOfItems.Count && !string.IsNullOrEmpty(rg.MainTable.ColumnHeaders.NumberOfItems[j]))
+                                                                                                {
+                                                                                                    if (j == 0)
+                                                                                                    {
+                                                                                                        <td>1 to @rg.MainTable.ColumnHeaders.NumberOfItems[j]</td>
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        if (rg.MainTable.ColumnHeaders.NumberOfItems[j].Equals("infinity"))
+                                                                                                        {
+                                                                                                            <td>@(Convert.ToInt32(rg.MainTable.ColumnHeaders.NumberOfItems[j - 1]) + 1) or more items</td>
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            <td>@(Convert.ToInt32(rg.MainTable.ColumnHeaders.NumberOfItems[j - 1]) + 1) to @rg.MainTable.ColumnHeaders.NumberOfItems[j]</td>
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                                if (rg.MainTable.ColumnHeaders.PostalCodeGroupNames != null && j < rg.MainTable.ColumnHeaders.PostalCodeGroupNames.Count && !string.IsNullOrEmpty(rg.MainTable.ColumnHeaders.PostalCodeGroupNames[j]))
+                                                                                                {
+                                                                                                    <td>@rg.MainTable.ColumnHeaders.PostalCodeGroupNames[j]</td>
+                                                                                                }
+                                                                                                if (rg.MainTable.ColumnHeaders.Locations != null && j < rg.MainTable.ColumnHeaders.Locations.Count && rg.MainTable.ColumnHeaders.Locations[j] != null)
+                                                                                                {
+                                                                                                    <td>@(string.Join(", ", rg.MainTable.ColumnHeaders.Locations[j].LocationIds))</td>
+                                                                                                }
+                                                                                            }
+                                                                                            @if (!string.IsNullOrEmpty(cells.CarrierRateName))
+                                                                                            {
+                                                                                                <td><a href="javascript:void(0)" onclick="getCarrierData('carrierRate_@(mainData)_@(carrierData)')">@cells.CarrierRateName</a></td>
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                <td></td>
+                                                                                            }
+                                                                                            @if (cells.NoShipping != null)
+                                                                                            {
+                                                                                                <td>@((bool)cells.NoShipping ? "No Shipping" : "")</td>
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                <td></td>
+                                                                                            }
+                                                                                            @if (!string.IsNullOrEmpty(cells.PricePercentage))
+                                                                                            {
+                                                                                                <td>@cells.PricePercentage %</td>}
+                                                                                            else
+                                                                                            {
+                                                                                                <td></td>
+                                                                                            }
+                                                                                            <td>@cells.SubtableName</td>
+                                                                                            @if (cells.FlatRate != null)
+                                                                                            {
+                                                                                                <td>@cells.FlatRate.Value @cells.FlatRate.Currency</td>
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                <td></td>
+                                                                                            }
+                                                                                            @if (rg.ApplicableShippingLabels != null)
+                                                                                            {
+                                                                                                if (j == 0)
+                                                                                                {
+                                                                                                    <td rowspan="@(mtrows.Cells.Count + 1)">
+                                                                                                        @for (int asl = 0; asl < rg.ApplicableShippingLabels.Count; asl++)
+                                                                                                        {
+                                                                                                            <span class="ship-labels">@rg.ApplicableShippingLabels[asl]</span>
+                                                                                                        }
+                                                                                                    </td>
+                                                                                                }
+                                                                                            }
+                                                                                        </tr>
+                                                                                        { j++; }
+                                                                                    }
+                                                                                </table>
+                                                                            </td>
+                                                                        </tr>
+                                                                        { i++; }
+                                                                    }
+                                                                }
+                                                            }
+                                                            @if (rg.CarrierRates != null)
+                                                            {
+                                                                <tr style="display:none">
+                                                                    <td>
+                                                                        <div id="carrierRate_@(mainData)_@(carrierData)" style="display:none">
+                                                                            <table class="table">
+                                                                                <tr>
+                                                                                    <th>Name</th>
+                                                                                    <th>Carrier Name</th>
+                                                                                    <th>Carrier Service</th>
+                                                                                    <th>Amount</th>
+                                                                                    <th>Origin Postcode</th>
+                                                                                    <th>Percentage Adjustment</th>
+                                                                                </tr>
+                                                                                @if (rg.CarrierRates != null)
+                                                                                {
+                                                                                    foreach (var cr in rg.CarrierRates)
+                                                                                    {
+                                                                                        <tr>
+                                                                                            <td>@cr.Name</td>
+                                                                                            <td>@cr.CarrierName</td>
+                                                                                            <td>@cr.CarrierService</td>
+                                                                                            @if (cr.FlatAdjustment != null)
+                                                                                            {
+                                                                                                <td>@cr.FlatAdjustment.Value @cr.FlatAdjustment.Currency</td>
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                <td></td>
+                                                                                            }
+                                                                                            <td>@cr.OriginPostalCode</td>
+                                                                                            @if (!string.IsNullOrEmpty(cr.PercentageAdjustment))
+                                                                                            {
+                                                                                                <td>@cr.PercentageAdjustment %</td>
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                <td></td>
+                                                                                            }
+                                                                                        </tr>
+                                                                                    }
+                                                                                }
+                                                                            </table>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                { carrierData++; }
+                                                            }
+                                                        </table>
+
+                                                    }
+                                                    @{ mainData++; carrierData = 0; }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                    { mainData = 0; }
+                                }
+                                else
+                                {
+                                    @:
+                                    <tr><td><span style="color:red">Configure Shipping in your merchant center account.<a href="@Model.ShippingConfigureLink" target="_blank">Visit Merchant Center</a></span></td></tr>
+                                }
+                            </table>
+                        </div>
+                        <div class="pull-right"><a href="https://www.seurata.com/" target="_blank"><img alt="https://www.seurata.com/" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIwAAAAZCAYAAADja8bOAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2xpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTM4IDc5LjE1OTgyNCwgMjAxNi8wOS8xNC0wMTowOTowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDphMjJmMmRmYi1mNzA5LTQyMzgtOTlhZS1hMjlhNzZjODgxZWUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MjA4RTA5NzAwOEM3MTFFOEE4MkFDRTRBMTUyOUFFMzUiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MjA4RTA5NkYwOEM3MTFFOEE4MkFDRTRBMTUyOUFFMzUiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBXaW5kb3dzIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6Qjg0REJCNDEyNzlERTcxMTg0M0FFOTQ1QzQ2QjdFQTQiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6YTIyZjJkZmItZjcwOS00MjM4LTk5YWUtYTI5YTc2Yzg4MWVlIi8+IDwvcmRmOkRl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"></a></div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal For Carrier Data Display-->
+<div class="modal fade" id="carrierDataModal" tabindex="-1" role="dialog" aria-labelledby="carrierDataModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h2 class="modal-title">Carrier Data</h2>
+            </div>
+            <div class="modal-body" id="carriermodalbodyData">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function getCarrierData(divName) {
+        $("#carriermodalbodyData").empty().html($("#" + divName).html());
+        $('#carrierDataModal').modal('show');
+        $('.modal-title').text('Carrier Data');
+    }
+
+    function getShipData(divName) {
+        $("#carriermodalbodyData").empty().html($("#" + divName).html());
+        $('#carrierDataModal').modal('show');
+        $('.modal-title').text('Rate Table');
+    }
+</script>
+
+
