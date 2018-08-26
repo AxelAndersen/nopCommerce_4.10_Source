@@ -1,4 +1,5 @@
-﻿using Nop.Plugin.ExternalSuppliers.Intersurf.Models;
+﻿using Nop.Core.Domain.Catalog;
+using Nop.Plugin.ExternalSuppliers.Intersurf.Models;
 using Nop.Services.Catalog;
 using Nop.Services.Logging;
 using Nop.Services.Tasks;
@@ -15,17 +16,19 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
         private readonly IntersurfSettings _intersurfSettings;
         private readonly IProductAttributeService _productAttributeService;
         private readonly string _destinationPath;
+        private readonly IProductServiceIntersurf _productServiceIntersurf;
         private readonly IProductService _productService;
         private List<VariantData> _variantData;
         private List<string> _usedEans = new List<string>();
 
-        public IntersurfSchedule(ILogger logger, IntersurfSettings intersurfSettings, IProductService productService, IProductAttributeService productAttributeService)
+        public IntersurfSchedule(ILogger logger, IntersurfSettings intersurfSettings, IProductServiceIntersurf productServiceIntersurf, IProductAttributeService productAttributeService, IProductService productService)
         {
             this._logger = logger;
             this._intersurfSettings = intersurfSettings;
             this._destinationPath = AppDomain.CurrentDomain.BaseDirectory + @"\" + _intersurfSettings.CSVFileName;
-            this._productService = productService;
+            this._productServiceIntersurf = productServiceIntersurf;
             this._productAttributeService = productAttributeService;
+            this._productService = productService;
         }
 
         public async void Execute()
@@ -79,7 +82,7 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
 
         private void SaveProductVariant(VariantData data)
         {
-            var productAttributeCombination = _productService.GetProductAttributeCombinationByGtin(data.EAN);
+            var productAttributeCombination = _productServiceIntersurf.GetProductAttributeCombinationByGtin(data.EAN);
             if(productAttributeCombination == null)
             {
                 return;
@@ -87,7 +90,6 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
 
             productAttributeCombination.StockQuantity = data.StockCount;
             _productAttributeService.UpdateProductAttributeCombination(productAttributeCombination);
-
         }
 
         private async System.Threading.Tasks.Task GetCSVContentFromAPI()

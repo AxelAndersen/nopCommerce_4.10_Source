@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
 {
-    public interface IProductService
+    public interface IProductServiceIntersurf
     {
         ProductAttributeCombination GetProductAttributeCombinationByGtin(string Gtin);
     }

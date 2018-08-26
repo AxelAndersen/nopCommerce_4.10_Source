@@ -7,11 +7,11 @@ using System.Text;
 
 namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
 {
-    public class ProductService : IProductService
+    public class ProductServiceIntersurf : IProductServiceIntersurf
     {
         private readonly IRepository<ProductAttributeCombination> _productAttributeCombinationRepository;
 
-        public ProductService(IRepository<ProductAttributeCombination> productAttributeCombinationRepository)
+        public ProductServiceIntersurf(IRepository<ProductAttributeCombination> productAttributeCombinationRepository)
         {
             _productAttributeCombinationRepository = productAttributeCombinationRepository;
         }

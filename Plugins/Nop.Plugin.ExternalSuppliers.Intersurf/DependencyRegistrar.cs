@@ -21,7 +21,7 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf
 
         public virtual void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
         {
-            builder.RegisterType<ProductService>().As<IProductService>().InstancePerLifetimeScope();
+            builder.RegisterType<ProductServiceIntersurf>().As<IProductServiceIntersurf>().InstancePerLifetimeScope();
         }
     }
 }
