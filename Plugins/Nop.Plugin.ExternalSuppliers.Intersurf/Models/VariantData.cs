@@ -1,4 +1,5 @@
 ﻿using Nop.Plugin.ExternalSuppliers.Intersurf.Extensions;
+using Nop.Services.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -36,7 +37,7 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Models
         public string Brand { get => brand; set => brand = value; }
 
 
-        public static VariantData FromCsv(string csvLine)
+        public static VariantData FromCsv(string csvLine, ILogger logger)
         {
             if(string.IsNullOrEmpty(csvLine))
             {
@@ -56,17 +57,25 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Models
                 variantData.OriginalTitle = data[1].Clean();
                 variantData.ColorStr = data[2].Clean();
                 variantData.SizeStr = data[3].Clean();
+                variantData.EAN = data[5].Clean().Replace(" ", "");
+
                 int stockCount = 0;
                 int.TryParse((data[4].Clean()), out stockCount);
                 variantData.StockCount = stockCount;
-                variantData.EAN = data[5].Clean().Replace(" ", "");
-                variantData.CostPrice = decimal.Parse(data[6].Clean());
-                variantData.RetailPrice = decimal.Parse(data[7].Clean());
-                variantData.OriginalCategory = data[8].Clean();
+                
+                decimal costPrice = 0;
+                decimal.TryParse(data[6].Clean(), out costPrice);
+                variantData.CostPrice = costPrice;
+
+                decimal retailPrice = 0;
+                decimal.TryParse(data[7].Clean(), out retailPrice);
+                variantData.RetailPrice = retailPrice;
+
+                variantData.OriginalCategory = data[8].Clean();                
             }
             catch(Exception ex)
             {
-
+                logger.Error("Error in FromCsv(): " + ex.Message + Environment.NewLine + "csvLine: " + csvLine, ex);
             }
             return variantData;
         }

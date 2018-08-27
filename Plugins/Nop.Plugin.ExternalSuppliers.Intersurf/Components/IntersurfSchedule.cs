@@ -119,7 +119,7 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
         {
             _variantData = File.ReadAllLines(@"" + _destinationPath)
                .Skip(1)
-               .Select(t => VariantData.FromCsv(t))
+               .Select(t => VariantData.FromCsv(t, _logger))
                .ToList();           
         }
 
