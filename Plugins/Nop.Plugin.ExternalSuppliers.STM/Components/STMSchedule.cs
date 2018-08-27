@@ -1,11 +1,15 @@
 ﻿
+using Nop.Plugin.ExternalSuppliers.STM.Extensions;
 using Nop.Plugin.ExternalSuppliers.STM.Models;
 using Nop.Services.Logging;
 using Nop.Services.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace Nop.Plugin.ExternalSuppliers.STM.Components
 {
@@ -13,125 +17,101 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
     {
         private readonly ILogger _logger;
         private readonly STMSettings _stmSettings;
-        private readonly string _destinationPath;
+        private List<VariantData> _variantData;
+        private int _newlyCreatedProducts = 0, _newlyCreatePSC = 0, _updatedPSCs = 0, _newActivePSCs = 0, _newRemovedPSCs = 0, _leftOutDueToBrand = 0, _leftoutDueToStockType = 0, _leftOutDueToMissingEAN = 0, _leftoutDueToLowStock = 0, _leftOutDueToMissingSizeOrColor = 0;
+        private string _leaveOutBrands = ";tentipi;", _extraInfo;
 
         public STMSchedule(ILogger logger, STMSettings stmSettings)
         {
             this._logger = logger;
-            this._stmSettings = stmSettings;
-            this._destinationPath = AppDomain.CurrentDomain.BaseDirectory + @"\" + _stmSettings.CSVFileName;
+            this._stmSettings = stmSettings;            
         }
 
-        public void Execute()
+        public async void Execute()
         {
+            try
+            {
+                ValidateSettings();
 
-            //return;
+                await GetVariantData();
 
-            //try
-            //{
-            //    ValidateSettings();
+                SaveVariantData();
 
-
-            //    IntersurfProducts.GetCSVStringResponse csvContent = null;
-
-            //    using (IntersurfProducts.CSV_ServiceSoapClient client = new IntersurfProducts.CSV_ServiceSoapClient(IntersurfProducts.CSV_ServiceSoapClient.EndpointConfiguration.CSV_ServiceSoap12,_stmSettings.EndpointAddress))
-            //    {
-            //        var serviceHeader = new IntersurfProducts.SecuredWebServiceHeader();
-            //        serviceHeader.Username = _stmSettings.Username; // "60750600";
-            //        serviceHeader.Password = _stmSettings.Password; // "friliv";
-
-            //        IntersurfProducts.AuthenticateUserResponse response = await client.AuthenticateUserAsync(serviceHeader);
-            //        serviceHeader.AuthenticatedToken = response.AuthenticateUserResult;
-
-            //        // Both timeouts are needed (the call takes about 3 minutes)
-            //        client.Endpoint.Binding.SendTimeout = new TimeSpan(0, 25, 00); // 25 minutes                    
-            //        client.InnerChannel.OperationTimeout = new TimeSpan(0, 25, 00); // 25 minutes
-
-            //        csvContent = await client.GetCSVStringAsync(serviceHeader);
-            //    }
-                                
-            //    System.IO.File.WriteAllText(_destinationPath, csvContent.GetCSVStringResult.Replace(System.Environment.NewLine, ""));
-
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.Error("STMSchedule.Execute()", ex);                
-            //}
-            //throw new NotImplementedException();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("STMSchedule.Execute()", ex);
+            }            
         }
 
-        private void ReadDataFromFile()
+        private async System.Threading.Tasks.Task GetVariantData()
         {
+            XElement xElementResult = null;
+            using (STMService.STM_APISoapClient client = new STMService.STM_APISoapClient(STMService.STM_APISoapClient.EndpointConfiguration.STM_APISoap12, _stmSettings.EndpointAddress))
+            {
+                // Both timeouts are needed (the call takes about 3 minutes)
+                client.Endpoint.Binding.SendTimeout = new TimeSpan(0, 25, 00); // 25 minutes                    
+                client.InnerChannel.OperationTimeout = new TimeSpan(0, 25, 00); // 25 minutes
 
-            List<VariantData> VarData = File.ReadAllLines(@"" + _destinationPath)
-               .Skip(1)
-               .Select(t => VariantData.FromCsv(t))
-               .ToList();
+                xElementResult = await client.GetItemsAsync();
+            }
 
-            var test = VarData;
-            //Console.WriteLine("Reading data from csv file to List in memory");
-            //using (TextFieldParser parser = new TextFieldParser(_filePath))
-            //{
-            //    parser.TextFieldType = FieldType.Delimited;
-            //    parser.SetDelimiters(";");
-            //    parser.HasFieldsEnclosedInQuotes = false;
-            //    VariantData data;
-            //    _variantData = new List<VariantData>();
-            //    bool firstRow = true;
+            VariantData data;
+            _variantData = new List<VariantData>();
+            foreach (XmlNode node in xElementResult.ToXmlDocument().DocumentElement.ChildNodes)
+            {
+                data = new VariantData();
+                data.OrgItemNumber = data.SupplierProductId = node["ITEMNUMBER"].InnerText;
+                data.Brand = node["BRAND"].InnerText;
+                data.SetSupplierProductId();
 
-            //    string missing = "";
-            //    while (!parser.EndOfData)
-            //    {
-            //        string[] row = parser.ReadFields();
-            //        if (firstRow)
-            //        {
-            //            firstRow = false;
-            //            continue;
-            //        }
-            //        try
-            //        {
-            //            if (row.Length != 9 || row[0].ToString().Length == 0)
-            //                continue;
+                data.OriginalTitle = data.Title = node["ITEMNAME"].InnerText.Trim();
+                data.StockCount = Convert.ToInt32(node["INVENTORY"].InnerText.Trim());
+                data.RetailPrice = Math.Round(Convert.ToDecimal(node["SALESPRICE"].InnerText.Trim(), CultureInfo.InvariantCulture), 2);
+                data.EAN = node["BARCODE"].InnerText.Trim().Replace("-", "");
 
-            //            data = new VariantData();
-            //            data.SupplierProductId = row[0].ToString().Replace("\"", "");
-            //            data.OriginalTitle = data.Title = row[1].ToString().Replace("\"", "");
-            //            data.ColorStr = row[2].ToString().Replace("\"", "").Trim();
-            //            data.SizeStr = row[3].ToString().Replace("\"", "").Trim();
-            //            data.StockCount = Convert.ToInt32(row[4].ToString().Replace("\"", ""));
+                data.SizeStr = (node["SIZE"].InnerText.Trim().ToLower() == "stk." || node["SIZE"].InnerText.Trim().ToLower() == "-") ? "" : node["SIZE"].InnerText.Trim();
+                data.SetSizeString();
 
-            //            data.EAN = row[5].ToString().Replace("\"", "").Replace(" ", "").Trim();
-            //            if (string.IsNullOrEmpty(data.EAN) || data.EAN.Length < 11)
-            //                continue;
+                data.ColorStr = node["COLOR"].InnerText.Trim();
 
-            //            data.CostPrice = decimal.Parse(row[6].ToString().Replace("\"", ""));
-            //            data.RetailPrice = decimal.Parse(row[7].ToString().Replace("\"", ""));
-            //            data.OriginalCategory = row[8].ToString().Replace("\"", "");
+                _variantData.Add(data);
+            }
+        }
 
-            //            if (Categories.Associations.ContainsKey(data.OriginalCategory))
-            //            {
-            //                data.WebshopCategoryId = Categories.Associations[data.OriginalCategory];
-            //            }
-            //            else if (missing.IndexOf(data.OriginalCategory + "';") == -1)
-            //            {
-            //                missing += "Missing category: '" + data.OriginalCategory + "'; ";
-            //            }
+        private void SaveVariantData()
+        {
+            Console.WriteLine("Saving data to database, updating stock count");
+            int count = 0;
+            foreach (VariantData data in _variantData)
+            {
+                if (_leaveOutBrands.Contains(";" + data.Brand.ToLower().Trim() + ";"))
+                {
+                    _leftOutDueToBrand++;
+                    continue;
+                }
 
-            //            // Should be changed if we get more information from Intersurf
-            //            data.SizeCategoryId = (int)Enumerations.SizeCategories.Mics;
+                if (string.IsNullOrEmpty(data.EAN) || data.EAN.Length < 10)
+                {
+                    _leftOutDueToMissingEAN++;
+                    continue;
+                }
 
-            //            _variantData.Add(data);
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            HandleError(ex);
-            //        }
-            //    }
-            //    if (!string.IsNullOrEmpty(missing))
-            //    {
-            //        HandleError(new Exception("Missing category association in InterSurfProducts.cs: " + missing));
-            //    }
-            //}
+                if (data.MissingSizeOrColor())
+                {
+                    _leftOutDueToMissingSizeOrColor++;
+                    continue;
+                }
+
+                SaveVariant(data);
+
+                count++;                
+            }
+        }
+
+        private void SaveVariant(VariantData data)
+        {
+            throw new NotImplementedException();
         }
 
         private void ValidateSettings()
@@ -146,26 +126,10 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
                 throw new Exception("No EndpointAddress found in STM settings, aborting task");
             }
 
-            if (string.IsNullOrEmpty(this._stmSettings.Username))
+            if (string.IsNullOrEmpty(this._stmSettings.MinimumStockCount))
             {
-                throw new Exception("No Username found in STM settings, aborting task");
-            }
-
-            if (string.IsNullOrEmpty(this._stmSettings.Password))
-            {
-                throw new Exception("No Password found in STM settings, aborting task");
-            }
-
-            if (string.IsNullOrEmpty(this._stmSettings.CSVFileName))
-            {
-                throw new Exception("No CSVFileName found in STM settings, aborting task");
-            }
-
-            if (this._stmSettings.CSVFileName.EndsWith(".csv") == false)
-            {
-                throw new Exception("CSVFileName must end with '.csv', aborting task");
-            }
-
+                throw new Exception("No MinimumStockCount found in STM settings, aborting task");
+            }          
         }
     }
 }

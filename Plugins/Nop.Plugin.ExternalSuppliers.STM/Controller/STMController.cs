@@ -49,8 +49,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Controller
                 model.ErrorMessage += "<br />" + ex.Message;
             }
 
-            return await Task.Run(() => View("~/Plugins/ExternalSuppliers.STM/Views/Configure.cshtml", model));
-            //return View("~/Plugins/ExternalSuppliers.STM/Views/Configure.cshtml", model);
+            return await Task.Run(() => View("~/Plugins/ExternalSuppliers.STM/Views/Configure.cshtml", model));            
         }
 
         [HttpPost]
@@ -65,9 +64,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Controller
             try
             {
                 _stmSettings.EndpointAddress = model.EndpointAddress;
-                _stmSettings.Username = model.Username;
-                _stmSettings.Password = model.Password;
-                _stmSettings.CSVFileName = model.CSVFileName;                
+                _stmSettings.MinimumStockCount = model.MinimumStockCount;           
 
                 _settingService.SaveSetting(_stmSettings);
             }
@@ -76,7 +73,8 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Controller
                 _logger.Error("Configure STM", ex);
                 model.ErrorMessage += "<br />" + ex.Message;
             }
-            return View();
+
+            return View("~/Plugins/ExternalSuppliers.STM/Views/Configure.cshtml", model);
         }               
 
         private STMModel GetBaseModel()
@@ -84,9 +82,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Controller
             return new STMModel
             {
                 EndpointAddress = _stmSettings.EndpointAddress,
-                Username = _stmSettings.Username,
-                Password = _stmSettings.Password,
-                CSVFileName = _stmSettings.CSVFileName
+                MinimumStockCount = _stmSettings.MinimumStockCount
             };
         }
     }

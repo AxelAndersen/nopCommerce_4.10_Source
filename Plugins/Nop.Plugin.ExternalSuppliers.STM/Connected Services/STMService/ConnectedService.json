@@ -5,8 +5,8 @@
     "Uri": "https://go.microsoft.com/fwlink/?linkid=858517"
   },
   "ExtendedData": {
-    "Uri": "https://webshop.intersurf.dk/CSV_service.asmx",
-    "Namespace": "IntersurfProducts",
+    "Uri": "http://185.154.176.79/STM/STM_API.asmx",
+    "Namespace": "STMService",
     "SelectedAccessLevelForGeneratedClass": "Public",
     "GenerateMessageContract": false,
     "ReuseTypesinReferencedAssemblies": true,
@@ -21,7 +21,7 @@
     },
     "CheckedReferencedAssemblies": [],
     "InstanceId": null,
-    "Name": "IntersurfProducts",
+    "Name": "STMService",
     "Metadata": {}
   }
 }

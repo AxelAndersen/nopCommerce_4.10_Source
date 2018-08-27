@@ -11,14 +11,8 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Models
         [Display(Name = "Endpoint address")]
         public string EndpointAddress { get; set; }
 
-        [Display(Name = "User name")]
-        public string Username { get; set; }
-
-        [Display(Name = "Password")]
-        public string Password { get; set; }
-
-        [Display(Name = "CSV file name")]
-        public string CSVFileName { get; set; }
+        [Display(Name = "Minimum stock count")]
+        public string MinimumStockCount { get; set; }      
 
         public string ErrorMessage { get; set; }
     }
