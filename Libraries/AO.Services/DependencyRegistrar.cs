@@ -1,13 +1,13 @@
-﻿using Autofac;
+﻿using AO.Services.Products;
+using Autofac;
 using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
 using Nop.Core.Infrastructure.DependencyManagement;
-using Nop.Plugin.ExternalSuppliers.Intersurf.Components;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Nop.Plugin.ExternalSuppliers.Intersurf
+namespace AO.Services
 {
     public class DependencyRegistrar : IDependencyRegistrar
     {
@@ -21,7 +21,7 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf
 
         public virtual void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
         {
-            //builder.RegisterType<ProductServiceIntersurf>().As<IProductServiceIntersurf>().InstancePerLifetimeScope();
+            builder.RegisterType<AOProductService>().As<IAOProductService>().InstancePerLifetimeScope();
         }
     }
 }

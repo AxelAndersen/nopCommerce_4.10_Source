@@ -59,9 +59,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Payments.Square"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.POS.Kaching", "Plugins\Nop.Plugin.POS.Kaching\Nop.Plugin.POS.Kaching.csproj", "{B8418F80-B90A-4701-A7F4-878888C27AFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.ExternalSuppliers.STM", "Plugins\Nop.Plugin.ExternalSuppliers.STM\Nop.Plugin.ExternalSuppliers.STM.csproj", "{6F37DD1A-00DD-45E5-A2FB-08E0F758F4C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.ExternalSuppliers.STM", "Plugins\Nop.Plugin.ExternalSuppliers.STM\Nop.Plugin.ExternalSuppliers.STM.csproj", "{6F37DD1A-00DD-45E5-A2FB-08E0F758F4C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.ExternalSuppliers.Intersurf", "Plugins\Nop.Plugin.ExternalSuppliers.Intersurf\Nop.Plugin.ExternalSuppliers.Intersurf.csproj", "{A08F86B9-A694-420F-842C-3076EDD660A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.ExternalSuppliers.Intersurf", "Plugins\Nop.Plugin.ExternalSuppliers.Intersurf\Nop.Plugin.ExternalSuppliers.Intersurf.csproj", "{A08F86B9-A694-420F-842C-3076EDD660A7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AO.Services", "Libraries\AO.Services\AO.Services.csproj", "{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -353,6 +355,18 @@ Global
 		{A08F86B9-A694-420F-842C-3076EDD660A7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A08F86B9-A694-420F-842C-3076EDD660A7}.Release|x86.ActiveCfg = Release|Any CPU
 		{A08F86B9-A694-420F-842C-3076EDD660A7}.Release|x86.Build.0 = Release|Any CPU
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}.Debug|x86.Build.0 = Debug|Any CPU
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}.Release|x86.ActiveCfg = Release|Any CPU
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -384,6 +398,7 @@ Global
 		{B8418F80-B90A-4701-A7F4-878888C27AFA} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 		{6F37DD1A-00DD-45E5-A2FB-08E0F758F4C5} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 		{A08F86B9-A694-420F-842C-3076EDD660A7} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
+		{CF8B98F3-9CFD-4BE7-BA45-7D683507766F} = {E4ACA93B-D3DE-4557-B069-F1DB42925A4B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EE72A8B2-332A-4175-9319-6726D36E9D25}

@@ -1,4 +1,5 @@
-﻿using Nop.Core.Domain.Catalog;
+﻿using AO.Services.Products;
+using Nop.Core.Domain.Catalog;
 using Nop.Plugin.ExternalSuppliers.Intersurf.Models;
 using Nop.Services.Catalog;
 using Nop.Services.Logging;
@@ -16,17 +17,17 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
         private readonly IntersurfSettings _intersurfSettings;
         private readonly IProductAttributeService _productAttributeService;
         private readonly string _destinationPath;
-        private readonly IProductServiceIntersurf _productServiceIntersurf;
+        private readonly IAOProductService _aoProductService;
         private readonly IProductService _productService;
         private List<VariantData> _variantData;
         private List<string> _usedEans = new List<string>();
 
-        public IntersurfSchedule(ILogger logger, IntersurfSettings intersurfSettings, IProductServiceIntersurf productServiceIntersurf, IProductAttributeService productAttributeService, IProductService productService)
+        public IntersurfSchedule(ILogger logger, IntersurfSettings intersurfSettings, IAOProductService aoProductService, IProductAttributeService productAttributeService, IProductService productService)
         {
             this._logger = logger;
             this._intersurfSettings = intersurfSettings;
             this._destinationPath = AppDomain.CurrentDomain.BaseDirectory + @"\" + _intersurfSettings.CSVFileName;
-            this._productServiceIntersurf = productServiceIntersurf;
+            this._aoProductService = aoProductService;
             this._productAttributeService = productAttributeService;
             this._productService = productService;
         }
@@ -82,7 +83,7 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
 
         private void SaveProductVariant(VariantData data)
         {
-            var productAttributeCombination = _productServiceIntersurf.GetProductAttributeCombinationByGtin(data.EAN);
+            var productAttributeCombination = _aoProductService.GetProductAttributeCombinationByGtin(data.EAN);
             if(productAttributeCombination == null)
             {
                 return;
