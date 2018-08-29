@@ -50,6 +50,7 @@ namespace AO.Services.Products
 
         public Product CreateNewProduct(string originalTitle, string title, string orgItemNumber, string brand, decimal retailPrice, decimal costPrice, string eAN, string originalCategory, string colorStr, string sizeStr)
         {
+            // Vaiting for API to be ready
             return null;
         }
 
