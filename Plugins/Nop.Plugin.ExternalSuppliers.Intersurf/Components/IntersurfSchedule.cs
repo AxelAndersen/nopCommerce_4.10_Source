@@ -1,6 +1,6 @@
 ﻿using AO.Services.Products;
+using AO.Services.Products.Models;
 using Nop.Core.Domain.Catalog;
-using Nop.Plugin.ExternalSuppliers.Intersurf.Models;
 using Nop.Services.Catalog;
 using Nop.Services.Logging;
 using Nop.Services.Tasks;
@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AO.Services.Extensions;
 
 namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
 {
@@ -20,7 +21,7 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
         private readonly IAOProductService _aoProductService;
         private readonly IProductService _productService;
         private List<VariantData> _variantData;
-        private List<string> _usedEans = new List<string>();
+        private List<string> _usedEans = new List<string>();        
 
         public IntersurfSchedule(ILogger logger, IntersurfSettings intersurfSettings, IAOProductService aoProductService, IProductAttributeService productAttributeService, IProductService productService)
         {
@@ -32,68 +33,31 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
             this._productService = productService;
         }
 
-        public async void Execute()
+        public void Execute()
         {            
             try
             {
                 // Validates that every setting is set correct in the Configure area.
                 ValidateSettings();
-
-
+                
                 // TESTING, incomment again when running for real
                 // Gets the data content from asmx service and saves in csv file
-                //await GetCSVContentFromAPI();
+                GetData();
 
                 // Add data to VariantData list
-                ReadDataFromFile();
+                OrganizeData();
 
-
-                SaveVariantData();
+                _aoProductService.SaveVariantData(_variantData);
             }
             catch (Exception ex)
             {
-                _logger.Error("IntersurfSchedule.Execute()", ex);                
+                Exception inner = ex;
+                while (inner.InnerException != null) inner = inner.InnerException;
+                _logger.Error("IntersurfSchedule.Execute(): " + inner.Message, ex);                
             }            
         }
 
-        private void SaveVariantData()
-        {            
-            int count = 0;
-            foreach (VariantData data in _variantData)
-            {
-                try
-                {
-                    if (_usedEans.Contains(data.EAN))
-                    {
-                        
-                    }
-                    else
-                    {
-                        _usedEans.Add(data.EAN);
-                        SaveProductVariant(data);
-                    }
-                    count++;
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error("IntersurfSchedule.Execute()", ex);                    
-                }                
-            }
-        }
-
-        private void SaveProductVariant(VariantData data)
-        {
-            var productAttributeCombination = _aoProductService.GetProductAttributeCombinationByGtin(data.EAN);
-            if(productAttributeCombination == null)
-            {
-                return;
-            }
-
-            productAttributeCombination.StockQuantity = data.StockCount;
-            _productAttributeService.UpdateProductAttributeCombination(productAttributeCombination);
-        }
-
-        private async System.Threading.Tasks.Task GetCSVContentFromAPI()
+        private void GetData()
         {
             IntersurfSR.GetCSVStringResponse csvContent = null;
 
@@ -103,24 +67,25 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
                 serviceHeader.Username = _intersurfSettings.Username; // "60750600";
                 serviceHeader.Password = _intersurfSettings.Password; // "friliv";
 
-                IntersurfSR.AuthenticateUserResponse response = await client.AuthenticateUserAsync(serviceHeader);
+                IntersurfSR.AuthenticateUserResponse response = client.AuthenticateUserAsync(serviceHeader).Result;
                 serviceHeader.AuthenticatedToken = response.AuthenticateUserResult;
 
                 // Both timeouts are needed (the call takes about 3 minutes)
                 client.Endpoint.Binding.SendTimeout = new TimeSpan(0, 25, 00); // 25 minutes                    
                 client.InnerChannel.OperationTimeout = new TimeSpan(0, 25, 00); // 25 minutes
 
-                csvContent = await client.GetCSVStringAsync(serviceHeader);
+                csvContent = client.GetCSVStringAsync(serviceHeader).Result;
             }
 
             System.IO.File.WriteAllText(_destinationPath, csvContent.GetCSVStringResult.Replace(System.Environment.NewLine, ""));
         }
 
-        private void ReadDataFromFile()
+        private void OrganizeData()
         {
             _variantData = File.ReadAllLines(@"" + _destinationPath)
                .Skip(1)
-               .Select(t => VariantData.FromCsv(t, _logger))
+               .Select(t => VariantData.FromCsv(t, ';'))
+               .Where(y => y != null)
                .ToList();           
         }
 

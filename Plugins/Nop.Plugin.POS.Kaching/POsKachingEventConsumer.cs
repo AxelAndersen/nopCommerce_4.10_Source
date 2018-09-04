@@ -47,7 +47,9 @@ namespace Nop.Plugin.POS.Kaching
             }
             catch (Exception ex)
             {
-                _logger.Error("HandleEvent POS Kaching", ex);
+                Exception inner = ex;
+                while (inner.InnerException != null) inner = inner.InnerException;
+                _logger.Error("HandleEvent POS Kaching: " + inner.Message, ex); 
             }
         }
 

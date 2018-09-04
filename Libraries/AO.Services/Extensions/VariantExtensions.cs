@@ -1,13 +1,12 @@
-﻿using Nop.Plugin.ExternalSuppliers.STM.Models;
-using System;
+﻿using AO.Services.Products.Models;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
-namespace Nop.Plugin.ExternalSuppliers.STM.Extensions
+namespace AO.Services.Extensions
 {
     public static class VariantExtensions
     {
-        internal static void SetSupplierProductId(this VariantData data)
+        public static void SetSupplierProductId(this VariantData data)
         {
             string brand = data.Brand.ToLower();
             switch (brand)
@@ -30,7 +29,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Extensions
             }
         }
 
-        internal static void SetSizeString(this VariantData data)
+        public static void SetSizeString(this VariantData data)
         {
             if (string.IsNullOrEmpty(data.SizeStr) && data.OriginalTitle.Contains("\"\""))
             {
@@ -40,7 +39,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Extensions
             }
         }
 
-        internal static bool MissingSizeOrColor(this VariantData data)
+        public static bool MissingSizeOrColor(this VariantData data)
         {
             var firstIndex = data.OrgItemNumber.IndexOf("-");
             // If we do not have "-" in the string, maybe no color and sizes are nessacary
@@ -63,6 +62,24 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Extensions
 
             // All good, no missing color or size
             return false;
+        }
+
+        /// <summary>
+        /// Will remove all duplicate EAN entries
+        /// </summary>
+        /// <param name="variantData"></param>
+        /// <returns></returns>
+        public static List<VariantData> Cleanup(this List<VariantData> variantData)
+        {
+            var distinctItems = variantData.GroupBy(x => x.EAN).Select(y => y.First()).ToList();
+            return distinctItems;
+        }
+
+        public static string Clean(this string input)
+        {
+            string stripped = input.Replace("\"", "");
+
+            return stripped.Trim();
         }
     }
 }

@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using AO.Services.Extensions;
+using System;
 
-namespace Nop.Plugin.ExternalSuppliers.STM.Models
+namespace AO.Services.Products.Models
 {
     public class VariantData
     {
@@ -41,13 +40,31 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Models
         public string VariantColor { get => variantColor; set => variantColor = value; }
 
 
-        public static VariantData FromCsv(string csvLine)
+        public static VariantData FromCsv(string csvLine, char splitter)
         {
-            string[] TxtSpk = csvLine.Split(',');
+            string[] props = csvLine.Split(splitter);
+            if(props.Length != 9)
+            {
+                return null;
+            }
             VariantData variantData = new VariantData();
-            variantData.SupplierProductId = TxtSpk[0];
-            variantData.OriginalTitle = TxtSpk[1];
 
+            try
+            {
+                variantData.SupplierProductId = props[0];
+                variantData.OriginalTitle = props[1];
+                variantData.ColorStr = props[2].Clean();
+                variantData.SizeStr = props[3].Clean();
+                variantData.StockCount = Convert.ToInt32(props[4].Clean());
+                variantData.EAN = props[5].Clean().Replace(" ", "");
+                variantData.CostPrice = decimal.Parse(props[6].Clean());
+                variantData.RetailPrice = decimal.Parse(props[7].Clean());
+                variantData.OriginalCategory = props[8].Clean();
+            }
+            catch(Exception ex)
+            {
+
+            }
             return variantData;
         }
     }

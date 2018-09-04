@@ -45,8 +45,10 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Controller
             }        
             catch (Exception ex)
             {
-                _logger.Error("Configure Intersurf", ex);
-                model.ErrorMessage += "<br />" + ex.Message;
+                Exception inner = ex;
+                while (inner.InnerException != null) inner = inner.InnerException;
+                _logger.Error("Configure Intersurf: " + inner.Message, ex);
+                model.ErrorMessage += "<br />" + inner.Message;
             }
 
             return await Task.Run(() => View("~/Plugins/ExternalSuppliers.Intersurf/Views/Configure.cshtml", model));            
@@ -72,8 +74,10 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Controller
             }
             catch (Exception ex)
             {
-                _logger.Error("Configure Intersurf", ex);
-                model.ErrorMessage += "<br />" + ex.Message;
+                Exception inner = ex;
+                while (inner.InnerException != null) inner = inner.InnerException;
+                _logger.Error("Configure Intersurf: " + inner.Message, ex);
+                model.ErrorMessage += "<br />" + inner.Message;
             }
             return View("~/Plugins/ExternalSuppliers.Intersurf/Views/Configure.cshtml", model);
         }               

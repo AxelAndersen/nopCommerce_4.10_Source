@@ -44,8 +44,10 @@ namespace Nop.Plugin.POS.Kaching.Controller
             }
             catch (Exception ex)
             {
-                _logger.Error("Configure POS Kaching", ex);
-                model.ErrorMessage += "<br />" + ex.Message;
+                Exception inner = ex;
+                while (inner.InnerException != null) inner = inner.InnerException;
+                _logger.Error("Configure POS Kaching: " + inner.Message, ex);                
+                model.ErrorMessage += "<br />" + inner.Message;
             }
             return View("~/Plugins/Nop.Plugin.POS.Kaching/Views/Configure.cshtml", model);
         }
@@ -71,8 +73,10 @@ namespace Nop.Plugin.POS.Kaching.Controller
             }
             catch (Exception ex)
             {
-                _logger.Error("Configure POS Kaching", ex);
-                model.ErrorMessage += "<br />" + ex.Message;
+                Exception inner = ex;
+                while (inner.InnerException != null) inner = inner.InnerException;
+                _logger.Error("Configure POS Kaching: " + inner.Message, ex);
+                model.ErrorMessage += "<br />" + inner.Message;
             }
             return Configure();
         }
@@ -99,8 +103,10 @@ namespace Nop.Plugin.POS.Kaching.Controller
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error("Configure POS Kaching", ex);
-                    model.ErrorMessage += "<br />" + ex.Message;
+                    Exception inner = ex;
+                    while (inner.InnerException != null) inner = inner.InnerException;
+                    _logger.Error("Configure POS Kaching: " + inner.Message, ex);
+                    model.ErrorMessage += "<br />" + inner.Message;
                 }
             }
 
@@ -135,8 +141,10 @@ namespace Nop.Plugin.POS.Kaching.Controller
             }
             catch (Exception ex)
             {
-                _logger.Error("HandleEvent POS Kaching", ex);
-                model.ErrorMessage = ex.Message;
+                Exception inner = ex;
+                while (inner.InnerException != null) inner = inner.InnerException;
+                _logger.Error("Configure POS Kaching: " + inner.Message, ex);
+                model.ErrorMessage += "<br />" + inner.Message;
             }
             
             return View("~/Plugins/Nop.Plugin.POS.Kaching/Views/Configure.cshtml", model);

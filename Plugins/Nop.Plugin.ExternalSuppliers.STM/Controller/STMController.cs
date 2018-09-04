@@ -45,8 +45,10 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Controller
             }        
             catch (Exception ex)
             {
-                _logger.Error("Configure STM", ex);
-                model.ErrorMessage += "<br />" + ex.Message;
+                Exception inner = ex;
+                while (inner.InnerException != null) inner = inner.InnerException;
+                _logger.Error("Configure STM: " + inner.Message, ex);                
+                model.ErrorMessage += "<br />" + inner.Message;
             }
 
             return await Task.Run(() => View("~/Plugins/ExternalSuppliers.STM/Views/Configure.cshtml", model));            
@@ -70,8 +72,10 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Controller
             }
             catch (Exception ex)
             {
-                _logger.Error("Configure STM", ex);
-                model.ErrorMessage += "<br />" + ex.Message;
+                Exception inner = ex;
+                while (inner.InnerException != null) inner = inner.InnerException;
+                _logger.Error("Configure STM: " + inner.Message, ex);
+                model.ErrorMessage += "<br />" + inner.Message;
             }
 
             return View("~/Plugins/ExternalSuppliers.STM/Views/Configure.cshtml", model);
