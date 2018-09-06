@@ -65,14 +65,41 @@ namespace AO.Services.Extensions
         }
 
         /// <summary>
-        /// Will remove all duplicate EAN entries
+        /// Will remove items without valid EAN and remove duplicate EANs
         /// </summary>
         /// <param name="variantData"></param>
         /// <returns></returns>
         public static List<VariantData> Cleanup(this List<VariantData> variantData)
         {
-            var distinctItems = variantData.GroupBy(x => x.EAN).Select(y => y.First()).ToList();
-            return distinctItems;
+            // This will remove rows with invalid EAN numbers
+            var cleanedItems = variantData.Where(p => p.EAN != null && p.EAN.Length > 10).ToList();
+
+            // This will remove any EAN duplicates
+            cleanedItems = cleanedItems.GroupBy(x => x.EAN).Select(y => y.First()).ToList();
+            
+            return cleanedItems;
+        }
+
+        /// <summary>
+        /// Will remove items without valid EAN and remove duplicate EANs
+        /// </summary>
+        /// <param name="variantData"></param>
+        /// <returns></returns>
+        public static List<VariantData> CleanupForCreation(this List<VariantData> variantData)
+        {
+            // This will remove rows with invalid EAN numbers
+            var cleanedItems = Cleanup(variantData);
+            
+            // This will remove all with missing brand name
+            cleanedItems = cleanedItems.Where(p => p.Brand.Trim() != "").ToList();
+
+            // This will remove all thats no longer available
+            cleanedItems = cleanedItems.Where(p => p.OriginalTitle.ToLower().Trim() != "udgået" && p.OriginalTitle.ToLower().Trim() != "spærret").ToList();
+
+            // This will remove all without salesprice
+            cleanedItems = cleanedItems.Where(p => p.RetailPrice > 0).ToList();
+
+            return cleanedItems;
         }
 
         public static string Clean(this string input)

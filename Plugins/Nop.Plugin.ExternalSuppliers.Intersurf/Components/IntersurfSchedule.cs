@@ -21,7 +21,8 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
         private readonly IAOProductService _aoProductService;
         private readonly IProductService _productService;
         private List<VariantData> _variantData;
-        private List<string> _usedEans = new List<string>();        
+        private List<string> _usedEans = new List<string>();
+        private const string _updaterName = "Intersurf";
 
         public IntersurfSchedule(ILogger logger, IntersurfSettings intersurfSettings, IAOProductService aoProductService, IProductAttributeService productAttributeService, IProductService productService)
         {
@@ -47,7 +48,7 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
                 // Add data to VariantData list
                 OrganizeData();
 
-                _aoProductService.SaveVariantData(_variantData);
+                _aoProductService.SaveVariantData(_variantData, _updaterName);
             }
             catch (Exception ex)
             {

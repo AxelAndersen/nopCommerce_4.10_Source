@@ -5,6 +5,6 @@ namespace AO.Services.Products
 {
     public interface IAOProductService
     {        
-        void SaveVariantData(List<VariantData> variantDataList);
+        void SaveVariantData(List<VariantData> variantDataList, string updaterName);
     }
 }

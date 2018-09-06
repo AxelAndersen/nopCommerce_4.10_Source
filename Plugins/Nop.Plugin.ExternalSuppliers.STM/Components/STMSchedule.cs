@@ -22,25 +22,15 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
         private readonly ILogger _logger;
         private readonly STMSettings _stmSettings;
         private readonly IAOProductService _aoProductService;                
-        private readonly IProductService _productService;
-        private readonly IMessageService _messageService;
         private List<VariantData> _variantData;
-        private int _totalProductsToHandle, _newlyCreatedProducts = 0, _newlyCreatePSC = 0, _updatedPSCs = 0, _newActivePSCs = 0, _newRemovedPSCs = 0, _leftOutDueToBrand = 0, _leftoutDueToStockType = 0, _leftOutDueToMissingEAN = 0, _leftoutDueToLowStock = 0, _leftOutDueToMissingSizeOrColor = 0;
-        private string _leaveOutBrands = ";tentipi;", _extraInfo;
-        private IList<Manufacturer> _manufacturers;
-        private IList<Product> _productsSKUAndName;        
-        private static List<UpdatedProducts> _updatedProducts;
-        private static List<UpdatedProducts> _updatedProductsSetActive = new List<UpdatedProducts>();        
-        private const string _updaterName = "STM";
         private XmlNodeList _variantsNodeList;
+        private const string _updaterName = "STM";
 
-        public STMSchedule(ILogger logger, STMSettings stmSettings, IAOProductService aoProductService, IProductService productService, IMessageService messageService)
+        public STMSchedule(ILogger logger, STMSettings stmSettings, IAOProductService aoProductService)
         {
             this._logger = logger;
             this._stmSettings = stmSettings;
-            this._aoProductService = aoProductService;                        
-            this._productService = productService;
-            this._messageService = messageService;
+            this._aoProductService = aoProductService;                                    
         }
 
         public void Execute()
@@ -53,7 +43,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
                 GetData();
                 OrganizeData();
 
-                _aoProductService.SaveVariantData(_variantData);
+                _aoProductService.SaveVariantData(_variantData, _updaterName);
             }
             catch (Exception ex)
             {
@@ -62,11 +52,6 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
                 Exception inner = ex;
                 while (inner.InnerException != null) inner = inner.InnerException;
                 _logger.Error("STMSchedule.Execute(): " + inner.Message, ex);                
-            }
-
-            if (allWell)
-            {
-                ShowAndLogStatus();
             }
         }
 
@@ -93,9 +78,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
             if(_variantsNodeList == null || _variantsNodeList.Count == 0)
             {
                 return;
-            }
-
-            _totalProductsToHandle = _variantsNodeList.Count;
+            }            
 
             int goodCount = 0, missingBrand = 0, lockedTitle = 0, missingPrice = 0, wrongCount = 0, wrongEAN = 0;
             VariantData data;
@@ -167,28 +150,6 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
             {
                 throw new Exception("No MinimumStockCount found in STM settings, aborting task");
             }          
-        }
-
-        private void ShowAndLogStatus()
-        {
-            UpdatingStatus status = new UpdatingStatus(_updatedProducts, _updatedProductsSetActive, _updaterName);
-            status.CreatedProducts = _newlyCreatedProducts;
-            status.CreatedVariants = _newlyCreatePSC;
-            status.UpdatedVariants = _updatedPSCs;
-            status.NewActiveVariants = _newActivePSCs;
-            status.NewRemovedVariants = _newRemovedPSCs;
-            status.LeftoutDueToStockType = _leftoutDueToStockType;
-            status.LeftOutDueToBrand = _leftOutDueToBrand;
-            status.LeftOutDueToLowStock = _leftoutDueToLowStock;
-            status.LeftOutDueToMissingEAN = _leftOutDueToMissingEAN;
-            status.LeftOutDueToMissingSizeOrColor = _leftOutDueToMissingSizeOrColor;
-            status.ExtraInfo = _extraInfo;
-
-            string strStatus = status.BuildStatus();
-
-            _logger.Information(strStatus);
-            //send email
-            _messageService.SendAdminEmail("axelandersen@gmail.com", "NopCommerce Admin", "STM status: " + strStatus);
-        }
+        }       
     }
 }
