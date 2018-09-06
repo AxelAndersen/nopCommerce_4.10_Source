@@ -50,6 +50,11 @@ namespace AO.Services.Products
 
         public void SaveVariantData(List<VariantData> variantDataList, string updaterName)
         {
+            if(variantDataList == null)
+            {
+                return;
+            }
+
             _manufacturers = _manufacturerService.GetAllManufacturers();
             _productAttributeCombinations = GetAllProductAttributeCombinations();
             _updaterName = updaterName;

@@ -51,7 +51,7 @@ namespace Nop.Plugin.ExternalSuppliers.Bonvita.Components
             {
                 Exception inner = ex;
                 while (inner.InnerException != null) inner = inner.InnerException;
-                _logger.Error("IntersurfSchedule.Execute(): " + inner.Message, ex);
+                _logger.Error("BonvitaSchedule.Execute(): " + inner.Message, ex);
             }
         }
 
@@ -93,32 +93,32 @@ namespace Nop.Plugin.ExternalSuppliers.Bonvita.Components
         {
             if (this._bonvitaSettings == null)
             {
-                throw new Exception("No Intersurf settings found, aborting task");
+                throw new Exception("No Bonvita settings found, aborting task");
             }
 
             if (string.IsNullOrEmpty(this._bonvitaSettings.FtpHost))
             {
-                throw new Exception("No EndpointAddress found in Intersurf settings, aborting task");
+                throw new Exception("No FtpHost found in Bonvita settings, aborting task");
             }
 
             if (string.IsNullOrEmpty(this._bonvitaSettings.User))
             {
-                throw new Exception("No Username found in Intersurf settings, aborting task");
+                throw new Exception("No User found in Bonvita settings, aborting task");
             }
 
             if (string.IsNullOrEmpty(this._bonvitaSettings.Pass))
             {
-                throw new Exception("No Password found in Intersurf settings, aborting task");
+                throw new Exception("No Pass found in Bonvita settings, aborting task");
             }
 
             if (string.IsNullOrEmpty(this._bonvitaSettings.CSVFileName))
             {
-                throw new Exception("No CSVFileName found in Intersurf settings, aborting task");
+                throw new Exception("No CSVFileName found in Bonvita settings, aborting task");
             }
 
             if (this._bonvitaSettings.CSVFileName.EndsWith(".csv") == false)
             {
-                throw new Exception("CSVFileName must end with '.csv', aborting task");
+                throw new Exception("CSVFileName must end with '.csv' in Bonvita Settings, aborting task");
             }
         }
     }
