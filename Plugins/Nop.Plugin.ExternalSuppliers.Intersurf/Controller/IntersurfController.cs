@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Plugin.ExternalSuppliers.Intersurf.Models;
-using Nop.Services.Catalog;
 using Nop.Services.Configuration;
 using Nop.Services.Logging;
-using Nop.Services.Media;
 using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Mvc.Filters;
@@ -18,19 +16,13 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Controller
     {
         private readonly ILogger _logger;
         private readonly IntersurfSettings _stmSettings;
-        private readonly ISettingService _settingService;
-        private readonly IProductService _productService;
-        private readonly IPictureService _pictureService;
-        private readonly IProductAttributeService _productAttributeService;
+        private readonly ISettingService _settingService;                       
 
-        public IntersurfController(ILogger logger, IntersurfSettings stmSettings, ISettingService settingService, IPictureService pictureService, IProductAttributeService productAttributeService, IProductService productService)
+        public IntersurfController(ILogger logger, IntersurfSettings stmSettings, ISettingService settingService)
         {
             this._logger = logger;
             this._stmSettings = stmSettings;
-            this._settingService = settingService;
-            this._productService = productService;
-            this._pictureService = pictureService;
-            this._productAttributeService = productAttributeService;
+            this._settingService = settingService;                        
         }
 
         [AuthorizeAdmin]

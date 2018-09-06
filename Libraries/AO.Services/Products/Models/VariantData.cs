@@ -60,6 +60,7 @@ namespace AO.Services.Products.Models
                 variantData.CostPrice = decimal.Parse(props[6].Clean());
                 variantData.RetailPrice = decimal.Parse(props[7].Clean());
                 variantData.OriginalCategory = props[8].Clean();
+                variantData.Brand = "Didriksons";
             }
             catch(Exception ex)
             {

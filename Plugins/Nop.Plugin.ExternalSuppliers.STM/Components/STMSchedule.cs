@@ -79,8 +79,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
             {
                 return;
             }            
-
-            int goodCount = 0, missingBrand = 0, lockedTitle = 0, missingPrice = 0, wrongCount = 0, wrongEAN = 0;
+            
             VariantData data;
             _variantData = new List<VariantData>();            
             foreach (XmlNode node in _variantsNodeList)
@@ -88,47 +87,19 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
                 data = new VariantData();
                 data.EAN = node["BARCODE"].InnerText.Trim().Replace("-", "");
                 if(string.IsNullOrEmpty(data.EAN) || data.EAN.Length < 10)
-                {
-                    wrongEAN++;
+                {                    
                     continue;
                 }
 
                 data.OrgItemNumber = data.SupplierProductId = node["ITEMNUMBER"].InnerText;
                 data.Brand = node["BRAND"].InnerText;
                 data.SetSupplierProductId();
-
                 data.OriginalTitle = data.Title = node["ITEMNAME"].InnerText.Trim();
                 data.StockCount = Convert.ToInt32(node["INVENTORY"].InnerText.Trim());
-                data.RetailPrice = Math.Round(Convert.ToDecimal(node["SALESPRICE"].InnerText.Trim(), CultureInfo.InvariantCulture), 2);
-                
-
+                data.RetailPrice = Math.Round(Convert.ToDecimal(node["SALESPRICE"].InnerText.Trim(), CultureInfo.InvariantCulture), 2);                
                 data.SizeStr = (node["SIZE"].InnerText.Trim().ToLower() == "stk." || node["SIZE"].InnerText.Trim().ToLower() == "-") ? "" : node["SIZE"].InnerText.Trim();
                 data.SetSizeString();
-
                 data.ColorStr = node["COLOR"].InnerText.Trim();
-
-                if (string.IsNullOrEmpty(data.Brand))
-                {
-                    missingBrand++;
-                }
-                if (data.OriginalTitle.ToLower() == "spærret")
-                {
-                    lockedTitle++;
-                }
-                if (data.RetailPrice == 0)
-                {
-                    missingPrice++;
-                }
-
-
-                if (string.IsNullOrEmpty(data.Brand) || data.OriginalTitle.ToLower() == "spærret" || data.RetailPrice == 0)
-                {
-                    wrongCount++;
-                }
-                else
-                {
-                    goodCount++;                    
-                }
 
                 _variantData.Add(data);
             }

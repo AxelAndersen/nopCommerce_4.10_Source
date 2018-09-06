@@ -1,0 +1,11 @@
+﻿{
+  "Group": "External suppliers",
+  "FriendlyName": "Bonvita",
+  "SystemName": "ExternalSuppliers.Bonvita",
+  "Version": "0.1",
+  "SupportedVersions": [ "4.10" ],
+  "Author": "Axel Andersen [Andersen Outdoor ApS]",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.ExternalSuppliers.Bonvita.dll",
+  "Description": "This plugin will keep Bonvita products up to date"
+}

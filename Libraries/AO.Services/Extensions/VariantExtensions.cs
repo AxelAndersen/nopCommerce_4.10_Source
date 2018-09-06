@@ -39,31 +39,6 @@ namespace AO.Services.Extensions
             }
         }
 
-        public static bool MissingSizeOrColor(this VariantData data)
-        {
-            var firstIndex = data.OrgItemNumber.IndexOf("-");
-            // If we do not have "-" in the string, maybe no color and sizes are nessacary
-            if (firstIndex == -1)
-                return false;
-
-            bool containsTwo = firstIndex != data.OrgItemNumber.LastIndexOf("-");
-            // If we do not have "-" twice, maybe no color and sizes are nessacary
-            if (!containsTwo)
-                return false;
-
-            // Now we know this product should have both size and color strings.            
-            string productId = data.OrgItemNumber.Substring(0, data.OrgItemNumber.IndexOf("-"));
-            string colorStr = data.OrgItemNumber.Substring(data.OrgItemNumber.IndexOf("-") + 1, (data.OrgItemNumber.LastIndexOf("-") - data.OrgItemNumber.IndexOf("-") - 1));
-            string sizeStr = data.OrgItemNumber.Substring(data.OrgItemNumber.LastIndexOf("-") + 1);
-
-            // Now we have a problem, we should have both color and size
-            if ((string.IsNullOrEmpty(data.ColorStr) && string.IsNullOrEmpty(data.SizeStr)) || (data.ColorStr == "0" && data.SizeStr == "0"))
-                return true;
-
-            // All good, no missing color or size
-            return false;
-        }
-
         /// <summary>
         /// Will remove items without valid EAN and remove duplicate EANs
         /// </summary>

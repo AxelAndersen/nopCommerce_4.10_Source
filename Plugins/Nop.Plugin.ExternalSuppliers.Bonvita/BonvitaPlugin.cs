@@ -3,16 +3,19 @@ using Nop.Core.Plugins;
 using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Nop.Plugin.ExternalSuppliers.STM
+namespace Nop.Plugin.ExternalSuppliers.Bonvita
 {
-    public class STMPlugin : BasePlugin, IMiscPlugin
+    public class BonvitaPlugin : BasePlugin, IMiscPlugin
     {
         private readonly IWebHelper _webHelper;
         private readonly ISettingService _settingService;
         private readonly ILocalizationService _localizationService;
 
-        public STMPlugin(IWebHelper webHelper, ISettingService settingService, ILocalizationService localizationService)
+        public BonvitaPlugin(IWebHelper webHelper, ISettingService settingService, ILocalizationService localizationService)
         {
             this._webHelper = webHelper;
             this._settingService = settingService;
@@ -25,7 +28,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM
         /// 
         public override string GetConfigurationPageUrl()
         {
-            return $"{_webHelper.GetStoreLocation()}Admin/STM/Configure";
+            return $"{_webHelper.GetStoreLocation()}Admin/Bonvita/Configure";
         }
 
         /// <summary>
@@ -34,9 +37,8 @@ namespace Nop.Plugin.ExternalSuppliers.STM
         public override void Install()
         {
             //settings
-            _settingService.SaveSetting(new STMSettings());
+            _settingService.SaveSetting(new BonvitaSettings());
 
- 
             base.Install();
         }
 
@@ -46,7 +48,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM
         public override void Uninstall()
         {
             //settings
-            _settingService.DeleteSetting<STMSettings>();
+            _settingService.DeleteSetting<BonvitaSettings>();
 
             base.Uninstall();
         }
