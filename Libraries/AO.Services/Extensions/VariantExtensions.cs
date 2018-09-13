@@ -74,6 +74,9 @@ namespace AO.Services.Extensions
             // This will remove all without salesprice
             cleanedItems = cleanedItems.Where(p => p.RetailPrice > 0).ToList();
 
+            // This will remove all without any one in stock. (this removal should only be performed before creation, not stockupdate).
+            cleanedItems = cleanedItems.Where(p => p.StockCount > 0).ToList();
+
             return cleanedItems;
         }
 

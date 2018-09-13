@@ -15,7 +15,7 @@
   "Widgets.NivoSlider",
   "POS.Kaching",
   "Nop.Plugin.Seurata.GoogleShopping",
-  "ExternalSuppliers.STM",
   "ExternalSuppliers.Intersurf",
-  "ExternalSuppliers.Bonvita"
+  "ExternalSuppliers.Bonvita",
+  "ExternalSuppliers.STM"
 ]

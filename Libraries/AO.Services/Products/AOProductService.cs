@@ -60,7 +60,7 @@ namespace AO.Services.Products
             _updaterName = updaterName;
             _updatedProducts = new List<UpdatedProducts>();
             _updatedProductsSetActive = new List<UpdatedProducts>();
-
+            
             foreach (VariantData data in variantDataList.Cleanup())
             {
                 try
@@ -75,8 +75,9 @@ namespace AO.Services.Products
                 }
             }
 
-            foreach (VariantData data in _variantDataToBeCreated.CleanupForCreation())
-            {
+            var SaveVariantTime = System.Diagnostics.Stopwatch.StartNew();                     
+            foreach (VariantData data in _variantDataToBeCreated.CleanupForCreation().Take(3000))
+            {                                
                 try
                 {
                     SaveNewVariant(data);
@@ -88,6 +89,8 @@ namespace AO.Services.Products
                     _logger.Error("UpdateStock() in SaveVariantData in AOProductService (" + _updaterName + "): " + inner.Message, ex);
                 }
             }
+            SaveVariantTime.Stop();
+            var elapsedsecs = SaveVariantTime.Elapsed.Seconds;
         }
 
         #region Private methods
@@ -143,12 +146,12 @@ namespace AO.Services.Products
         }
 
         private void SaveNewVariant(VariantData data)
-        {
+        {            
             Manufacturer manufacturer = _manufacturers.Where(m => m.Name == data.Brand).FirstOrDefault();
             if (manufacturer == null)
             {
                 var manuturerName = GetAssociatedManufacturerName(data.Brand);
-                manufacturer = _manufacturers.Where(m => m.Name == data.Brand).FirstOrDefault();
+                manufacturer = _manufacturers.Where(m => m.Name == manuturerName).FirstOrDefault();
                 if (manufacturer == null)
                 {
                     _logger.Error("SaveVariant, missing manufacturer (" + _updaterName + "): '" + data.Brand + "'");
@@ -172,7 +175,7 @@ namespace AO.Services.Products
                     _newlyCreatePSC++;
                     throw new NotImplementedException("Mangler kode til at tilføje en ny combination (" + _updaterName + ")");
                 }
-            }           
+            }         
         }
 
         private string GetAssociatedManufacturerName(string brand)
