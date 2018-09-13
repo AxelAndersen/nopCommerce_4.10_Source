@@ -71,7 +71,7 @@ namespace AO.Services.Products
                 {
                     Exception inner = ex;
                     while (inner.InnerException != null) inner = inner.InnerException;
-                    _logger.Error("UpdateStock() in SaveVariantData in AOProductService: " + inner.Message, ex);
+                    _logger.Error("UpdateStock() in SaveVariantData in AOProductService (" + _updaterName + "): " + inner.Message, ex);
                 }
             }
 
@@ -85,7 +85,7 @@ namespace AO.Services.Products
                 {
                     Exception inner = ex;
                     while (inner.InnerException != null) inner = inner.InnerException;
-                    _logger.Error("UpdateStock() in SaveVariantData in AOProductService: " + inner.Message, ex);
+                    _logger.Error("UpdateStock() in SaveVariantData in AOProductService (" + _updaterName + "): " + inner.Message, ex);
                 }
             }
         }
@@ -151,7 +151,7 @@ namespace AO.Services.Products
                 manufacturer = _manufacturers.Where(m => m.Name == data.Brand).FirstOrDefault();
                 if (manufacturer == null)
                 {
-                    _logger.Error("SaveVariant, missing manufacturer: '" + data.Brand + "'");
+                    _logger.Error("SaveVariant, missing manufacturer (" + _updaterName + "): '" + data.Brand + "'");
                     return;
                 }
             }        
@@ -170,7 +170,7 @@ namespace AO.Services.Products
                 else
                 {
                     _newlyCreatePSC++;
-                    throw new NotImplementedException("Mangler kode til at tilføje en ny combination");
+                    throw new NotImplementedException("Mangler kode til at tilføje en ny combination (" + _updaterName + ")");
                 }
             }           
         }
@@ -204,7 +204,7 @@ namespace AO.Services.Products
 
             _logger.Information(strStatus);
             //send email
-            _messageService.SendAdminEmail("axelandersen@gmail.com", "NopCommerce Admin", "STM status: " + strStatus);
+            _messageService.SendAdminEmail("axelandersen@gmail.com", "NopCommerce Admin", _updaterName + ": " + strStatus);
         }
         #endregion
     }

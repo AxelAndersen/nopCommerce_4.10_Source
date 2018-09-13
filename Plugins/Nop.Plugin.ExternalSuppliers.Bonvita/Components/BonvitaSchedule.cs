@@ -103,12 +103,12 @@ namespace Nop.Plugin.ExternalSuppliers.Bonvita.Components
 
             if (string.IsNullOrEmpty(this._bonvitaSettings.User))
             {
-                throw new Exception("No User found in Bonvita settings, aborting task");
+                throw new Exception("No Username found in Bonvita settings, aborting task");
             }
 
             if (string.IsNullOrEmpty(this._bonvitaSettings.Pass))
             {
-                throw new Exception("No Pass found in Bonvita settings, aborting task");
+                throw new Exception("No Password found in Bonvita settings, aborting task");
             }
 
             if (string.IsNullOrEmpty(this._bonvitaSettings.CSVFileName))

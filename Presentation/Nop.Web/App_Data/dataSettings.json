@@ -1,5 +1,5 @@
 ﻿{
   "DataProvider": "sqlserver",
-  "DataConnectionString": "Data Source=DESKTOP-04RVIKA\\SQLEXPRESS;Initial Catalog=NopCommerce-4.1;Integrated Security=True;Persist Security Info=False",
+  "DataConnectionString": "Data Source=DESKTOP-04RVIKA\\SQLEXPRESS;Initial Catalog=NopCommerce-4.1;Integrated Security=True;Persist Security Info=False;Connection Timeout=300",
   "RawDataSettings": {}
 }
