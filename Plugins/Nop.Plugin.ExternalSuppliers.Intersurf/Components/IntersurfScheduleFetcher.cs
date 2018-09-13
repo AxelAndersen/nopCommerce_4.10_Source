@@ -28,6 +28,10 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
                 Validation.ValidateSettings(_intersurfSettings);
 
                 // Gets the data content from asmx service and saves in csv file
+                // This call runs loanger than the timeout of a WebClient and therefore this HAS to be an async method.
+                // This way we return immediately, but we also dispose any services initiated by DI.
+                // Thats why we have another schedule to do the product update, using there data.
+                // See more here: https://www.nopcommerce.com/boards/t/55357/long-running-scheduled-tasks.aspx
                 await GetData();
             }
             catch (Exception ex)
