@@ -27,7 +27,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
         private List<VariantData> _variantData;
         private XmlNodeList _variantsNodeList;
         private const string _updaterName = "STM";
-        private const int _takeNumber = 5000;
+        private const int _takeNumber = 1000;
 
         public STMSchedule(ILogger logger, STMSettings stmSettings, ISettingService settingService, IAOProductService aoProductService)
         {
@@ -41,22 +41,30 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
         {            
             try
             {
+                var runningTime = System.Diagnostics.Stopwatch.StartNew();
+
                 ValidateSettings();
 
-                GetData();
+               GetData();
 
                 OrganizeData();
 
                 _aoProductService.SaveVariantData(_variantData, _updaterName);
 
+                // Important this is done before
+                string logText = GetLogText();
+
                 SetSkipNumber();
 
-                var variantText = "";
-                if(_variantData[0] != null)
-                {
-                    variantText = "'" + _variantData[0].Title + " (" + _variantData[0].Brand + ", " + _variantData[0].SupplierProductId + ")'";
-                }
-                _logger.Information("STM: Done running through " + _variantData.Count + " variants, Started at number " + _stmSettings.SkipNumber + ": " + variantText);
+                runningTime.Stop();
+                var elapsedsecs = runningTime.Elapsed.Seconds;
+
+                var logTime = System.Diagnostics.Stopwatch.StartNew();
+                _logger.Information(logText + Environment.NewLine + "Seconds elapsed: " + elapsedsecs + " (Max 60)");
+                logTime.Stop();
+                var logTimeMili = logTime.Elapsed.Milliseconds;
+
+                _logger.Information("Mili seconds to do one log: " + logTimeMili);
             }
             catch (Exception ex)
             {
@@ -64,6 +72,17 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
                 while (inner.InnerException != null) inner = inner.InnerException;
                 _logger.Error("STMSchedule.Execute(): " + inner.Message, ex);                
             }
+        }
+
+        private string GetLogText()
+        {
+            var logText = "STM: Done running through " + _variantData.Count.ToString("N0") + " variants, Started at number " + _stmSettings.SkipNumber.ToString("N0");
+            if (_variantData[0] != null)
+            {
+                logText += Environment.NewLine + _variantData[0].Title + " (" + _variantData[0].Brand + ", " + _variantData[0].SupplierProductId + ")'";
+            }
+            
+            return logText;
         }
 
         private void SetSkipNumber()
@@ -129,7 +148,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
                 _variantData.Add(data);
             }
 
-            _variantData = _variantData.Skip(_stmSettings.SkipNumber).Take(_takeNumber).ToList();
+            _variantData = _variantData.Skip(_stmSettings.SkipNumber).Take(_takeNumber).ToList().Take(1).ToList();
         }        
 
         private void ValidateSettings()

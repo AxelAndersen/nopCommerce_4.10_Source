@@ -10,6 +10,7 @@ using Nop.Services.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace AO.Services.Products
 {
@@ -23,6 +24,7 @@ namespace AO.Services.Products
         private readonly IManufacturerService _manufacturerService;
         private readonly IProductAttributeService _productAttributeService;
         private readonly IMessageService _messageService;
+        private readonly IProductService _productService;
 
         private IList<Manufacturer> _manufacturers;
         private IList<ProductAttributeCombination> _productAttributeCombinations;
@@ -32,9 +34,10 @@ namespace AO.Services.Products
         private string _updaterName;
         private int _newlyCreatedProducts, _newlyCreatePSC, _updatedPSCs;
         private List<VariantData> _variantDataToBeCreated;
+        private Manufacturer _currentManufacturer;
         #endregion
 
-        public AOProductService(ILogger logger, IMessageService messageService, IRepository<ProductAttributeCombination> productAttributeCombinationRepository, IProductAttributeService productAttributeService, IManufacturerService manufacturerService, IRepository<Product> productRepository, IRepository<Manufacturer> manufacturerRepository)
+        public AOProductService(ILogger logger, IMessageService messageService, IRepository<ProductAttributeCombination> productAttributeCombinationRepository, IProductAttributeService productAttributeService, IManufacturerService manufacturerService, IRepository<Product> productRepository, IRepository<Manufacturer> manufacturerRepository, IProductService productService)
         {
             _productAttributeCombinationRepository = productAttributeCombinationRepository;
             _productRepository = productRepository;
@@ -43,6 +46,7 @@ namespace AO.Services.Products
             _productAttributeService = productAttributeService;
             _logger = logger;
             _messageService = messageService;
+            _productService = productService;
 
             _productsSKUAndName = GetAllProductsSKUAndName();
             _variantDataToBeCreated = new List<VariantData>();
@@ -74,9 +78,8 @@ namespace AO.Services.Products
                     _logger.Error("UpdateStock() in SaveVariantData in AOProductService (" + _updaterName + "): " + inner.Message, ex);
                 }
             }
-
-            var SaveVariantTime = System.Diagnostics.Stopwatch.StartNew();                     
-            foreach (VariantData data in _variantDataToBeCreated.CleanupForCreation().Take(3000))
+            
+            foreach (VariantData data in _variantDataToBeCreated.CleanupForCreation())
             {                                
                 try
                 {
@@ -88,9 +91,7 @@ namespace AO.Services.Products
                     while (inner.InnerException != null) inner = inner.InnerException;
                     _logger.Error("UpdateStock() in SaveVariantData in AOProductService (" + _updaterName + "): " + inner.Message, ex);
                 }
-            }
-            SaveVariantTime.Stop();
-            var elapsedsecs = SaveVariantTime.Elapsed.Seconds;
+            }            
         }
 
         #region Private methods
@@ -136,6 +137,7 @@ namespace AO.Services.Products
             if(combination == null)
             {
                 _variantDataToBeCreated.Add(data);
+                Thread.Sleep(50);
             }
             else
             {
@@ -146,13 +148,13 @@ namespace AO.Services.Products
         }
 
         private void SaveNewVariant(VariantData data)
-        {            
-            Manufacturer manufacturer = _manufacturers.Where(m => m.Name == data.Brand).FirstOrDefault();
-            if (manufacturer == null)
+        {
+            _currentManufacturer = _manufacturers.Where(m => m.Name == data.Brand).FirstOrDefault();
+            if (_currentManufacturer == null)
             {
                 var manuturerName = GetAssociatedManufacturerName(data.Brand);
-                manufacturer = _manufacturers.Where(m => m.Name == manuturerName).FirstOrDefault();
-                if (manufacturer == null)
+                _currentManufacturer = _manufacturers.Where(m => m.Name == manuturerName).FirstOrDefault();
+                if (_currentManufacturer == null)
                 {
                     _logger.Error("SaveVariant, missing manufacturer (" + _updaterName + "): '" + data.Brand + "'");
                     return;
@@ -170,7 +172,8 @@ namespace AO.Services.Products
                     product = CreateProduct(data);
                     _newlyCreatedProducts++;
                 }
-                else
+
+                if(product != null)
                 {
                     _newlyCreatePSC++;
                     throw new NotImplementedException("Mangler kode til at tilføje en ny combination (" + _updaterName + ")");
@@ -190,10 +193,29 @@ namespace AO.Services.Products
         }
 
         private Product CreateProduct(VariantData data)
+        {            
+            var product = new Product();
+            product.Name = data.Title;
+            product.Price = data.RetailPrice;
+            product.ProductCost = data.CostPrice;
+            product.Sku = product.ManufacturerPartNumber = data.OrgItemNumber;            
+            product.CreatedOnUtc = DateTime.UtcNow;
+            product.UpdatedOnUtc = DateTime.UtcNow;
+            _productService.InsertProduct(product);
+
+            AddManufacturerToProduct(product.Id, _currentManufacturer.Id);
+            
+            return product;
+        }
+
+        private void AddManufacturerToProduct(int productId, int manufacturerId)
         {
-            // Missing API to create product
-            //Product product = CreateNewProduct(data.OriginalTitle, data.Title, data.OrgItemNumber, data.Brand, data.RetailPrice, data.CostPrice, data.EAN, data.OriginalCategory, data.ColorStr, data.SizeStr);
-            return null;
+            _manufacturerService.InsertProductManufacturer(new ProductManufacturer
+            {
+                ProductId = productId,
+                ManufacturerId = manufacturerId,
+                DisplayOrder = 1
+            });
         }
 
         private void ShowAndLogStatus()

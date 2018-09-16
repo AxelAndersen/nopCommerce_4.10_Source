@@ -10,10 +10,11 @@ namespace AO.Services.Dictionaries
         {              
             {"Isbjorn of Sweden", "Isbjörn of Sweden"},
             {"Isbjorn of sweden", "Isbjörn of Sweden"},
-            {"Isbjørn of Sweden", "Isbjorn of Sweden"},
-            {"Isbjoern of Sweden", "Isbjorn of Sweden"},
-            {"Isbjørn of sweden", "Isbjorn of Sweden"},
-            {"Isbjoern of sweden", "Isbjorn of Sweden"},
+            {"Isbjørn of Sweden", "Isbjörn of Sweden"},
+            {"Isbjoern of Sweden", "Isbjörn of Sweden"},
+            {"Isbjørn of sweden", "Isbjörn of Sweden"},
+            {"Isbjoern of sweden", "Isbjörn of Sweden"},
+            {"Isbj›rn of Sweden", "Isbjörn of Sweden"},
             {"MUURIKKA", "Muurikka"},
         };
     }
