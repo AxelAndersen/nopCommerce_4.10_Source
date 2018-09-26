@@ -32,7 +32,10 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
                 // This way we return immediately, but we also dispose any services initiated by DI.
                 // Thats why we have another schedule to do the product update, using there data.
                 // See more here: https://www.nopcommerce.com/boards/t/55357/long-running-scheduled-tasks.aspx
+                _logger.Information("IntersurfScheduleFetcher.Execute() preparing to get data and save them to:" + Environment.NewLine + _destinationPath);
+
                 await GetData();
+                // No logging can be done after the await has been called as all dependency injected objects have been disposed then
             }
             catch (Exception ex)
             {

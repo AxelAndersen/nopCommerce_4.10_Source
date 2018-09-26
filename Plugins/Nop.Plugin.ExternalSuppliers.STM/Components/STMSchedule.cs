@@ -27,7 +27,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
         private List<VariantData> _variantData;
         private XmlNodeList _variantsNodeList;
         private const string _updaterName = "STM";
-        private const int _takeNumber = 1000;
+        private const int _takeNumber = 500;
 
         public STMSchedule(ILogger logger, STMSettings stmSettings, ISettingService settingService, IAOProductService aoProductService)
         {
@@ -64,7 +64,7 @@ namespace Nop.Plugin.ExternalSuppliers.STM.Components
                 logTime.Stop();
                 var logTimeMili = logTime.Elapsed.Milliseconds;
 
-                _logger.Information("Mili seconds to do one log: " + logTimeMili);
+               // _logger.Information("Mili seconds to do one log: " + logTimeMili);
             }
             catch (Exception ex)
             {

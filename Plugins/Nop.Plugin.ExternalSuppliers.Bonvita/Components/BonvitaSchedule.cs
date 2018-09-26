@@ -46,6 +46,8 @@ namespace Nop.Plugin.ExternalSuppliers.Bonvita.Components
                 OrganizeData();
 
                 _aoProductService.SaveVariantData(_variantData, _updaterName);
+
+                _logger.Information("BonvitaSchedule.Execute() done. Doing nothing yet");
             }
             catch (Exception ex)
             {

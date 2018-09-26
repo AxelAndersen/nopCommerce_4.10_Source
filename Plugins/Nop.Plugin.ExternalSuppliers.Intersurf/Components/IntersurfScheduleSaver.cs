@@ -41,6 +41,9 @@ namespace Nop.Plugin.ExternalSuppliers.Intersurf.Components
 
                 // Save data and update stock
                 _aoProductService.SaveVariantData(_variantData, _updaterName);
+
+
+                _logger.Information("IntersurfScheduleSaver.Execute() done." + Environment.NewLine + _variantData.Count + " variants in total");
             }
             catch (Exception ex)
             {
