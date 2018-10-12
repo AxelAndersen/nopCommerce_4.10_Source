@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -147,6 +148,11 @@ namespace Nop.Core.Infrastructure
 
             var provider = services.BuildServiceProvider();
             var hostingEnvironment = provider.GetRequiredService<IHostingEnvironment>();
+            if (string.IsNullOrWhiteSpace(hostingEnvironment.WebRootPath))
+            {
+                hostingEnvironment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            }
+
             CommonHelper.DefaultFileProvider = new NopFileProvider(hostingEnvironment);
 
             //initialize plugins

@@ -16,6 +16,7 @@ ul, ol {
 }
 .margin-t-5 {
     margin-top: 5px;
+    grid-template-columns: 1fr;
 }
 .margin-b-5 {
     margin-bottom: 5px;

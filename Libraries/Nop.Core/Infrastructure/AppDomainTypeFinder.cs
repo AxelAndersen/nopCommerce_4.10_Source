@@ -233,7 +233,7 @@ namespace Nop.Core.Infrastructure
                     {
                         types = a.GetTypes();
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         //Entity Framework 6 doesn't allow getting types (throws an exception)
                         if (!_ignoreReflectionErrors)

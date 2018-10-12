@@ -17,5 +17,6 @@
   "Nop.Plugin.Seurata.GoogleShopping",
   "ExternalSuppliers.Intersurf",
   "ExternalSuppliers.Bonvita",
-  "ExternalSuppliers.STM"
+  "ExternalSuppliers.STM",
+  "Nop.Plugin.Api"
 ]
