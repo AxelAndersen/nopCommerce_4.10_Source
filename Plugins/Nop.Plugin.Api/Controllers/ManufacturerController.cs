@@ -38,14 +38,16 @@ namespace Nop.Plugin.Api.Controllers
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ManufacturerController : BaseApiController
     {
-        private readonly IManufacturerApiService _manufacturerApiService;        
+        private readonly IManufacturerApiService _manufacturerApiService;
+        private readonly IManufacturerService _manufacturerService;
         private readonly IUrlRecordService _urlRecordService;
-        private readonly IFactory<Category> _factory;
+        private readonly IFactory<Manufacturer> _factory;
         private readonly IDTOHelper _dtoHelper;
         private readonly ILocalizedEntityService _localizedEntityService;
 
         public ManufacturerController(IManufacturerApiService manufacturerApiService,
-            IJsonFieldsSerializer jsonFieldsSerializer,            
+            IJsonFieldsSerializer jsonFieldsSerializer,
+            IManufacturerService manufacturerService,
             IUrlRecordService urlRecordService,
             ICustomerActivityService customerActivityService,
             ILocalizationService localizationService,
@@ -55,11 +57,12 @@ namespace Nop.Plugin.Api.Controllers
             IDiscountService discountService,
             IAclService aclService,
             ICustomerService customerService,
-            IFactory<Category> factory,
+            IFactory<Manufacturer> factory,
             IDTOHelper dtoHelper,
             ILocalizedEntityService localizedEntityService) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService, pictureService)
         {
-            _manufacturerApiService = manufacturerApiService;            
+            _manufacturerApiService = manufacturerApiService;
+            _manufacturerService = manufacturerService;
             _urlRecordService = urlRecordService;
             _factory = factory;
             _dtoHelper = dtoHelper;
@@ -93,6 +96,35 @@ namespace Nop.Plugin.Api.Controllers
             };
 
             var json = JsonFieldsSerializer.Serialize(manufacturersRootObject, null);
+
+            return new RawJsonActionResult(json);
+        }
+
+        [HttpPost]
+        [Route("/api/manufacturers")]
+        [ProducesResponseType(typeof(ManufacturersRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), 422)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        public IActionResult CreateManufacturer([ModelBinder(typeof(JsonModelBinder<ManufacturerDto>))] Delta<ManufacturerDto> manufacturerDelta)
+        {
+            // Here we display the errors if the validation has failed at some point.
+            if (!ModelState.IsValid)
+            {
+                return Error();
+            }
+
+            // Inserting the new category
+            var manufacturer = _factory.Initialize();
+            manufacturerDelta.Merge(manufacturer);
+            _manufacturerService.InsertManufacturer(manufacturer);
+
+            // Preparing the result dto of the new category
+            var newManufacturerDto = _dtoHelper.PrepareManufacturerDTO(manufacturer);
+            var manufacturersRootObject = new ManufacturersRootObject();
+            manufacturersRootObject.Manufacturers.Add(newManufacturerDto);
+
+            var json = JsonFieldsSerializer.Serialize(manufacturersRootObject, string.Empty);
 
             return new RawJsonActionResult(json);
         }

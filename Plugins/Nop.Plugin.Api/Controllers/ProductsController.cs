@@ -36,6 +36,7 @@ namespace Nop.Plugin.Api.Controllers
     using Nop.Plugin.Api.DTOs.Languages;
     using Nop.Core.Domain.Media;
     using Newtonsoft.Json;
+    using AO.Services.Extensions;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ProductsController : BaseApiController
@@ -462,7 +463,10 @@ namespace Nop.Plugin.Api.Controllers
                             case AttributeControlType.ImageSquares:
                                 {
                                     var ctrlAttributes = "";
-
+                                    if (attribute.ProductAttribute == null)
+                                    {
+                                        attribute.ProductAttribute = _productAttributeService.GetProductAttributeById(attribute.ProductAttributeId);
+                                    }
                                     if (attribute.ProductAttribute.Name.ToLower().Equals("size"))
                                     {
                                         var attributeValues = attribute.ProductAttributeValues.Where(x => x.Name.ToLower().Equals(productAttributeCombination.SizeValueName.ToLower())).FirstOrDefault();
@@ -536,6 +540,52 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.BadRequest, "productAttributeCombination", string.Join(",", warnings));
             }
 
+
+            // Preparing the result dto of the new product
+            var productDto = _dtoHelper.PrepareProductDTO(product);
+
+            var productsRootObject = new ProductsRootObjectDto();
+
+            productsRootObject.Products.Add(productDto);
+
+            var json = JsonFieldsSerializer.Serialize(productsRootObject, string.Empty);
+
+            return new RawJsonActionResult(json);
+        }
+
+        [HttpPut]
+        [Route("/api/productsename/{id}")]
+        [ProducesResponseType(typeof(ProductsRootObjectDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ErrorsRootObject), 422)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        public IActionResult UpdateProductSeName([ModelBinder(typeof(JsonModelBinder<ProductDto>))] Delta<ProductDto> productDelta)
+        {
+            // Here we display the errors if the validation has failed at some point.
+            if (!ModelState.IsValid)
+            {
+                return Error();
+            }
+
+            var product = _productApiService.GetProductById(productDelta.Dto.Id);
+
+            if (product == null)
+            {
+                return Error(HttpStatusCode.NotFound, "product", "not found");
+            }
+
+            //productDelta.Merge(product);
+
+            //product.UpdatedOnUtc = DateTime.UtcNow;
+            //_productService.UpdateProduct(product);
+
+            // Update the SeName if specified
+            if (productDelta.Dto.SeName != null)
+            {
+                var seName = _urlRecordService.ValidateSeName(product, productDelta.Dto.SeName.ReplaceSpecialCharacters(), product.Name, true);
+                _urlRecordService.SaveSlug(product, seName, 0);
+            }
 
             // Preparing the result dto of the new product
             var productDto = _dtoHelper.PrepareProductDTO(product);

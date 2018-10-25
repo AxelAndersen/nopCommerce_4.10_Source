@@ -12,5 +12,7 @@ namespace Nop.Plugin.Api.Services
         int GetProductAttributesCount();
 
         ProductAttribute GetById(int id);
+
+        IList<SpecificationAttributeOption> GetSpecificationAttributeOptions();
     }
 }

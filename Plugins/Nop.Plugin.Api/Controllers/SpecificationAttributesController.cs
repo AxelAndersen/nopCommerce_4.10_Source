@@ -33,6 +33,7 @@ namespace Nop.Plugin.Api.Controllers
     {
         private readonly ISpecificationAttributeService _specificationAttributeService;
         private readonly ISpecificationAttributeApiService _specificationAttributeApiService;
+        private readonly IProductAttributesApiService _productAttributesApiService;
         private readonly IDTOHelper _dtoHelper;
         private readonly ILocalizedEntityService _localizedEntityService;
         private readonly IUrlRecordService _urlRecordService;
@@ -50,6 +51,7 @@ namespace Nop.Plugin.Api.Controllers
                                   ISpecificationAttributeApiService specificationAttributesApiService,
                                   IDTOHelper dtoHelper,
                                   ILocalizedEntityService localizedEntityService,
+                                  IProductAttributesApiService productAttributesApiService,
                                   IUrlRecordService urlRecordService) : base(jsonFieldsSerializer, aclService, customerService, storeMappingService, storeService, discountService, customerActivityService, localizationService, pictureService)
         {
             _specificationAttributeService = specificationAttributeService;
@@ -57,6 +59,7 @@ namespace Nop.Plugin.Api.Controllers
             _dtoHelper = dtoHelper;
             _localizedEntityService = localizedEntityService;
             _urlRecordService = urlRecordService;
+            _productAttributesApiService = productAttributesApiService;
         }
 
         /// <summary>
@@ -263,6 +266,37 @@ namespace Nop.Plugin.Api.Controllers
             CustomerActivityService.InsertActivity("DeleteSpecAttribute", LocalizationService.GetResource("ActivityLog.DeleteSpecAttribute"), specificationAttribute);
 
             return new RawJsonActionResult("{}");
+        }
+
+        [HttpGet]
+        [Route("/api/specificationattributeoptions")]
+        [ProducesResponseType(typeof(SpecificationAttributesOptionRootObjectDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [GetRequestsErrorInterceptorActionFilter]
+        public IActionResult GetOptions()
+        {           
+            var specificationAttributeOptions = _productAttributesApiService.GetSpecificationAttributeOptions();
+
+            if (specificationAttributeOptions == null)
+            {
+                return Error(HttpStatusCode.NotFound, "No specification attribute options found", "not found");
+            }
+
+            IList<SpecificationAttributeOptionDto> attributesOptionAsDtos = specificationAttributeOptions.Select(specificAttribute =>
+            {
+                return _dtoHelper.PrepareSpecificationAttributeOptionDTO(specificAttribute);
+
+            }).ToList();
+
+            var productAttributesRootObject = new SpecificationAttributesOptionRootObjectDto()
+            {
+                SpecificationAttributeOptions = attributesOptionAsDtos
+            };
+
+            var json = JsonFieldsSerializer.Serialize(productAttributesRootObject, null);
+
+            return new RawJsonActionResult(json);
         }
 
         [HttpGet]

@@ -9,6 +9,6 @@ namespace Nop.Plugin.Api.Services
 
         IList<Manufacturer> GetManufacturers();
 
-        int GetManufacturersCount();
+        int GetManufacturersCount();        
     }
 }

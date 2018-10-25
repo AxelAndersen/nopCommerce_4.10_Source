@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v2.1": {
       "Nop.Plugin.Api/1.0.0": {
         "dependencies": {
+          "AO.Services": "1.0.0",
           "AutoMapper": "7.0.1",
           "IdentityServer4": "2.0.3",
           "IdentityServer4.AccessTokenValidation": "2.0.2",
@@ -4393,6 +4394,16 @@
           }
         }
       },
+      "AO.Services/1.0.0": {
+        "dependencies": {
+          "Nop.Core": "4.1.0",
+          "Nop.Data": "4.1.0",
+          "Nop.Services": "4.1.0"
+        },
+        "runtime": {
+          "AO.Services.dll": {}
+        }
+      },
       "Nop.Core/4.1.0": {
         "dependencies": {
           "AutoMapper.Extensions.Microsoft.DependencyInjection": "5.0.1",
@@ -6722,6 +6733,11 @@
       "sha512": "sha512-ph8JP7XcDGrTZvrmWd+22qrUB4iEdp7YK+jiwyuLaxpzEwkkmTo2/Ed9W8jTz9rnaXwYDEmynvoFFXsqyi8ZxA==",
       "path": "windowsazure.storage/9.3.0",
       "hashPath": "windowsazure.storage.9.3.0.nupkg.sha512"
+    },
+    "AO.Services/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     },
     "Nop.Core/4.1.0": {
       "type": "project",
