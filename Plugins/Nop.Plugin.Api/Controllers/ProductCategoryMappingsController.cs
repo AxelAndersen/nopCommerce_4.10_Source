@@ -218,7 +218,7 @@ namespace Nop.Plugin.Api.Controllers
             var json = JsonFieldsSerializer.Serialize(productCategoryMappingsRootObject, string.Empty);
 
             //activity log 
-            CustomerActivityService.InsertActivity("AddNewProductCategoryMapping", LocalizationService.GetResource("ActivityLog.AddNewProductCategoryMapping"), newProductCategory);
+            CustomerActivityService.InsertActivity("AddNewProductCategoryMapping", "New product category mapping added", newProductCategory);
 
             return new RawJsonActionResult(json);
         }

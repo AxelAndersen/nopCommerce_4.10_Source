@@ -32,11 +32,8 @@ namespace Nop.Plugin.POS.Kaching
         }
 
         public void HandleEvent(EntityUpdatedEvent<Core.Domain.Catalog.Product> eventMessage)
-        {
-            _logger.Information("Handling product update in POS Kaching Plugin");
-
+        {            
             Core.Domain.Catalog.Product product = null;
-
             try
             {
                 product = GetProduct(eventMessage);

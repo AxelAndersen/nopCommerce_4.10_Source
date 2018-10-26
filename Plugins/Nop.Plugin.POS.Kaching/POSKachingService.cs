@@ -87,7 +87,10 @@ namespace Nop.Plugin.POS.Kaching
             kaChingProduct.Product.Name = new Description();
             kaChingProduct.Product.Name.Da = kaChingProduct.Product.Name.En = product.Name;
             kaChingProduct.Product.Description = new Description();
-            kaChingProduct.Product.Description.Da = kaChingProduct.Product.Description.En = product.FullDescription.StripHTML();
+            if (!string.IsNullOrEmpty(product.FullDescription))
+            {
+                kaChingProduct.Product.Description.Da = kaChingProduct.Product.Description.En = product.FullDescription.StripHTML();
+            }
             kaChingProduct.Product.RetailPrice = (long)product.Price;
 
             foreach (var pp in product.ProductPictures)
