@@ -251,6 +251,8 @@ namespace Nop.Plugin.Api.Controllers
 
             //search engine name
             var seName = _urlRecordService.ValidateSeName(product, productDelta.Dto.SeName, product.Name, true);
+
+            // Maybe languageid should just be 0 here ?
             _urlRecordService.SaveSlug(product, seName, 0);
 
             UpdateLocales(product, productDelta.Dto.LocalizedNames);
@@ -427,6 +429,8 @@ namespace Nop.Plugin.Api.Controllers
             if (productDelta.Dto.SeName != null)
             {
                 var seName = _urlRecordService.ValidateSeName(product, productDelta.Dto.SeName, product.Name, true);
+
+                // Maybe languageid should just be 0 here ?
                 _urlRecordService.SaveSlug(product, seName, 0);
             }
 
@@ -584,6 +588,8 @@ namespace Nop.Plugin.Api.Controllers
             if (productDelta.Dto.SeName != null)
             {
                 var seName = _urlRecordService.ValidateSeName(product, productDelta.Dto.SeName.ReplaceSpecialCharacters(), product.Name, true);
+
+                // Maybe languageid should just be 0 here ?
                 _urlRecordService.SaveSlug(product, seName, 0);
             }
 

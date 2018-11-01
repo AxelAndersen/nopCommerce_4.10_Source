@@ -224,6 +224,8 @@ namespace Nop.Plugin.Api.Controllers
             //search engine name
 
             var seName = _urlRecordService.ValidateSeName(category, categoryDelta.Dto.SeName, category.Name, true);
+
+            // Maybe languageid should just be 0 here ?
             _urlRecordService.SaveSlug(category, seName, 0);
 
             CustomerActivityService.InsertActivity("AddNewCategory",
@@ -283,8 +285,9 @@ namespace Nop.Plugin.Api.Controllers
             //search engine name
             if (categoryDelta.Dto.SeName != null)
             {
-
                 var seName = _urlRecordService.ValidateSeName(category, categoryDelta.Dto.SeName, category.Name, true);
+
+                // Maybe languageid should just be 0 here ?
                 _urlRecordService.SaveSlug(category, seName, 0);
             }
 
@@ -426,7 +429,7 @@ namespace Nop.Plugin.Api.Controllers
                     localized.LanguageId.Value);
 
                 var seName = _urlRecordService.ValidateSeName(category, localized.LocalizedName, category.Name, false);
-                _urlRecordService.SaveSlug(category, seName, 0);
+                _urlRecordService.SaveSlug(category, seName, localized.LanguageId.Value);
             }
         }
     }
