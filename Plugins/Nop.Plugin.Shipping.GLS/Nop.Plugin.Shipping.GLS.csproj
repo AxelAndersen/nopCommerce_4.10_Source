@@ -36,6 +36,12 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="System.ServiceModel.Duplex" Version="4.5.3" />
+    <PackageReference Include="System.ServiceModel.Http" Version="4.5.3" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.5.3" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.5.3" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\Libraries\AO.Services\AO.Services.csproj" />
     <ProjectReference Include="..\..\Libraries\Nop.Core\Nop.Core.csproj" />
     <ProjectReference Include="..\..\Libraries\Nop.Services\Nop.Services.csproj" />
