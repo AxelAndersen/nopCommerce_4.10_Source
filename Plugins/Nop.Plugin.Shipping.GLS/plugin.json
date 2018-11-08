@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Shipping",
+  "FriendlyName": "GLS",
+  "SystemName": "Shipping.GLS",
+  "Version": "0.1",
+  "SupportedVersions": [ "4.10" ],
+  "Author": "Axel Andersen [Andersen Outdoor ApS]",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Shipping.GLS.dll",
+  "Description": "This plugin will give customers access to GLS shipping method"
+}

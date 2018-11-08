@@ -18,5 +18,6 @@
   "ExternalSuppliers.Intersurf",
   "ExternalSuppliers.Bonvita",
   "ExternalSuppliers.STM",
-  "Nop.Plugin.Api"
+  "Nop.Plugin.Api",
+  "Shipping.GLS"
 ]

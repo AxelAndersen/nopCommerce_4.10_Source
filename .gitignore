@@ -259,5 +259,8 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/Presentation/Nop.Web/Plugins
 /Presentation/Nop.Web/wwwroot/images/thumbs/0000004_ada-teltet.png
 /Presentation/Nop.Web/wwwroot/images/thumbs/0000004_ada-teltet_75.png
+/Presentation/Nop.Web/wwwroot/images/thumbs
+/Presentation/Nop.Web/App_Data/DataProtectionKeys/key-dcff068d-db64-4d38-8eca-c0f187551094.xml
