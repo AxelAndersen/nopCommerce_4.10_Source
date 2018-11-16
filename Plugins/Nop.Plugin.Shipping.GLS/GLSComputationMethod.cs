@@ -1,5 +1,6 @@
 ﻿using GLSReference;
 using Nop.Core;
+using Nop.Core.Domain.Shipping;
 using Nop.Core.Plugins;
 using Nop.Plugin.Shipping.GLS.Components;
 using Nop.Plugin.Shipping.GLS.Settings;
@@ -7,10 +8,13 @@ using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Directory;
 using Nop.Services.Localization;
+using Nop.Services.Logging;
 using Nop.Services.Shipping;
 using Nop.Services.Shipping.Tracking;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using static GLSReference.wsShopFinderSoapClient;
 
 namespace Nop.Plugin.Shipping.GLS
@@ -22,14 +26,16 @@ namespace Nop.Plugin.Shipping.GLS
         private readonly ILocalizationService _localizationService;
         private readonly ICountryService _countryService;
         private readonly GLSSettings _glsSettings;
+        private readonly ILogger _logger;
 
-        public GLSComputationMethod(IWebHelper webHelper, ISettingService settingService, ILocalizationService localizationService, ICountryService countryService, GLSSettings glsSettings)
+        public GLSComputationMethod(IWebHelper webHelper, ISettingService settingService, ILocalizationService localizationService, ICountryService countryService, GLSSettings glsSettings, ILogger logger)
         {
             this._webHelper = webHelper;
             this._settingService = settingService;
             this._localizationService = localizationService;
             this._countryService = countryService;
             this._glsSettings = glsSettings;
+            this._logger = logger;
         }
 
         #region Properties
@@ -66,59 +72,61 @@ namespace Nop.Plugin.Shipping.GLS
         }
 
         public GetShippingOptionResponse GetShippingOptions(GetShippingOptionRequest getShippingOptionRequest)
-        {
-            if (getShippingOptionRequest == null)
-            {
-                throw new ArgumentNullException(nameof(getShippingOptionRequest));
-            }
-
+        {            
             var response = new GetShippingOptionResponse();
 
-            if (getShippingOptionRequest.Items == null)
-            {
-                response.AddError("No shipment items");
-                return response;
-            }
+            _logger.Information("Ready to validate shipping input");
 
-            if (getShippingOptionRequest.ShippingAddress == null)
+            bool validInput = ValidateShippingInfo(getShippingOptionRequest, ref response);
+            if(validInput == false && response.Errors != null && response.Errors.Count > 0)
             {
-                response.AddError("Shipping address is not set");
-                return response;
-            }
-
-            if (getShippingOptionRequest.ShippingAddress.Country == null)
-            {
-                response.AddError("Shipping country is not set");
-                return response;
-            }
-
-            if (getShippingOptionRequest.CountryFrom == null)
-            {
-                response.AddError("From country is not set");
                 return response;
             }
 
             try
             {
-
+                _logger.Information("Ready to prapare GLS call");
                 wsShopFinderSoapClient client = new wsShopFinderSoapClient(EndpointConfiguration.wsShopFinderSoap12, _glsSettings.EndpointAddress);
                 string zip = getShippingOptionRequest.ShippingAddress.ZipPostalCode;
-                if (string.IsNullOrEmpty(zip))
-                {
-                    response.AddError("Zipcode not set");
-                    return response;
-                }
-
-                if (!Associations.GLSCountryCode.ContainsKey(getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode))
-                {
-                    response.AddError($"Zip iso code '{getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode}' not found in asscociations");
-                    return response;
-                }
+                string street = getShippingOptionRequest.ShippingAddress.Address1;               
                 string glsCountryCode = Associations.GLSCountryCode[getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode];
 
+                _logger.Information("Ready to call GLS on 1 '" + _glsSettings.EndpointAddress + "'");
+                List<PakkeshopData> parcelShops = null;
+                try
+                {
+                    // First try to find a number of shops near the address
+                    parcelShops = client.GetParcelShopDropPointAsync(street, zip, glsCountryCode, _glsSettings.AmountNearestShops).Result.parcelshops.ToList();
+                }
+                catch { }
 
-                var shops = client.GetParcelShopsInZipcodeAsync(zip, glsCountryCode).Result;
+                if (parcelShops == null || parcelShops.Count == 0)
+                {
+                    try
+                    {
+                        // If any errors or no shop found, try to find shops from only zip code
+                        parcelShops = client.GetParcelShopsInZipcodeAsync(zip, glsCountryCode).Result.GetParcelShopsInZipcodeResult.ToList();
+                    }
+                    catch { }
+                }
 
+                if(parcelShops == null || parcelShops.Count == 0)
+                {
+                    response.AddError($"GLS Service could not find any shops with the given information: {street} {zip}");
+                    return response;
+                }
+
+                foreach (var parcelShop in parcelShops)
+                {
+                    ShippingOption shippingOption = new ShippingOption()
+                    {
+                        Name = parcelShop.CompanyName,
+                        Description = parcelShop.CityName,                        
+                        ShippingRateComputationMethodSystemName = "GLSComputationMethod"
+                    };
+                    
+                    response.ShippingOptions.Add(shippingOption);
+                }
 
                 //var requestString = CreateRequest(_glsSettings.AccessKey, _glsSettings.Username, _glsSettings.Password, getShippingOptionRequest,
                 //    _upsSettings.CustomerClassification, _upsSettings.PickupType, _upsSettings.PackagingType, false);
@@ -174,12 +182,15 @@ namespace Nop.Plugin.Shipping.GLS
                 //        response.AddError(error);
                 //}
 
-                //if (response.ShippingOptions.Any())
-                //    response.Errors.Clear();
-            }
+                if (response.ShippingOptions.Any())
+                {
+                    response.Errors.Clear();
+                }
+            }           
             catch (Exception exc)
             {
-                response.AddError($"GLS Service is currently unavailable, try again later. {exc.Message}");
+                while (exc.InnerException != null) exc = exc.InnerException;
+                response.AddError($"GLS Service is currently unavailable, try again later. {exc.ToString()}");
             }
             finally
             {
@@ -192,6 +203,52 @@ namespace Nop.Plugin.Shipping.GLS
             }
 
             return response;
+        }
+
+        private bool ValidateShippingInfo(GetShippingOptionRequest getShippingOptionRequest, ref GetShippingOptionResponse response)
+        {
+            if (getShippingOptionRequest == null)
+            {
+                throw new ArgumentNullException(nameof(getShippingOptionRequest));            
+            }
+
+            if (getShippingOptionRequest.Items == null)
+            {
+                response.AddError("No shipment items");
+                return false;
+            }
+
+            if (getShippingOptionRequest.ShippingAddress == null)
+            {
+                response.AddError("Shipping address is not set");
+                return false;
+            }
+
+            if (getShippingOptionRequest.ShippingAddress.Country == null)
+            {
+                response.AddError("Shipping country is not set");
+                return false;
+            }
+
+            if (getShippingOptionRequest.CountryFrom == null)
+            {
+                response.AddError("From country is not set");
+                return false;
+            }
+
+            if (!Associations.GLSCountryCode.ContainsKey(getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode))
+            {
+                response.AddError($"Zip iso code '{getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode}' not found in asscociations");
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(getShippingOptionRequest.ShippingAddress.ZipPostalCode))
+            {
+                response.AddError("Zipcode not set");
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>

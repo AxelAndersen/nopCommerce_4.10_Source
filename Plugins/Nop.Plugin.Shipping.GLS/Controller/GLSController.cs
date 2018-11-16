@@ -56,7 +56,8 @@ namespace Nop.Plugin.Shipping.GLS.Controller
 
             try
             {
-                _glsSettings.EndpointAddress = model.EndpointAddress;                
+                _glsSettings.EndpointAddress = model.EndpointAddress;
+                _glsSettings.AmountNearestShops = model.AmountNearestShops;
                 _settingService.SaveSetting(_glsSettings);
             }
             catch (Exception ex)
@@ -74,7 +75,8 @@ namespace Nop.Plugin.Shipping.GLS.Controller
         {
             return new GLSModel
             {
-                EndpointAddress = _glsSettings.EndpointAddress                
+                EndpointAddress = _glsSettings.EndpointAddress,
+                AmountNearestShops = _glsSettings.AmountNearestShops
             };
         }
     }

@@ -178,6 +178,84 @@ namespace Nop.Plugin.Api.Controllers
             return new RawJsonActionResult(json);
         }
 
+        /// <summary>
+        /// Retrieve category by spcified id
+        /// </summary>
+        /// <param name="id">Id of the category</param>
+        /// <param name="fields">Fields from the category you want your json to contain</param>
+        /// <response code="200">OK</response>
+        /// <response code="404">Not Found</response>
+        /// <response code="401">Unauthorized</response>
+        [HttpGet]
+        [Route("/api/completecategorystring/{id}")]
+        [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [GetRequestsErrorInterceptorActionFilter]
+        public string GetCompleteCategoryString(int id, string fields = "")
+        {
+            if (id <= 0)
+            {
+                throw new ArgumentException("id", "invalid id");
+            }
+
+            var category = _categoryApiService.GetCategoryById(id);
+
+            if (category == null)
+            {
+                throw new ArgumentException("category", "category not found");
+            }
+
+            var categoryDto = _dtoHelper.PrepareCategoryDTO(category);
+
+            string result = GetCategoryString(categoryDto);
+
+            if (categoryDto.ParentCategoryId > 0)
+            {
+                var parentCategory = _categoryApiService.GetCategoryById(categoryDto.ParentCategoryId.Value);
+                var parentCategoryDto = _dtoHelper.PrepareCategoryDTO(parentCategory);
+                result = GetCategoryString(parentCategoryDto) + "-" + result;
+
+                if (parentCategoryDto.ParentCategoryId > 0)
+                {
+                    var parentCategory2 = _categoryApiService.GetCategoryById(parentCategoryDto.ParentCategoryId.Value);
+                    var parentCategoryDto2 = _dtoHelper.PrepareCategoryDTO(parentCategory2);
+                    result = GetCategoryString(parentCategoryDto2) + "-" + result;
+
+                    if (parentCategoryDto2.ParentCategoryId > 0)
+                    {
+                        var parentCategory3 = _categoryApiService.GetCategoryById(parentCategoryDto2.ParentCategoryId.Value);
+                        var parentCategoryDto3 = _dtoHelper.PrepareCategoryDTO(parentCategory3);
+                        result = GetCategoryString(parentCategoryDto3) + "-" + result;
+                    }
+                }
+            }
+            
+            return result;
+        }
+
+        private string GetCategoryString(CategoryDto categoryDto)
+        {
+            string result = "";
+
+            if (categoryDto.LocalizedNames != null && categoryDto.LocalizedNames.Count > 0)
+            {
+                var localizedCategory = categoryDto.LocalizedNames.Where(l => l.LanguageId == 3).FirstOrDefault();
+                if (localizedCategory == null)
+                {
+                    result = categoryDto.SeName ?? categoryDto.Name;
+                }
+                else
+                {
+                    result = localizedCategory.LocalizedName.ToLower();
+                }
+            }
+
+            result = _urlRecordService.GetSeName(result, true, false);
+
+            return result;
+        }
+
         [HttpPost]
         [Route("/api/categories")]
         [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
@@ -306,6 +384,7 @@ namespace Nop.Plugin.Api.Controllers
 
             return new RawJsonActionResult(json);
         }
+
 
         [HttpDelete]
         [Route("/api/categories/{id}")]

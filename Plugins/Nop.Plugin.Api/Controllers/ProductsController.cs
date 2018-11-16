@@ -149,12 +149,66 @@ namespace Nop.Plugin.Api.Controllers
 
             return new RawJsonActionResult(json);
         }
+
         public class CustomProduct
         {
             public int Id { get; set; }
             public string Name { get; set; }
             public string Manufacturer_part_number { get; set; }
+        }
 
+        [HttpGet]
+        [Route("/api/products/allseoproducts")]
+        [ProducesResponseType(typeof(ProductsRootObjectDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [GetRequestsErrorInterceptorActionFilter]
+        public IActionResult GetAllSeoProducts()
+        {
+            var getAllProduct = _productApiService.GetAllProducts().Where(c => StoreMappingService.Authorize(c))
+                .Select(c => new SeoProduct()
+                {
+                    ProductId = c.Id,
+                    ProductName = c.Name,
+                    LanguageId = 0,
+                    SeName = "",
+                    ProductCategoryIds = c.ProductCategories.Select(ca => ca.Category.Id).ToList()
+                }
+                ).ToList();
+
+            string json = "";
+            try
+            {
+                json = JsonConvert.SerializeObject(getAllProduct);
+            }
+            catch(Exception ex)
+            {
+
+            }
+
+            return new RawJsonActionResult(json);
+        }
+
+        [JsonObject(Title = "SeoProduct")]
+        public class SeoProduct
+        {
+            [JsonProperty("id")]
+            public int ProductId { get; set; }
+
+            [JsonProperty("productname")]
+            public string ProductName { get; set; }
+
+            [JsonProperty("sename")]
+            public string SeName { get; set; }
+
+            [JsonProperty("languageid")]
+            public int LanguageId { get; set; }
+
+            [JsonProperty("productcategoryids")]
+            public List<int> ProductCategoryIds { get; set; }
+
+            [JsonProperty("productcategoriesstring")]
+            public string ProductCategoriesString { get; set; }
         }
 
         /// <summary>
@@ -589,6 +643,7 @@ namespace Nop.Plugin.Api.Controllers
             {
                 var seName = _urlRecordService.ValidateSeName(product, productDelta.Dto.SeName.ReplaceSpecialCharacters(), product.Name, true);
 
+
                 // Maybe languageid should just be 0 here ?
                 _urlRecordService.SaveSlug(product, seName, 0);
             }
@@ -603,6 +658,35 @@ namespace Nop.Plugin.Api.Controllers
             var json = JsonFieldsSerializer.Serialize(productsRootObject, string.Empty);
 
             return new RawJsonActionResult(json);
+        }
+
+        [HttpPut]
+        [Route("/api/updatelanguagespecificproductsename")]
+        //[ProducesResponseType(typeof(SeoProduct), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        //[ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        //[ProducesResponseType(typeof(ErrorsRootObject), 422)]
+        //[ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        public void UpdateLanguageSpecificProductSeName([ModelBinder(typeof(JsonModelBinder<SeoProduct>))] Delta<SeoProduct> seoProduct)
+        {
+            var product = _productApiService.GetProductById(seoProduct.Dto.ProductId);
+
+            if (product == null)
+            {
+                throw new ArgumentException("Wrong id, no product found with id: " + seoProduct.Dto.ProductId);
+            }
+
+            if (seoProduct.Dto.LanguageId <= 0)
+            {
+                throw new ArgumentException("You must specify the language id");
+            }
+
+            if (string.IsNullOrEmpty(seoProduct.Dto.SeName))
+            {
+                throw new ArgumentException("You must specify the seName to use with langaugeid: " + seoProduct.Dto.LanguageId);
+            }
+
+            _urlRecordService.SaveSlug(product, seoProduct.Dto.SeName, seoProduct.Dto.LanguageId);
         }
 
         [HttpDelete]
