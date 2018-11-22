@@ -115,5 +115,19 @@ namespace Nop.Plugin.Api.Services
 
             return query;
         }
+
+        public IList<Category> GetCategoriesByProductId(int productId)
+        {
+            var categoryMappingsForProduct = from productCategoryMapping in _productCategoryMappingRepository.Table
+                                             where productCategoryMapping.ProductId == productId                                             
+                                             select productCategoryMapping;
+
+            var query = _categoryRepository.Table;
+            query = from category in query
+                    join productCategoryMapping in categoryMappingsForProduct on category.Id equals productCategoryMapping.CategoryId                    
+                    select category;
+
+            return new ApiList<Category>(query, 0, 100);
+        }
     }
 }

@@ -33,6 +33,7 @@ namespace Nop.Plugin.Api.Controllers
     using DTOs.Errors;
     using JSON.Serializers;
     using Nop.Plugin.Api.DTOs.Languages;
+    using System.Threading.Tasks;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CategoriesController : BaseApiController
@@ -81,12 +82,6 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetCategories(CategoriesParametersModel parameters)
         {
-            //set limit 50 to 50000 by code
-            //if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
-            //{
-            //    return Error(HttpStatusCode.BadRequest, "limit", "Invalid limit parameter");
-            //}
-
             if (parameters.Page < Configurations.DefaultPageValue)
             {
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid page parameter");
@@ -178,6 +173,42 @@ namespace Nop.Plugin.Api.Controllers
             return new RawJsonActionResult(json);
         }
 
+        [HttpGet]
+        [Route("/api/categoryidsbyproductid")]
+        [ProducesResponseType(typeof(List<int>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]        
+        public IList<int> GetCategoryIdsByProductId([FromQuery]int productId, [FromQuery]int languageId)
+        {
+            if (productId <= 0)
+            {
+                throw new Exception("Invalid productId in GetCategoryIdsByProductId");
+            }
+
+            if (languageId <= 0)
+            {
+                throw new Exception("Invalid languageId in GetCategoryIdsByProductId");
+            }
+
+            var categories = _categoryApiService.GetCategoriesByProductId(productId);
+
+            if (categories == null)
+            {
+                throw new Exception("Categories not found in GetCategoryIdsByProductId");
+            }
+
+            var categoriesRootObject = new CategoriesRootObject();
+            foreach (Category category in categories)
+            {
+                var categoryDto = _dtoHelper.PrepareCategoryDTO(category);                
+                categoriesRootObject.Categories.Add(categoryDto);
+            }
+
+            var result = categoriesRootObject.Categories.Select(c => c.Id).ToList();
+            return result;
+        }
+        
+
         /// <summary>
         /// Retrieve category by spcified id
         /// </summary>
@@ -187,46 +218,51 @@ namespace Nop.Plugin.Api.Controllers
         /// <response code="404">Not Found</response>
         /// <response code="401">Unauthorized</response>
         [HttpGet]
-        [Route("/api/completecategorystring/{id}")]
+        [Route("/api/completecategorystring")]
         [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [GetRequestsErrorInterceptorActionFilter]
-        public string GetCompleteCategoryString(int id, string fields = "")
+        public string GetCompleteCategoryString([FromQuery]int categoryId, [FromQuery]int languageId)
         {
-            if (id <= 0)
+            if (categoryId <= 0)
             {
-                throw new ArgumentException("id", "invalid id");
+                throw new Exception("Invalid categoryId in GetCompleteCategoryString");
             }
 
-            var category = _categoryApiService.GetCategoryById(id);
+            if (languageId <= 0)
+            {
+                throw new Exception("Invalid languageId in GetCompleteCategoryString");
+            }
+
+            var category = _categoryApiService.GetCategoryById(categoryId);
 
             if (category == null)
             {
-                throw new ArgumentException("category", "category not found");
+                throw new ArgumentException("category", "category not found in GetCompleteCategoryString");
             }
 
             var categoryDto = _dtoHelper.PrepareCategoryDTO(category);
 
-            string result = GetCategoryString(categoryDto);
+            string result = GetCategoryString(categoryDto, languageId);
 
             if (categoryDto.ParentCategoryId > 0)
             {
                 var parentCategory = _categoryApiService.GetCategoryById(categoryDto.ParentCategoryId.Value);
                 var parentCategoryDto = _dtoHelper.PrepareCategoryDTO(parentCategory);
-                result = GetCategoryString(parentCategoryDto) + "-" + result;
+                result = GetCategoryString(parentCategoryDto, languageId) + "-" + result;
 
                 if (parentCategoryDto.ParentCategoryId > 0)
                 {
                     var parentCategory2 = _categoryApiService.GetCategoryById(parentCategoryDto.ParentCategoryId.Value);
                     var parentCategoryDto2 = _dtoHelper.PrepareCategoryDTO(parentCategory2);
-                    result = GetCategoryString(parentCategoryDto2) + "-" + result;
+                    result = GetCategoryString(parentCategoryDto2, languageId) + "-" + result;
 
                     if (parentCategoryDto2.ParentCategoryId > 0)
                     {
                         var parentCategory3 = _categoryApiService.GetCategoryById(parentCategoryDto2.ParentCategoryId.Value);
                         var parentCategoryDto3 = _dtoHelper.PrepareCategoryDTO(parentCategory3);
-                        result = GetCategoryString(parentCategoryDto3) + "-" + result;
+                        result = GetCategoryString(parentCategoryDto3, languageId) + "-" + result;
                     }
                 }
             }
@@ -234,13 +270,13 @@ namespace Nop.Plugin.Api.Controllers
             return result;
         }
 
-        private string GetCategoryString(CategoryDto categoryDto)
+        private string GetCategoryString(CategoryDto categoryDto, int languageId)
         {
             string result = "";
 
             if (categoryDto.LocalizedNames != null && categoryDto.LocalizedNames.Count > 0)
             {
-                var localizedCategory = categoryDto.LocalizedNames.Where(l => l.LanguageId == 3).FirstOrDefault();
+                var localizedCategory = categoryDto.LocalizedNames.Where(l => l.LanguageId == languageId).FirstOrDefault();
                 if (localizedCategory == null)
                 {
                     result = categoryDto.SeName ?? categoryDto.Name;

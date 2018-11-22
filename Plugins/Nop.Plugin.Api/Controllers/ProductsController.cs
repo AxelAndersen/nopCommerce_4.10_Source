@@ -171,8 +171,8 @@ namespace Nop.Plugin.Api.Controllers
                     ProductId = c.Id,
                     ProductName = c.Name,
                     LanguageId = 0,
-                    SeName = "",
-                    ProductCategoryIds = c.ProductCategories.Select(ca => ca.Category.Id).ToList()
+                    SeName = ""//,
+                    //ProductCategryIds = c.ProductCategories.Select(ca => ca.Category.Id).ToList()
                 }
                 ).ToList();
 
