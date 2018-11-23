@@ -165,28 +165,31 @@ namespace Nop.Plugin.Api.Controllers
         [GetRequestsErrorInterceptorActionFilter]
         public IActionResult GetAllSeoProducts()
         {
-            var getAllProduct = _productApiService.GetAllProducts().Where(c => StoreMappingService.Authorize(c))
-                .Select(c => new SeoProduct()
-                {
-                    ProductId = c.Id,
-                    ProductName = c.Name,
-                    LanguageId = 0,
-                    SeName = ""//,
-                    //ProductCategryIds = c.ProductCategories.Select(ca => ca.Category.Id).ToList()
-                }
-                ).ToList();
+            var getAllProduct = _productApiService.GetAllSeoProducts().ToList();
 
-            string json = "";
-            try
-            {
-                json = JsonConvert.SerializeObject(getAllProduct);
-            }
-            catch(Exception ex)
-            {
-
-            }
-
+            string json = JsonConvert.SerializeObject(getAllProduct);           
             return new RawJsonActionResult(json);
+        }
+
+        [HttpGet]
+        [Route("/api/products/allseoproductswithoutsename")]
+        [ProducesResponseType(typeof(ProductsRootObjectDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [GetRequestsErrorInterceptorActionFilter]
+        public List<SeoProduct> GetAllSeoProducts([FromQuery] int languageId)
+        {            
+            List<SeoProduct> productsWithoutSeoName = new List<SeoProduct>();
+            var allProducts = _productApiService.GetAllProducts();
+            foreach (Product product in allProducts)
+            {
+                string seName = _urlRecordService.GetSeName(product, languageId, false);
+                if (string.IsNullOrEmpty(seName))
+                {
+                    productsWithoutSeoName.Add(new SeoProduct() { LanguageId = languageId, ProductId = product.Id, ProductName = product.Name });
+                }
+            }
+            return productsWithoutSeoName;
         }
 
         [JsonObject(Title = "SeoProduct")]

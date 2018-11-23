@@ -7,6 +7,7 @@ using Nop.Core.Domain.Vendors;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
 using Nop.Services.Stores;
+using static Nop.Plugin.Api.Controllers.ProductsController;
 
 namespace Nop.Plugin.Api.Services
 {
@@ -50,6 +51,15 @@ namespace Nop.Plugin.Api.Services
                         select p;
             var products = query.ToList();
 
+            return products;
+        }
+
+        public IList<SeoProduct> GetAllSeoProducts()
+        {
+            var query = from p in _productRepository.Table
+                        where !p.Deleted
+                        select new SeoProduct() { ProductId = p.Id, ProductName = p.Name };
+            var products = query.ToList();
             return products;
         }
 

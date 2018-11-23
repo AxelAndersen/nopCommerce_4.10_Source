@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Constants;
+using static Nop.Plugin.Api.Controllers.ProductsController;
 
 namespace Nop.Plugin.Api.Services
 {
@@ -21,5 +22,7 @@ namespace Nop.Plugin.Api.Services
         Product GetProductByIdNoTracking(int productId);
 
         IList<Product> GetAllProducts();
+
+        IList<SeoProduct> GetAllSeoProducts();
     }
 }
