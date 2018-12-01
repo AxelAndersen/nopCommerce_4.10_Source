@@ -9,6 +9,9 @@ namespace Nop.Plugin.POS.Kaching.Models
 {
     public class KachingConfigurationModel : BaseNopModel
     {
+        [NopResourceDisplayName("Nop.Plugin.POS.Kaching.POSKaChingActive")]
+        public bool POSKaChingActive { get; set; }
+
         [NopResourceDisplayName("Nop.Plugin.POS.Kaching.KaChingHost")]
         public string POSKaChingHost { get; set; }
 

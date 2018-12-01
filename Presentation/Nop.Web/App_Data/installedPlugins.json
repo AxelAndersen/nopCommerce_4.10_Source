@@ -13,11 +13,11 @@
   "Tax.FixedOrByCountryStateZip",
   "Widgets.GoogleAnalytics",
   "Widgets.NivoSlider",
-  "POS.Kaching",
   "Nop.Plugin.Seurata.GoogleShopping",
   "ExternalSuppliers.Intersurf",
   "ExternalSuppliers.Bonvita",
   "ExternalSuppliers.STM",
   "Nop.Plugin.Api",
-  "Shipping.GLS"
+  "Shipping.GLS",
+  "POS.Kaching"
 ]

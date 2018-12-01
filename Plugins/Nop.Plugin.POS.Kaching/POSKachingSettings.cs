@@ -7,6 +7,7 @@ namespace Nop.Plugin.POS.Kaching
 {
     public class POSKachingSettings : ISettings
     {
+        public bool POSKaChingActive { get; set; }
         public string POSKaChingHost { get; set; }
         public string POSKaChingId { get; set; }
         public string POSKaChingAccountToken { get; set; }

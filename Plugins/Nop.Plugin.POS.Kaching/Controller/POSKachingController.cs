@@ -63,6 +63,7 @@ namespace Nop.Plugin.POS.Kaching.Controller
 
             try
             {
+                _kachingSettings.POSKaChingActive = model.POSKaChingActive;
                 _kachingSettings.POSKaChingHost = model.POSKaChingHost;
                 _kachingSettings.POSKaChingId = model.POSKaChingId;
                 _kachingSettings.POSKaChingAccountToken = model.POSKaChingAccountToken;
@@ -89,30 +90,37 @@ namespace Nop.Plugin.POS.Kaching.Controller
         {
             KachingConfigurationModel model = GetBaseModel();
 
-            IPagedList<Core.Domain.Catalog.Product> products = _productService.SearchProducts();                      
-            int count = 0;
-            foreach (Core.Domain.Catalog.Product product in products)
-            {
-                try
+            if (this._kachingSettings.POSKaChingActive)
+            {                
+                IPagedList<Core.Domain.Catalog.Product> products = _productService.SearchProducts();
+                int count = 0;
+                foreach (Core.Domain.Catalog.Product product in products)
                 {
-                    POSKachingService service = new POSKachingService(_logger, _kachingSettings, _settingService, _pictureService, _productAttributeService);
-                    var json = service.BuildJSONString(product);
+                    try
+                    {
+                        POSKachingService service = new POSKachingService(_logger, _kachingSettings, _settingService, _pictureService, _productAttributeService);
+                        var json = service.BuildJSONString(product);
 
-                    service.SaveProduct(json);
-                    count++;
+                        service.SaveProduct(json);
+                        count++;
+                    }
+                    catch (Exception ex)
+                    {
+                        Exception inner = ex;
+                        while (inner.InnerException != null) inner = inner.InnerException;
+                        _logger.Error("Configure POS Kaching: " + inner.Message, ex);
+                        model.ErrorMessage += "<br />" + inner.Message;
+                    }
                 }
-                catch (Exception ex)
+
+                if (count > 0)
                 {
-                    Exception inner = ex;
-                    while (inner.InnerException != null) inner = inner.InnerException;
-                    _logger.Error("Configure POS Kaching: " + inner.Message, ex);
-                    model.ErrorMessage += "<br />" + inner.Message;
+                    model.ProductsTransferred = "Products transferred: " + count;
                 }
             }
-
-            if (count > 0)
+            else
             {
-                model.ProductsTransferred = "Products transferred: " + count;
+                model.ErrorMessage = "Kaching is not active";               
             }
 
             return View("~/Plugins/Nop.Plugin.POS.Kaching/Views/Configure.cshtml", model);
@@ -154,6 +162,7 @@ namespace Nop.Plugin.POS.Kaching.Controller
         {
             return new KachingConfigurationModel
             {
+                POSKaChingActive = _kachingSettings.POSKaChingActive,
                 POSKaChingHost = _kachingSettings.POSKaChingHost,
                 POSKaChingId = _kachingSettings.POSKaChingId,
                 POSKaChingAccountToken = _kachingSettings.POSKaChingAccountToken,

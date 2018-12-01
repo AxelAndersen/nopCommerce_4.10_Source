@@ -33,6 +33,11 @@ namespace Nop.Plugin.POS.Kaching
 
         public void HandleEvent(EntityUpdatedEvent<Core.Domain.Catalog.Product> eventMessage)
         {            
+            if(this._kachingSettings.POSKaChingActive == false)
+            {
+                return;
+            }
+
             Core.Domain.Catalog.Product product = null;
             try
             {

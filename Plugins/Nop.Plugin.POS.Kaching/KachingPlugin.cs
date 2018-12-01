@@ -14,7 +14,7 @@ namespace Nop.Plugin.POS.Kaching
         private readonly ILocalizationService _localizationService;
 
         public KachingPlugin(IWebHelper webHelper, ISettingService settingService, ILocalizationService localizationService)
-        {
+        {            
             this._webHelper = webHelper;
             this._settingService = settingService;
             this._localizationService = localizationService;
@@ -37,6 +37,7 @@ namespace Nop.Plugin.POS.Kaching
             //settings
             _settingService.SaveSetting(new POSKachingSettings());
 
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.POS.Kaching.POSKaChingActive", "Active");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.POS.Kaching.KaChingHost", "Kaching host");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.POS.Kaching.POSKaChingId", "Kaching Id");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.POS.Kaching.POSKaChingAccountToken", "Kaching Account Token");
