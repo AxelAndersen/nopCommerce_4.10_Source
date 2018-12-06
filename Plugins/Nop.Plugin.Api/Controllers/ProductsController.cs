@@ -158,26 +158,12 @@ namespace Nop.Plugin.Api.Controllers
         }
 
         [HttpGet]
-        [Route("/api/products/allseoproducts")]
-        [ProducesResponseType(typeof(ProductsRootObjectDto), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
-        [GetRequestsErrorInterceptorActionFilter]
-        public IActionResult GetAllSeoProducts()
-        {
-            var getAllProduct = _productApiService.GetAllSeoProducts().ToList();
-
-            string json = JsonConvert.SerializeObject(getAllProduct);           
-            return new RawJsonActionResult(json);
-        }
-
-        [HttpGet]
         [Route("/api/products/allseoproductswithoutsename")]
         [ProducesResponseType(typeof(ProductsRootObjectDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [GetRequestsErrorInterceptorActionFilter]
-        public List<SeoProduct> GetAllSeoProducts([FromQuery] int languageId)
+        public List<SeoProduct> GetAllSeoProductsWithOutSeName([FromQuery] int languageId)
         {            
             List<SeoProduct> productsWithoutSeoName = new List<SeoProduct>();
             var allProducts = _productApiService.GetAllProducts();
@@ -190,6 +176,23 @@ namespace Nop.Plugin.Api.Controllers
                 }
             }
             return productsWithoutSeoName;
+        }
+
+        [HttpGet]
+        [Route("/api/products/allseoproducts")]
+        [ProducesResponseType(typeof(ProductsRootObjectDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [GetRequestsErrorInterceptorActionFilter]
+        public List<SeoProduct> GetAllSeoProducts([FromQuery] int languageId)
+        {
+            List<SeoProduct> products = new List<SeoProduct>();
+            var allProducts = _productApiService.GetAllProducts();
+            foreach (Product product in allProducts)
+            {
+                products.Add(new SeoProduct() { LanguageId = languageId, ProductId = product.Id, ProductName = product.Name });
+            }
+            return products;
         }
 
         [JsonObject(Title = "SeoProduct")]
@@ -636,16 +639,10 @@ namespace Nop.Plugin.Api.Controllers
                 return Error(HttpStatusCode.NotFound, "product", "not found");
             }
 
-            //productDelta.Merge(product);
-
-            //product.UpdatedOnUtc = DateTime.UtcNow;
-            //_productService.UpdateProduct(product);
-
             // Update the SeName if specified
             if (productDelta.Dto.SeName != null)
             {
                 var seName = _urlRecordService.ValidateSeName(product, productDelta.Dto.SeName.ReplaceSpecialCharacters(), product.Name, true);
-
 
                 // Maybe languageid should just be 0 here ?
                 _urlRecordService.SaveSlug(product, seName, 0);
@@ -665,11 +662,6 @@ namespace Nop.Plugin.Api.Controllers
 
         [HttpPut]
         [Route("/api/updatelanguagespecificproductsename")]
-        //[ProducesResponseType(typeof(SeoProduct), (int)HttpStatusCode.OK)]
-        //[ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
-        //[ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
-        //[ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        //[ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         public void UpdateLanguageSpecificProductSeName([ModelBinder(typeof(JsonModelBinder<SeoProduct>))] Delta<SeoProduct> seoProduct)
         {
             var product = _productApiService.GetProductById(seoProduct.Dto.ProductId);

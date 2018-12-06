@@ -34,6 +34,7 @@ namespace Nop.Plugin.Api.Controllers
     using JSON.Serializers;
     using Nop.Plugin.Api.DTOs.Languages;
     using System.Threading.Tasks;
+    using Nop.Plugin.Api.Models;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CategoriesController : BaseApiController
@@ -421,6 +422,54 @@ namespace Nop.Plugin.Api.Controllers
             return new RawJsonActionResult(json);
         }
 
+        [HttpGet]
+        [Route("/api/categories/allseocategories")]
+        [ProducesResponseType(typeof(CategoriesRootObject), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
+        [GetRequestsErrorInterceptorActionFilter]
+        public List<SeoCategory> GetAllSeoCategories([FromQuery] int languageId)
+        {
+            List<SeoCategory> categories = new List<SeoCategory>();
+            var allCategories = _categoryApiService.GetCategories();           
+
+            foreach (Category category in allCategories)
+            {
+                string seName = _urlRecordService.GetSeName<Category>(category, languageId, false);
+                categories.Add(new SeoCategory()
+                                {
+                                    LanguageId = languageId,
+                                    CategoryId = category.Id,
+                                    CategoryName = category.Name,
+                                    SeName = seName
+                                });
+            }
+            return categories;
+        }
+
+        [HttpPut]
+        [Route("/api/updatelanguagespecificcategorysename")]        
+        public void UpdateLanguageSpecificCategorySeName([ModelBinder(typeof(JsonModelBinder<SeoCategory>))] Delta<SeoCategory> seoCategory)
+        {
+            var category = _categoryApiService.GetCategoryById(seoCategory.Dto.CategoryId);
+
+            if (category == null)
+            {
+                throw new ArgumentException("Wrong id, no category found with id: " + seoCategory.Dto.CategoryId);
+            }
+
+            if (seoCategory.Dto.LanguageId <= 0)
+            {
+                throw new ArgumentException("You must specify the language id");
+            }
+
+            if (string.IsNullOrEmpty(seoCategory.Dto.SeName))
+            {
+                throw new ArgumentException("You must specify the seName to use with langaugeid: " + seoCategory.Dto.LanguageId);
+            }
+
+            _urlRecordService.SaveSlug(category, seoCategory.Dto.SeName, seoCategory.Dto.LanguageId);
+        }
 
         [HttpDelete]
         [Route("/api/categories/{id}")]
