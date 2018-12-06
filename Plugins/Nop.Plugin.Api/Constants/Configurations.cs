@@ -6,7 +6,7 @@
         // https://stackoverflow.com/questions/43593074/jwt-validation-fails/43605820
         public const int DefaultAccessTokenExpiration = 315360000;
         public const int DefaultRefreshTokenExpiration = int.MaxValue;
-        public const int DefaultLimit = 50;
+        public const int DefaultLimit = 250;
         public const int DefaultPageValue = 1;
         public const int DefaultSinceId = 0;
         public const int DefaultCustomerId = 0;
