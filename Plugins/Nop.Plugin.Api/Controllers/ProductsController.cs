@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using Nop.Core.Domain.Catalog;
+﻿using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Discounts;
 using Nop.Plugin.Api.Attributes;
 using Nop.Plugin.Api.Constants;
@@ -10,6 +6,7 @@ using Nop.Plugin.Api.Delta;
 using Nop.Plugin.Api.DTOs.Images;
 using Nop.Plugin.Api.DTOs.Products;
 using Nop.Plugin.Api.Factories;
+using Nop.Plugin.Api.Helpers;
 using Nop.Plugin.Api.JSON.ActionResults;
 using Nop.Plugin.Api.ModelBinders;
 using Nop.Plugin.Api.Models.ProductsParameters;
@@ -23,20 +20,25 @@ using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Seo;
 using Nop.Services.Stores;
-using Nop.Plugin.Api.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 
 namespace Nop.Plugin.Api.Controllers
 {
-    using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using Microsoft.AspNetCore.Mvc;
+    using AO.Services.Extensions;
+    using AO.SharedServices.Models;
     using DTOs.Errors;
     using JSON.Serializers;
-    using Nop.Services.Orders;
-    using Nop.Core;
-    using Nop.Plugin.Api.DTOs.Languages;
-    using Nop.Core.Domain.Media;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.AspNetCore.Mvc;
     using Newtonsoft.Json;
-    using AO.Services.Extensions;
+    using Nop.Core.Domain.Media;
+    using Nop.Plugin.Api.DTOs.Languages;
+    using Nop.Plugin.Api.Models;
+    using Nop.Services.Orders;
+    using System.Globalization;
 
     [ApiAuthorize(Policy = JwtBearerDefaults.AuthenticationScheme, AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ProductsController : BaseApiController
@@ -194,29 +196,7 @@ namespace Nop.Plugin.Api.Controllers
             }
             return products;
         }
-
-        [JsonObject(Title = "SeoProduct")]
-        public class SeoProduct
-        {
-            [JsonProperty("id")]
-            public int ProductId { get; set; }
-
-            [JsonProperty("productname")]
-            public string ProductName { get; set; }
-
-            [JsonProperty("sename")]
-            public string SeName { get; set; }
-
-            [JsonProperty("languageid")]
-            public int LanguageId { get; set; }
-
-            [JsonProperty("productcategoryids")]
-            public List<int> ProductCategoryIds { get; set; }
-
-            [JsonProperty("productcategoriesstring")]
-            public string ProductCategoriesString { get; set; }
-        }
-
+       
         /// <summary>
         /// Receive a count of all products
         /// </summary>
@@ -682,6 +662,52 @@ namespace Nop.Plugin.Api.Controllers
             }
 
             _urlRecordService.SaveSlug(product, seoProduct.Dto.SeName, seoProduct.Dto.LanguageId);
+        }
+
+        [HttpPut]
+        [Route("/api/updatepriceswithexchangerate")]
+        public IActionResult UpdatePricesWithExchangeRate([FromQuery]string exchangeRate)
+        {
+            IResult result = new Result();
+
+            decimal newExchangeRate = decimal.Parse(exchangeRate.Replace(",", "."), CultureInfo.InvariantCulture);
+            var products = _productApiService.GetAllProducts();
+
+            if (products == null || products.Count == 0)
+            {
+                result.ErrorMessage = "No products found in UpdatePricesForCurrency()";
+                result.Success = false;
+                return result as IActionResult;
+            }
+
+            if (newExchangeRate == 0)
+            {
+                result.ErrorMessage = "ExchangeRate cant be 0";
+                result.Success = false;
+                return result as IActionResult;                
+            }
+
+            result.Success = true;
+            foreach (Product product in products)
+            {
+                try
+                {
+                    if(product.MetaKeywords == "SEK-Updated")
+                    {
+                        continue;
+                    }
+
+                    _productApiService.UpdatePrice(product, newExchangeRate);
+                    result.EntityCount++;
+                }
+                catch(Exception ex)
+                {
+                    result.ErrorMessage += Environment.NewLine + product.Name + ": " + ex.Message;
+                    result.Success = false;
+                }
+            }
+           
+            return result as IActionResult;
         }
 
         [HttpDelete]

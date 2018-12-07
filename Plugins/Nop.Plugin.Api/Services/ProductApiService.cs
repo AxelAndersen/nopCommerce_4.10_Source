@@ -6,6 +6,7 @@ using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Vendors;
 using Nop.Plugin.Api.Constants;
 using Nop.Plugin.Api.DataStructures;
+using Nop.Plugin.Api.Models;
 using Nop.Services.Stores;
 using static Nop.Plugin.Api.Controllers.ProductsController;
 
@@ -64,8 +65,8 @@ namespace Nop.Plugin.Api.Services
         }
 
 
-        public int GetProductsCount(DateTime? createdAtMin = null, DateTime? createdAtMax = null, 
-            DateTime? updatedAtMin = null, DateTime? updatedAtMax = null, bool? publishedStatus = null, string vendorName = null, 
+        public int GetProductsCount(DateTime? createdAtMin = null, DateTime? createdAtMax = null,
+            DateTime? updatedAtMin = null, DateTime? updatedAtMax = null, bool? publishedStatus = null, string vendorName = null,
             int? categoryId = null)
         {
             var query = GetProductsQuery(createdAtMin, createdAtMax, updatedAtMin, updatedAtMax, vendorName,
@@ -90,10 +91,10 @@ namespace Nop.Plugin.Api.Services
             return _productRepository.Table.FirstOrDefault(product => product.Id == productId && !product.Deleted);
         }
 
-        private IQueryable<Product> GetProductsQuery(DateTime? createdAtMin = null, DateTime? createdAtMax = null, 
-            DateTime? updatedAtMin = null, DateTime? updatedAtMax = null, string vendorName = null, 
+        private IQueryable<Product> GetProductsQuery(DateTime? createdAtMin = null, DateTime? createdAtMax = null,
+            DateTime? updatedAtMin = null, DateTime? updatedAtMax = null, string vendorName = null,
             bool? publishedStatus = null, IList<int> ids = null, int? categoryId = null)
-            
+
         {
             var query = _productRepository.Table;
 
@@ -122,7 +123,7 @@ namespace Nop.Plugin.Api.Services
 
             if (updatedAtMin != null)
             {
-               query = query.Where(c => c.UpdatedOnUtc > updatedAtMin.Value);
+                query = query.Where(c => c.UpdatedOnUtc > updatedAtMin.Value);
             }
 
             if (updatedAtMax != null)
@@ -152,6 +153,29 @@ namespace Nop.Plugin.Api.Services
             query = query.OrderBy(product => product.Id);
 
             return query;
+        }
+
+        public void UpdatePrice(Product product, decimal exchangeRate)
+        {
+            product.Price = ApplyCurrencyMultiplication(product.Price, exchangeRate);
+            product.MetaKeywords = "SEK-Updated";
+            _productRepository.Update(product);
+        }
+
+        private decimal ApplyCurrencyMultiplication(decimal price, decimal exchangeRate)
+        {
+            price = (price * exchangeRate);
+
+            string tmpPrice = price.ToString("F0");
+            tmpPrice = tmpPrice.Substring(0, tmpPrice.Length - 1);
+            tmpPrice = tmpPrice + "9";
+
+            price = Convert.ToDecimal(tmpPrice);
+            if(price.ToString().EndsWith("09"))
+            {
+                price -= 10;
+            }
+            return price;
         }
     }
 }

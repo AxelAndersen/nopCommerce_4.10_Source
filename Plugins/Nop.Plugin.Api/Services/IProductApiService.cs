@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Nop.Core.Domain.Catalog;
 using Nop.Plugin.Api.Constants;
+using Nop.Plugin.Api.Models;
 using static Nop.Plugin.Api.Controllers.ProductsController;
 
 namespace Nop.Plugin.Api.Services
@@ -24,5 +25,7 @@ namespace Nop.Plugin.Api.Services
         IList<Product> GetAllProducts();
 
         IList<SeoProduct> GetAllSeoProducts();
+
+        void UpdatePrice(Product product, decimal exchangeRate);
     }
 }
