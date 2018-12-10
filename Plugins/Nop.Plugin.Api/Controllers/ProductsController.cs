@@ -692,7 +692,7 @@ namespace Nop.Plugin.Api.Controllers
             {
                 try
                 {
-                    if(product.MetaKeywords == "SEK-Updated")
+                    if(product.MetaKeywords == _productApiService.UPDATED_KEYWORD)
                     {
                         continue;
                     }
@@ -707,7 +707,7 @@ namespace Nop.Plugin.Api.Controllers
                 }
             }
            
-            return result as IActionResult;
+            return Ok(result);
         }
 
         [HttpDelete]

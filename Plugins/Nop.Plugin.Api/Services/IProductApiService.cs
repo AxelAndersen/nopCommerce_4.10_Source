@@ -11,11 +11,11 @@ namespace Nop.Plugin.Api.Services
     {
         IList<Product> GetProducts(IList<int> ids = null,
             DateTime? createdAtMin = null, DateTime? createdAtMax = null, DateTime? updatedAtMin = null, DateTime? updatedAtMax = null,
-           int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId, 
+           int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId,
            int? categoryId = null, string vendorName = null, bool? publishedStatus = null);
 
-        int GetProductsCount(DateTime? createdAtMin = null, DateTime? createdAtMax = null, 
-            DateTime? updatedAtMin = null, DateTime? updatedAtMax = null, bool? publishedStatus = null, 
+        int GetProductsCount(DateTime? createdAtMin = null, DateTime? createdAtMax = null,
+            DateTime? updatedAtMin = null, DateTime? updatedAtMax = null, bool? publishedStatus = null,
             string vendorName = null, int? categoryId = null);
 
         Product GetProductById(int productId);
@@ -27,5 +27,7 @@ namespace Nop.Plugin.Api.Services
         IList<SeoProduct> GetAllSeoProducts();
 
         void UpdatePrice(Product product, decimal exchangeRate);
+
+        string UPDATED_KEYWORD { get; }
     }
 }

@@ -18,6 +18,7 @@ namespace Nop.Plugin.Api.Services
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<ProductCategory> _productCategoryMappingRepository;
         private readonly IRepository<Vendor> _vendorRepository;
+        public string UPDATED_KEYWORD { get { return "SEK-Updated-OldPrice"; } }
 
         public ProductApiService(IRepository<Product> productRepository,
             IRepository<ProductCategory> productCategoryMappingRepository,
@@ -157,8 +158,23 @@ namespace Nop.Plugin.Api.Services
 
         public void UpdatePrice(Product product, decimal exchangeRate)
         {
-            product.Price = ApplyCurrencyMultiplication(product.Price, exchangeRate);
-            product.MetaKeywords = "SEK-Updated";
+            // Use this when applying to actual customer price
+            //product.Price = ApplyCurrencyMultiplication(product.Price, exchangeRate);
+            if (product.OldPrice > 0)
+            {
+                decimal newOldPrice = ApplyCurrencyMultiplication(product.OldPrice, exchangeRate);
+                if (newOldPrice != product.Price)
+                {
+                    // This means the product is somehow on sale, set old price which will indicate that price is onsale
+                    product.OldPrice = newOldPrice;                   
+                }
+                else
+                {
+                    // Product is sold at retail price, dont update old price
+                }                
+            }
+
+            product.MetaKeywords = UPDATED_KEYWORD;
             _productRepository.Update(product);
         }
 
