@@ -19,5 +19,6 @@
   "ExternalSuppliers.STM",
   "Nop.Plugin.Api",
   "Shipping.GLS",
-  "POS.Kaching"
+  "POS.Kaching",
+  "Admin.OrderManagementList"
 ]

@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Admin",
+  "FriendlyName": "Order mangement list",
+  "SystemName": "Admin.OrderManagementList",
+  "Version": "0.1",
+  "SupportedVersions": [ "4.10" ],
+  "Author": "Axel Andersen [Andersen Outdoor ApS]",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Admin.OrderManagementList.dll",
+  "Description": "This plugin will create a list for order management in the admin system"
+}
