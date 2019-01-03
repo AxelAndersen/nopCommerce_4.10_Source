@@ -20,6 +20,7 @@
     <None Remove="logo.png" />
     <None Remove="plugin.json" />
     <None Remove="Views\Configure.cshtml" />
+    <None Remove="Views\List.cshtml" />
     <None Remove="Views\_ViewImports.cshtml" />
   </ItemGroup>
   <ItemGroup>
@@ -32,6 +33,9 @@
     <Content Include="Views\Configure.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Views\List.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Views\_ViewImports.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -41,5 +45,10 @@
     <ProjectReference Include="..\..\Libraries\Nop.Services\Nop.Services.csproj" />
     <ProjectReference Include="..\..\Presentation\Nop.Web.Framework\Nop.Web.Framework.csproj" />
     <ProjectReference Include="..\..\Presentation\Nop.Web\Nop.Web.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Web">
+      <HintPath>System.Web</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

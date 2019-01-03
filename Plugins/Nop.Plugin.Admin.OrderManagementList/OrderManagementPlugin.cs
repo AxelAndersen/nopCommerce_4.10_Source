@@ -1,13 +1,16 @@
-﻿using Nop.Core;
+﻿using Microsoft.AspNetCore.Routing;
+using Nop.Core;
 using Nop.Core.Plugins;
 using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
+using Nop.Web.Framework.Menu;
 using System;
+using System.Linq;
 
 namespace Nop.Plugin.Admin.OrderManagementList
 {
-    public class OrderManagementPlugin : BasePlugin, IMiscPlugin
+    public class OrderManagementPlugin : BasePlugin, IMiscPlugin, IAdminMenuPlugin
     {
         private readonly IWebHelper _webHelper;
         private readonly ISettingService _settingService;
@@ -18,6 +21,26 @@ namespace Nop.Plugin.Admin.OrderManagementList
             this._webHelper = webHelper;
             this._settingService = settingService;
             this._localizationService = localizationService;
+        }
+
+        public void ManageSiteMap(SiteMapNode rootNode)
+        {
+            var menuItem = new SiteMapNode()
+            {
+                SystemName = "Admin.OrderManagementList",
+                Title = "Order management",
+                ControllerName = "OrderManagement",
+                ActionName = "List",
+                Visible = true,
+                IconClass = "fa fa-dot-circle-o", 
+                Url = $"{_webHelper.GetStoreLocation()}Admin/OrderManagement/List.cshtml",
+
+            };
+            var pluginNode = rootNode.ChildNodes.FirstOrDefault(x => x.SystemName == "Sales");
+            if (pluginNode != null)
+                pluginNode.ChildNodes.Add(menuItem);
+            else
+                rootNode.ChildNodes.Add(menuItem);
         }
 
         /// <summary>

@@ -26,6 +26,25 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
+        public IActionResult List()
+        {
+            //OrderManagementConfigurationModel model = null;
+            //try
+            //{
+            //    model = GetBaseModel();
+            //}
+            //catch (Exception ex)
+            //{
+            //    Exception inner = ex;
+            //    while (inner.InnerException != null) inner = inner.InnerException;
+            //    _logger.Error("Configure Order Management: " + inner.Message, ex);
+            //    model.ErrorMessage += "<br />" + inner.Message;
+            //}
+            return View("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Views/List.cshtml", null);
+        }
+
+        [AuthorizeAdmin]
+        [Area(AreaNames.Admin)]
         public IActionResult Configure()
         {
             OrderManagementConfigurationModel model = null;
