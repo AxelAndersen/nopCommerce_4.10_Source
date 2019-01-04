@@ -1,4 +1,6 @@
-﻿@{
+﻿@using AO.Services.Orders.Models
+@model List<AO.Services.Orders.Models.AOOrder>
+@{
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -9,6 +11,13 @@
                 <h4>Order management list</h4>
                 <br /><br />
 
+                @foreach (AOOrder order in Model)
+                {
+                    <span>@order.OrderId</span>
+                    <span>@order.OrderDateTime</span>
+                    <span>@order.ShippingInfo</span>
+                    <br />
+                }
 
             </div>
         </div>

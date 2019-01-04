@@ -1,4 +1,5 @@
 ﻿using AO.Services.Emails;
+using AO.Services.Orders;
 using AO.Services.Products;
 using Autofac;
 using Nop.Core.Configuration;
@@ -23,6 +24,7 @@ namespace AO.Services
         public virtual void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
         {
             builder.RegisterType<AOProductService>().As<IAOProductService>().InstancePerLifetimeScope();
+            builder.RegisterType<AOOrderService>().As<IAOOrderService>().InstancePerLifetimeScope();
             builder.RegisterType<MessageService>().As<IMessageService>().InstancePerLifetimeScope();
         }
     }

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AO.Services.Orders;
+using AO.Services.Orders.Models;
+using Microsoft.AspNetCore.Mvc;
 using Nop.Plugin.Admin.OrderManagementList.Models;
 using Nop.Services.Configuration;
 using Nop.Services.Logging;
@@ -6,6 +8,7 @@ using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Mvc.Filters;
 using System;
+using System.Collections.Generic;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 {
@@ -15,32 +18,56 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
     {
         private readonly ILogger _logger;
         private readonly OrderManagementSettings _orderManagementSettings;
+        private readonly IAOOrderService _aoOrderService;
         private readonly ISettingService _settingService;
 
-        public OrderManagementController(ILogger logger, OrderManagementSettings orderManagementSettings, ISettingService settingService)
+        public OrderManagementController(ILogger logger, OrderManagementSettings orderManagementSettings, ISettingService settingService, IAOOrderService aoOrderService)
         {
             this._logger = logger;
             this._orderManagementSettings = orderManagementSettings;
-            this._settingService = settingService;           
+            this._settingService = settingService;
+            this._aoOrderService = aoOrderService;
         }
 
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
         public IActionResult List()
         {
-            //OrderManagementConfigurationModel model = null;
-            //try
-            //{
-            //    model = GetBaseModel();
-            //}
-            //catch (Exception ex)
-            //{
-            //    Exception inner = ex;
-            //    while (inner.InnerException != null) inner = inner.InnerException;
-            //    _logger.Error("Configure Order Management: " + inner.Message, ex);
-            //    model.ErrorMessage += "<br />" + inner.Message;
-            //}
-            return View("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Views/List.cshtml", null);
+            List<AOOrder> model = null;
+
+            try
+            {
+                var orders  = _aoOrderService.GetCurrentOrders();
+
+                model = new List<AOOrder>();
+
+                foreach (AOOrder order in orders)
+                {
+                    model.Add(new AOOrder()
+                    {
+                        OrderId = order.OrderId,
+                        CustomerComment = order.CustomerComment,
+                        CustomerEmail = order.CustomerEmail,
+                        CustomerInfo = order.CustomerInfo,
+                        Id = order.Id,
+                        InternalComment = order.InternalComment,
+                        OrderDateTime = order.OrderDateTime,
+                        OrderItems = order.OrderItems,
+                        ShippingInfo = order.ShippingInfo,
+                        TotalOrderAmount = order.TotalOrderAmount
+                    }
+                    );                 
+                }
+            }
+            catch (Exception ex)
+            {
+                Exception inner = ex;
+                while (inner.InnerException != null) inner = inner.InnerException;
+                _logger.Error("Configure Order Management: " + inner.Message, ex);
+               // model.ErrorMessage += "<br />" + inner.Message;
+            }
+
+            return View("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Views/List.cshtml", model);
         }
 
         [AuthorizeAdmin]
