@@ -5,6 +5,6 @@ namespace AO.Services.Orders
 {
     public interface IAOOrderService
     {
-        List<AOOrder> GetCurrentOrders(bool onlyReadyToShip = false);
+        List<AOPresentationOrder> GetCurrentOrders(bool onlyReadyToShip = false);
     }
 }

@@ -33,26 +33,25 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         [Area(AreaNames.Admin)]
         public IActionResult List()
         {
-            List<AOOrder> model = null;
+            List<AOPresentationOrder> model = null;
 
             try
             {
                 var orders  = _aoOrderService.GetCurrentOrders();
 
-                model = new List<AOOrder>();
+                model = new List<AOPresentationOrder>();
 
-                foreach (AOOrder order in orders)
+                foreach (AOPresentationOrder order in orders)
                 {
-                    model.Add(new AOOrder()
+                    model.Add(new AOPresentationOrder()
                     {
                         OrderId = order.OrderId,
                         CustomerComment = order.CustomerComment,
                         CustomerEmail = order.CustomerEmail,
-                        CustomerInfo = order.CustomerInfo,
-                        Id = order.Id,
+                        CustomerInfo = order.CustomerInfo,                        
                         InternalComment = order.InternalComment,
                         OrderDateTime = order.OrderDateTime,
-                        OrderItems = order.OrderItems,
+                        PresentationOrderItems = order.PresentationOrderItems,
                         ShippingInfo = order.ShippingInfo,
                         TotalOrderAmount = order.TotalOrderAmount
                     }
