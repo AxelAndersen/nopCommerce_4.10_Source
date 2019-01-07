@@ -33,17 +33,17 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         [Area(AreaNames.Admin)]
         public IActionResult List()
         {
-            List<AOPresentationOrder> model = null;
+            OrderManagementListModel model = new OrderManagementListModel();
 
             try
             {
                 var orders  = _aoOrderService.GetCurrentOrders();
 
-                model = new List<AOPresentationOrder>();
+                model.PresentationOrders = new List<AOPresentationOrder>();
 
                 foreach (AOPresentationOrder order in orders)
                 {
-                    model.Add(new AOPresentationOrder()
+                    model.PresentationOrders.Add(new AOPresentationOrder()
                     {
                         OrderId = order.OrderId,
                         CustomerComment = order.CustomerComment,
@@ -62,8 +62,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             {
                 Exception inner = ex;
                 while (inner.InnerException != null) inner = inner.InnerException;
-                _logger.Error("Configure Order Management: " + inner.Message, ex);
-               // model.ErrorMessage += "<br />" + inner.Message;
+                _logger.Error("List Order Management: " + inner.Message, ex);
+                model.ErrorMessage = ex.ToString();
             }
 
             return View("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Views/List.cshtml", model);

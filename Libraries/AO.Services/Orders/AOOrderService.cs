@@ -5,7 +5,6 @@ using Nop.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace AO.Services.Orders
 {
@@ -22,13 +21,10 @@ namespace AO.Services.Orders
 
         public List<AOPresentationOrder> GetCurrentOrders(bool onlyReadyToShip = false)
         {
-            List<AOPresentationOrder> presentationOrders = null;
-            try
-            {
-                var orderContext = new OrderMangementContext(_configuration);
-                var orders = orderContext.AOOrders;
+            var orderContext = new OrderMangementContext(_configuration);
+            var orders = orderContext.AOOrders;
 
-                presentationOrders = orders
+            List<AOPresentationOrder> presentationOrders = orders
                                 .Select(x => new AOPresentationOrder()
                                 {
                                     OrderId = x.OrderId,
@@ -41,14 +37,8 @@ namespace AO.Services.Orders
                                     TotalOrderAmount = x.TotalOrderAmount,
                                     PresentationOrderItems = GetProductInfo(x)
                                 })
-                                .ToList();               
-            }
-            catch (Exception ex)
-            {
-                Exception inner = ex;
-                while (inner.InnerException != null) inner = inner.InnerException;                                    
-            }
-           
+                                .ToList();
+            
             return presentationOrders;
         }
 
@@ -58,7 +48,7 @@ namespace AO.Services.Orders
         private List<string[]> GetProductInfo(AOOrder order)
         {
             List<string[]> productInfo = new List<string[]>();
-            if(string.IsNullOrEmpty(order.OrderItems))
+            if (string.IsNullOrEmpty(order.OrderItems))
             {
                 productInfo.Add(NoOrderItem("No order items found for this order"));
                 return productInfo;
@@ -76,11 +66,11 @@ namespace AO.Services.Orders
         private string[] BuildOrderItem(string item)
         {
             string[] lineItems = item.Split(':');
-            if(lineItems.Length < 2)
+            if (lineItems.Length < 2)
             {
                 return NoOrderItem("lineItems.Length wrong: " + lineItems.Length);
             }
-            
+
             return lineItems;
         }
 
@@ -88,7 +78,7 @@ namespace AO.Services.Orders
         {
             string[] item = new string[2];
             item[0] = "0";
-            item[1] = message;            
+            item[1] = message;
             return item;
         }
     }

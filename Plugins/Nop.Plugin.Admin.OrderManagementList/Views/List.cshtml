@@ -1,5 +1,7 @@
-﻿@using AO.Services.Orders.Models
-@model List<AO.Services.Orders.Models.AOPresentationOrder>
+﻿@using Nop.Plugin.Admin.OrderManagementList.Models
+@using AO.Services.Orders.Models
+
+@model OrderManagementListModel
 @{
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     Html.AddCssFileParts("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Content/OrderStyles.css");
@@ -16,20 +18,29 @@
     </div>
 
     <hr />
-    @foreach (AOPresentationOrder order in Model)
+    @if (string.IsNullOrEmpty(Model.ErrorMessage) == false)
     {
-    <div class="divSingleOrder">
-        <span>@order.OrderId</span>|
-        <span>@order.OrderDateTime</span>|
-        <span>@order.ShippingInfo</span>
-        @foreach (string[] item in order.PresentationOrderItems)
-        {
-            <span>@item[0]</span>
-            <span> - </span>
-            <span>@item[1]</span>
-        }
-    </div>
+        <div id="divErrorMessage">
+            <h3>Error occurred:</h3>
+            <h4>@Model.ErrorMessage</h4>
+        </div>
     }
-
+    else
+    {
+        @foreach (AOPresentationOrder order in Model.PresentationOrders)
+        {
+            <div class="divSingleOrder">
+                <span>@order.OrderId</span>|
+                <span>@order.OrderDateTime</span>|
+                <span>@order.ShippingInfo</span>
+                @foreach (string[] item in order.PresentationOrderItems)
+                {
+                    <span>@item[0]</span>
+                    <span> - </span>
+                    <span>@item[1]</span>
+                }
+            </div>
+        }
+    }
 
 </form>
