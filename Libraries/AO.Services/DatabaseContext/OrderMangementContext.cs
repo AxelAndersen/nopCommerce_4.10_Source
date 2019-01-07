@@ -14,6 +14,7 @@ namespace AO.Services.DatabaseContext
     {
         private DbSet<AOOrder> Orders { get; set; }
         private DbSet<Product> Products { get; set; }
+        private DbSet<AOProductAttributeValue> ProductAttributeValues { get; set; }
 
         private readonly IConfiguration _configuration;
 
@@ -38,10 +39,16 @@ namespace AO.Services.DatabaseContext
             }
         }
 
+        public List<AOProductAttributeValue> AOProductAttributeValues(int[] ids)
+        {
+            return ProductAttributeValues.Where(p => ids.Contains(p.Id)).ToList();
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AOOrder>().ToTable("OrderManagementList");
             modelBuilder.Entity<Product>().ToTable("Product");
+            modelBuilder.Entity<AOProductAttributeValue>().ToTable("AOProductAttributeValue");
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

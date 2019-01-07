@@ -1,28 +1,31 @@
 ﻿using AO.Services.DatabaseContext;
 using AO.Services.Orders.Models;
 using Microsoft.Extensions.Configuration;
+using Nop.Core.Domain.Catalog;
 using Nop.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 
 namespace AO.Services.Orders
 {
     public class AOOrderService : IAOOrderService
     {
-        private readonly IDbContext _context;
+        //private readonly IDbContext _context;
+        private readonly OrderMangementContext _orderContext;
         private readonly IConfiguration _configuration;
 
-        public AOOrderService(IDbContext context, IConfiguration configuration)
+        public AOOrderService(IConfiguration configuration)
         {
-            this._context = context;
+            //this._context = context;
             this._configuration = configuration;
+            this._orderContext = new OrderMangementContext(_configuration);
         }
 
         public List<AOPresentationOrder> GetCurrentOrders(bool onlyReadyToShip = false)
-        {
-            var orderContext = new OrderMangementContext(_configuration);
-            var orders = orderContext.AOOrders;
+        {            
+            var orders = _orderContext.AOOrders;
 
             List<AOPresentationOrder> presentationOrders = orders
                                 .Select(x => new AOPresentationOrder()
@@ -71,7 +74,30 @@ namespace AO.Services.Orders
                 return NoOrderItem("lineItems.Length wrong: " + lineItems.Length);
             }
 
-            return lineItems;
+            string colorSizeText = GetAttributeInfo(lineItems[1]);
+            string[] info = new string[2];
+            info[0] = lineItems[0];
+            info[1] = colorSizeText;
+            return info;
+        }
+
+        private string GetAttributeInfo(string attributeXml)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(attributeXml);
+            List<int> ids = new List<int>();
+
+            foreach (XmlNode node in doc.DocumentElement.ChildNodes)
+            {
+                ids.Add(Convert.ToInt32(node.ChildNodes[0].InnerText));
+            }
+
+            List<AOProductAttributeValue> attributes = _orderContext.AOProductAttributeValues(ids.ToArray());
+            string res = attributes.Select(a => a.Name).Aggregate(
+                "", // start with empty string to handle empty list case.
+                     (current, next) => current + ", " + next);
+
+            return res;
         }
 
         private static string[] NoOrderItem(string message)
