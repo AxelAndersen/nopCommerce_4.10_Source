@@ -10,3 +10,5 @@
 
 #divErrorMessage { color: red; padding: 15px; }
 .hrOrderManagement { margin-top: 2px; margin-bottom: 2px; border: 0; border-top: 1px solid #000; }
+
+.success{ color: green; padding: 4px; }

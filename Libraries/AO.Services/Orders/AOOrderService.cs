@@ -1,11 +1,9 @@
 ﻿using AO.Services.DatabaseContext;
 using AO.Services.Orders.Models;
 using Microsoft.Extensions.Configuration;
-using Nop.Core.Domain.Orders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace AO.Services.Orders
@@ -100,33 +98,13 @@ namespace AO.Services.Orders
                 orderItems.Add(new Models.OrderItem()
                 {
                     ProductId = Convert.ToInt32(itemContent[0]),
-                    ProductName = itemContent[1].ToString() + " " + GetAttributeInfo(itemContent[2].ToString())
+                    OrderItemId = Convert.ToInt32(itemContent[1]),
+                    ProductName = itemContent[2].ToString() + " " + GetAttributeInfo(itemContent[3].ToString())
                 });   
             }
 
             return orderItems;
         }
-
-        //private string[] BuildOrderItem(string item)
-        //{
-        //    string[] lineItems = item.Split(':');
-        //    if (lineItems.Length < 2)
-        //    {
-        //        return NoOrderItem("lineItems.Length wrong: " + lineItems.Length);
-        //    }
-
-        //    if (lineItems[0].Contains(";") == false)
-        //    {
-        //        return NoOrderItem("lineItems[0] does not contain a ';': " + lineItems[0]);
-        //    }
-
-        //    string colorSizeText = GetAttributeInfo(lineItems[1]);
-        //    string[] info = new string[3];
-        //    info[0] = lineItems[0].Substring(0, lineItems[0].IndexOf(";"));
-        //    info[1] = lineItems[0].Substring(lineItems[0].IndexOf(";") + 1);
-        //    info[2] = colorSizeText;
-        //    return info;
-        //}
 
         private string GetAttributeInfo(string attributeXml)
         {
@@ -153,6 +131,12 @@ namespace AO.Services.Orders
             item[0] = "0";
             item[1] = message;
             return item;
+        }
+
+        public bool UpdateReadyOrNot(int productId, bool ready, ref string errorMessage)
+        {
+            return false;
+            
         }
     }
 }

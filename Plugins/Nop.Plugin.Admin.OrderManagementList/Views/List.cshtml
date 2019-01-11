@@ -44,13 +44,14 @@
                 <div class="divProductInfo">
                     @foreach (OrderItem item in order.PresentationOrderItems)
                     {
-                        <div>
-                            <input type="checkbox" name="chk" onclick="ChangeInventory(@item.ProductId);" value="@item.ProductId" id="chk-ready-@item.ProductId" />&nbsp;Klar&nbsp;&nbsp;
-                            <input type="checkbox" name="chk" value="@item.ProductId" id="chk-ordered-@item.ProductId" />&nbsp;Er bestilt
-                            <br />
-                            <span>@item.ProductName</span>
-                            <hr class="hrOrderManagement" />
-                        </div>
+                    <div>
+                        <input type="checkbox" name="chkReady" onclick="UpdateProductReadyAjax(@order.OrderId, @item.OrderItemId, @item.ProductId, this.checked);" />&nbsp;Klar&nbsp;&nbsp;
+                        <input type="checkbox" name="chkOrdered" value="@item.ProductId" />&nbsp;Er bestilt
+                        <span id="spn-@order.OrderId-@item.OrderItemId-@item.ProductId" class="success" style="display:none;"></span>
+                        <br />
+                        <span>@item.ProductName</span>
+                        <hr class="hrOrderManagement" />
+                    </div>
                     }
                 </div>
                 <div class="divOrderNote">@Html.Raw(order.OrderNotes)</div>
@@ -68,22 +69,22 @@
     }
 
     <script>
-        function ChangeInventory(productId)
-        {
+        function UpdateProductReadyAjax(orderId, orderItemId, productId, checked)
+        {            
             // Change inventory count for product
             $.ajax({
                 cache: false,
                 type: 'GET',
-                url: '@Url.Action("ChangeInventoryCount", "OrderManagement")',
-                data: { productId: productId },
+                url: '@Url.Action("UpdateProductReady", "OrderManagement")',
+                data: { productId: productId, ready: checked },
                 dataType: 'json',
-                success: function (data) {
-                    if (data) {
-                        alert(data);
-                    }
-                    else {
-                        alert('Saved');
-                    }
+                success: function (data) {                    
+                    var infoId = "#spn-" + orderId + "-" + orderItemId + "-" + productId;
+                    $(infoId).show();
+                    $(infoId).html(data);
+                    $(infoId).fadeOut(3000, function () {
+                        // Animation complete.
+                    });                    
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     if (xhr && xhr.responseText) {

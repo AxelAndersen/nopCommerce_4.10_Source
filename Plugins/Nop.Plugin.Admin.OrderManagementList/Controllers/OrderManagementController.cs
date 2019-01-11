@@ -117,9 +117,32 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
         [HttpGet]
         [AuthorizeAdmin(false)]
-        public IActionResult ChangeInventoryCount(int productId)
+        public IActionResult UpdateProductReady(int productId, bool ready)
         {
-            return Json("Great");
+            if (ready)
+            {
+                string result = DoUpdateProductReady(productId, ready);
+                return Json("Produkt klar, " + result);
+            }
+            else
+            {
+                string result = DoUpdateProductReady(productId, ready);
+                return Json("Produkt IKKE klar, " + result);
+            }
+        }
+
+        private string DoUpdateProductReady(int productId, bool ready)
+        {
+            string errorMessage = "";
+            bool allwell = _aoOrderService.UpdateReadyOrNot(productId, ready, ref errorMessage);
+            if (allwell && string.IsNullOrEmpty(errorMessage))
+            {
+                return "Opdatering lykkes";
+            }
+            else
+            {
+                return "Opdatering mislykkes";
+            }
         }
 
         private OrderManagementConfigurationModel GetBaseModel()
