@@ -1,24 +1,22 @@
 ﻿using AO.Services.DatabaseContext;
 using AO.Services.Orders.Models;
 using Microsoft.Extensions.Configuration;
-using Nop.Core.Domain.Catalog;
-using Nop.Data;
+using Nop.Core.Domain.Orders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Xml;
 
 namespace AO.Services.Orders
 {
     public class AOOrderService : IAOOrderService
-    {
-        //private readonly IDbContext _context;
+    {        
         private readonly OrderMangementContext _orderContext;
         private readonly IConfiguration _configuration;
 
         public AOOrderService(IConfiguration configuration)
-        {
-            //this._context = context;
+        {            
             this._configuration = configuration;
             this._orderContext = new OrderMangementContext(_configuration);
         }
@@ -28,58 +26,107 @@ namespace AO.Services.Orders
             var orders = _orderContext.AOOrders;
 
             List<AOPresentationOrder> presentationOrders = orders
-                                .Select(x => new AOPresentationOrder()
+                                .Select(order => new AOPresentationOrder()
                                 {
-                                    OrderId = x.OrderId,
-                                    CustomerComment = x.CustomerComment,
-                                    CustomerEmail = x.CustomerEmail,
-                                    CustomerInfo = x.CustomerInfo,
-                                    InternalComment = x.InternalComment,
-                                    OrderDateTime = x.OrderDateTime,
-                                    ShippingInfo = x.ShippingInfo,
-                                    TotalOrderAmount = x.TotalOrderAmount,
-                                    PresentationOrderItems = GetProductInfo(x)
+                                    OrderId = order.OrderId,
+                                    CustomerComment = GetCustomerComment(order),
+                                    CustomerEmail = order.CustomerEmail,
+                                    CustomerInfo = GetCustomerInfo(order),
+                                    OrderNotes = GetOrderNotes(order),
+                                    OrderDateTime = order.OrderDateTime.ToString("dd-MM-yy H:mm"),
+                                    ShippingInfo = order.ShippingInfo,
+                                    TotalOrderAmount = GetTotal(order),
+                                    PresentationOrderItems = GetProductInfo(order)
                                 })
                                 .ToList();
             
             return presentationOrders;
         }
 
-        /// <summary>
+        private string GetCustomerComment(AOOrder order)
+        {
+            return string.IsNullOrEmpty(order.CheckoutAttributeDescription) ? "&nbsp;" : order.CheckoutAttributeDescription;
+        }
+
+        private string GetCustomerInfo(AOOrder order)
+        {
+            return order.CustomerInfo.Replace("#", "<br />");
+        }
+
+        private string GetTotal(AOOrder order)
+        {
+            return order.TotalOrderAmount.ToString("N2") + " " + order.Currency;
+        }
+
+        private string GetOrderNotes(AOOrder order)
+        {
+            if(string.IsNullOrEmpty(order.OrderNotes))
+            {
+                return "&nbsp;";
+            }
+            
+            var orderNotes = order.OrderNotes.TrimStart(',').Replace(",", "<hr class='hrOrderManagement' /><br />").Replace("#", "<br />");
+            return orderNotes;
+        }
+
+        /// <summary>+
         /// Returns a list of string arrays. Each array contains 2 items, 1 with id, 1 with text
         /// </summary>
-        private List<string[]> GetProductInfo(AOOrder order)
+        private List<Models.OrderItem> GetProductInfo(AOOrder order)
         {
-            List<string[]> productInfo = new List<string[]>();
             if (string.IsNullOrEmpty(order.OrderItems))
             {
-                productInfo.Add(NoOrderItem("No order items found for this order"));
-                return productInfo;
+                List<Models.OrderItem> errorItems = new List<Models.OrderItem>();
+                errorItems.Add(new Models.OrderItem()
+                {
+                    ProductId = 0,
+                    ProductName = "No order items found for this order"                
+                });
+                return errorItems;
             }
 
-            var orderItems = order.OrderItems.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (string item in orderItems)
-            {
-                productInfo.Add(BuildOrderItem(item));
-            }
-
-            return productInfo;
+            List<Models.OrderItem> orderItems = GetOrderItems(order.OrderItems);           
+            return orderItems;
         }
 
-        private string[] BuildOrderItem(string item)
+        private List<Models.OrderItem> GetOrderItems(string orderItemsStr)
         {
-            string[] lineItems = item.Split(':');
-            if (lineItems.Length < 2)
-            {
-                return NoOrderItem("lineItems.Length wrong: " + lineItems.Length);
+            List<Models.OrderItem> orderItems = new List<Models.OrderItem>();
+
+            var items = orderItemsStr.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string s in items)
+            {    
+                var itemContent = s.Split(';');
+                orderItems.Add(new Models.OrderItem()
+                {
+                    ProductId = Convert.ToInt32(itemContent[0]),
+                    ProductName = itemContent[1].ToString() + " " + GetAttributeInfo(itemContent[2].ToString())
+                });   
             }
 
-            string colorSizeText = GetAttributeInfo(lineItems[1]);
-            string[] info = new string[2];
-            info[0] = lineItems[0];
-            info[1] = colorSizeText;
-            return info;
+            return orderItems;
         }
+
+        //private string[] BuildOrderItem(string item)
+        //{
+        //    string[] lineItems = item.Split(':');
+        //    if (lineItems.Length < 2)
+        //    {
+        //        return NoOrderItem("lineItems.Length wrong: " + lineItems.Length);
+        //    }
+
+        //    if (lineItems[0].Contains(";") == false)
+        //    {
+        //        return NoOrderItem("lineItems[0] does not contain a ';': " + lineItems[0]);
+        //    }
+
+        //    string colorSizeText = GetAttributeInfo(lineItems[1]);
+        //    string[] info = new string[3];
+        //    info[0] = lineItems[0].Substring(0, lineItems[0].IndexOf(";"));
+        //    info[1] = lineItems[0].Substring(lineItems[0].IndexOf(";") + 1);
+        //    info[2] = colorSizeText;
+        //    return info;
+        //}
 
         private string GetAttributeInfo(string attributeXml)
         {

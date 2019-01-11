@@ -7,9 +7,9 @@ namespace AO.Services.Orders.Models
     {
         public int OrderId { get; set; }
 
-        public decimal TotalOrderAmount { get; set; }
+        public string TotalOrderAmount { get; set; }        
 
-        public DateTime OrderDateTime { get; set; }
+        public string OrderDateTime { get; set; }
 
         public string CustomerInfo { get; set; }
 
@@ -19,8 +19,8 @@ namespace AO.Services.Orders.Models
 
         public string CustomerComment { get; set; }
 
-        public string InternalComment { get; set; }        
+        public string OrderNotes { get; set; }        
 
-        public List<string[]> PresentationOrderItems { get; set; }
+        public List<Models.OrderItem> PresentationOrderItems { get; set; }
     }
 }

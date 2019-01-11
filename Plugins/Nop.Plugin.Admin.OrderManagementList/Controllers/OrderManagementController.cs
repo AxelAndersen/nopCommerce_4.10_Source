@@ -49,7 +49,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                         CustomerComment = order.CustomerComment,
                         CustomerEmail = order.CustomerEmail,
                         CustomerInfo = order.CustomerInfo,                        
-                        InternalComment = order.InternalComment,
+                        OrderNotes = order.OrderNotes,
                         OrderDateTime = order.OrderDateTime,
                         PresentationOrderItems = order.PresentationOrderItems,
                         ShippingInfo = order.ShippingInfo,
@@ -113,6 +113,13 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 model.ErrorMessage += "<br />" + inner.Message;
             }
             return Configure();
+        }
+
+        [HttpGet]
+        [AuthorizeAdmin(false)]
+        public IActionResult ChangeInventoryCount(int productId)
+        {
+            return Json("Great");
         }
 
         private OrderManagementConfigurationModel GetBaseModel()

@@ -11,6 +11,8 @@ namespace AO.Services.Orders.Models
 
         public decimal TotalOrderAmount { get; set; }
 
+        public string Currency { get; set; }
+
         public DateTime OrderDateTime { get; set; }
 
         public string CustomerInfo { get; set; }
@@ -19,10 +21,10 @@ namespace AO.Services.Orders.Models
 
         public string ShippingInfo { get; set; }
 
-        public string CustomerComment { get; set; }
+        public string CheckoutAttributeDescription { get; set; }        
 
-        public string InternalComment { get; set; }
+        public string OrderItems { get; set; }
 
-        public string OrderItems { get; set; }        
+        public string OrderNotes { get; set; }        
     }
 }

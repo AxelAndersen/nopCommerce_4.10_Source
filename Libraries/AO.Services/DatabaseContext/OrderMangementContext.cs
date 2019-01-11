@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Nop.Core.Data;
 using Nop.Core.Domain.Catalog;
+using Nop.Core.Domain.Orders;
 
 namespace AO.Services.DatabaseContext
 {
@@ -27,7 +28,7 @@ namespace AO.Services.DatabaseContext
         {
             get
             {
-                return Orders.ToList();
+                return Orders.OrderByDescending(o => o.Id).ToList();
             }
         }
 
@@ -48,7 +49,7 @@ namespace AO.Services.DatabaseContext
         {
             modelBuilder.Entity<AOOrder>().ToTable("OrderManagementList");
             modelBuilder.Entity<Product>().ToTable("Product");
-            modelBuilder.Entity<AOProductAttributeValue>().ToTable("AOProductAttributeValue");
+            modelBuilder.Entity<AOProductAttributeValue>().ToTable("AOProductAttributeValue");            
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

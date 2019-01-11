@@ -29,21 +29,74 @@
     {
         @foreach (AOPresentationOrder order in Model.PresentationOrders)
         {
-        <div class="divSingleOrder">
-            <span>@order.OrderId</span>|
-            <span>@order.OrderDateTime</span>|
-            <span>@order.ShippingInfo</span>
-            <span>@order.CustomerInfo</span>
-            <span>@order.CustomerEmail</span>
-            @foreach (string[] item in order.PresentationOrderItems)
-            {
-                <checkbox id="chk@item[0]"></checkbox>
-                <span>@item[0]</span>
-                <span> - </span>
-                <span>@item[1]</span>
-            }
-        </div>
+            <div class="divSingleOrder">
+                <div class="divOrderInfo">
+                    <a href="/Admin/Order/Edit/@order.OrderId">Ordrenummer:&nbsp;@order.OrderId</a>
+                    <br />
+                    <a href="/Admin/Order/OrderNote/@order.OrderId">Følgeseddel</a>
+                    <br />
+                    <a href="/Admin/Order/InvoiceAndCapture/@order.OrderId">Capture</a>
+                    <br /><br />
+                    @order.OrderDateTime
+                    <br>
+                    @order.TotalOrderAmount
+                </div>
+                <div class="divProductInfo">
+                    @foreach (OrderItem item in order.PresentationOrderItems)
+                    {
+                        <div>
+                            <input type="checkbox" name="chk" onclick="ChangeInventory(@item.ProductId);" value="@item.ProductId" id="chk-ready-@item.ProductId" />&nbsp;Klar&nbsp;&nbsp;
+                            <input type="checkbox" name="chk" value="@item.ProductId" id="chk-ordered-@item.ProductId" />&nbsp;Er bestilt
+                            <br />
+                            <span>@item.ProductName</span>
+                            <hr class="hrOrderManagement" />
+                        </div>
+                    }
+                </div>
+                <div class="divOrderNote">@Html.Raw(order.OrderNotes)</div>
+                <div class="divCustomerComment">@Html.Raw(order.CustomerComment)</div>
+                <div class="divShippingInfo">@order.ShippingInfo</div>
+                <div class="divCustomerInfo">
+                    @Html.Raw(order.CustomerInfo)
+                    <br />
+                    @order.CustomerEmail
+                </div>
+            </div>
+            <div style="clear:both;"></div>
+            <hr class="hrOrderManagement" />
         }
     }
+
+    <script>
+        function ChangeInventory(productId)
+        {
+            // Change inventory count for product
+            $.ajax({
+                cache: false,
+                type: 'GET',
+                url: '@Url.Action("ChangeInventoryCount", "OrderManagement")',
+                data: { productId: productId },
+                dataType: 'json',
+                success: function (data) {
+                    if (data) {
+                        alert(data);
+                    }
+                    else {
+                        alert('Saved');
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    if (xhr && xhr.responseText) {
+                        var err = eval("(" + xhr.responseText + ")");
+                        alert('Error while saving.' + err.Message);
+                    }
+                    else {
+                        alert('Error while saving.');
+                    }
+                }
+            });
+            return false;
+        }
+     </script>
 
 </form>
