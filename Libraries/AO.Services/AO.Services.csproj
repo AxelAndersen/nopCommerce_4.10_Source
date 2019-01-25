@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Nop.Services\Nop.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DatabaseContext\" />
+  </ItemGroup>
+
 </Project>

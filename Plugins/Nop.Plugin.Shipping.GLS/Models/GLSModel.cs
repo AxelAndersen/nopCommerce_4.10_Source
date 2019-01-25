@@ -10,6 +10,11 @@ namespace Nop.Plugin.Shipping.GLS.Models
         [Display(Name = "Amount of suggested shops for customer")]
         public int AmountNearestShops { get; set; }
 
+        [Display(Name = "Shipping fee with GLS to Sweden")]
+        public decimal SwedishRate { get; set; }
+
+        public bool Tracing { get; set; }
+
         public string ErrorMessage { get; set; }
     }
 }

@@ -6,6 +6,10 @@ namespace Nop.Plugin.Shipping.GLS.Settings
     {
         public string EndpointAddress { get; set; }
 
-        public int AmountNearestShops { get; set; }        
+        public int AmountNearestShops { get; set; }
+
+        public decimal SwedishRate { get; set; }
+
+        public bool Tracing { get; set; }
     }
 }

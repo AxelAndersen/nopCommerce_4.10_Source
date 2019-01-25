@@ -1,8 +1,9 @@
-﻿using AO.Services.Orders;
-using AO.Services.Orders.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Nop.Plugin.Admin.OrderManagementList.Domain;
 using Nop.Plugin.Admin.OrderManagementList.Models;
+using Nop.Plugin.Admin.OrderManagementList.Services;
 using Nop.Services.Configuration;
+using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework;
@@ -18,15 +19,17 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
     {
         private readonly ILogger _logger;
         private readonly OrderManagementSettings _orderManagementSettings;
-        private readonly IAOOrderService _aoOrderService;
+        private readonly IOrderManagementService _orderManagementService;
         private readonly ISettingService _settingService;
+        private readonly ILocalizationService _localizationService;
 
-        public OrderManagementController(ILogger logger, OrderManagementSettings orderManagementSettings, ISettingService settingService, IAOOrderService aoOrderService)
+        public OrderManagementController(ILogger logger, OrderManagementSettings orderManagementSettings, ILocalizationService localizationService, ISettingService settingService, IOrderManagementService orderManagementService)
         {
             this._logger = logger;
             this._orderManagementSettings = orderManagementSettings;
             this._settingService = settingService;
-            this._aoOrderService = aoOrderService;
+            this._orderManagementService = orderManagementService;
+            this._localizationService = localizationService;
         }
 
         [AuthorizeAdmin]
@@ -37,7 +40,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
             try
             {
-                var orders  = _aoOrderService.GetCurrentOrders();
+                List<AOPresentationOrder> orders  = _orderManagementService.GetCurrentOrders();
 
                 model.PresentationOrders = new List<AOPresentationOrder>();
 
@@ -117,31 +120,32 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
         [HttpGet]
         [AuthorizeAdmin(false)]
-        public IActionResult UpdateProductReady(int productId, bool ready)
+        public IActionResult UpdateProductReady(int orderId, int orderItemId, int productId, bool isReady)
         {
-            if (ready)
+            if (isReady)
             {
-                string result = DoUpdateProductReady(productId, ready);
+                SuccessNotification(_localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessfullProductReady"));
+                string result = DoUpdateProductReady(orderId, orderItemId, productId, isReady);
                 return Json("Produkt klar, " + result);
             }
             else
             {
-                string result = DoUpdateProductReady(productId, ready);
+                string result = DoUpdateProductReady(orderId, orderItemId, productId, isReady);
                 return Json("Produkt IKKE klar, " + result);
             }
         }
 
-        private string DoUpdateProductReady(int productId, bool ready)
+        private string DoUpdateProductReady(int orderId, int orderItemId, int productId, bool isReady)
         {
             string errorMessage = "";
-            bool allwell = _aoOrderService.UpdateReadyOrNot(productId, ready, ref errorMessage);
+            bool allwell = false; // _aoOrderService.SetProductIsReady(orderId, orderItemId, productId, isReady);
             if (allwell && string.IsNullOrEmpty(errorMessage))
-            {
-                return "Opdatering lykkes";
+            {                
+                return _localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessUpdate");
             }
             else
             {
-                return "Opdatering mislykkes";
+                return _localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.FailedUpdate: " + errorMessage);
             }
         }
 

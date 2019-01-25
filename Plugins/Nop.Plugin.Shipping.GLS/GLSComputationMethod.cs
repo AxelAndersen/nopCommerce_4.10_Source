@@ -14,6 +14,7 @@ using Nop.Services.Shipping.Tracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using static GLSReference.wsShopFinderSoapClient;
 
@@ -27,6 +28,7 @@ namespace Nop.Plugin.Shipping.GLS
         private readonly ICountryService _countryService;
         private readonly GLSSettings _glsSettings;
         private readonly ILogger _logger;
+        private readonly StringBuilder _traceMessages;
 
         public GLSComputationMethod(IWebHelper webHelper, ISettingService settingService, ILocalizationService localizationService, ICountryService countryService, GLSSettings glsSettings, ILogger logger)
         {
@@ -36,6 +38,8 @@ namespace Nop.Plugin.Shipping.GLS
             this._countryService = countryService;
             this._glsSettings = glsSettings;
             this._logger = logger;
+
+            this._traceMessages = new StringBuilder();
         }
 
         #region Properties
@@ -75,7 +79,8 @@ namespace Nop.Plugin.Shipping.GLS
         {            
             var response = new GetShippingOptionResponse();
 
-            _logger.Information("Ready to validate shipping input");
+            if (_glsSettings.Tracing)
+                _traceMessages.AppendLine("Ready to validate shipping input");            
 
             bool validInput = ValidateShippingInfo(getShippingOptionRequest, ref response);
             if(validInput == false && response.Errors != null && response.Errors.Count > 0)
@@ -85,13 +90,17 @@ namespace Nop.Plugin.Shipping.GLS
 
             try
             {
-                _logger.Information("Ready to prapare GLS call");
+                if (_glsSettings.Tracing)
+                    _traceMessages.Append("\r\nReady to prapare GLS call");
+
                 wsShopFinderSoapClient client = new wsShopFinderSoapClient(EndpointConfiguration.wsShopFinderSoap12, _glsSettings.EndpointAddress);
                 string zip = getShippingOptionRequest.ShippingAddress.ZipPostalCode;
                 string street = getShippingOptionRequest.ShippingAddress.Address1;               
                 string glsCountryCode = Associations.GLSCountryCode[getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode];
 
-                _logger.Information("Ready to call GLS on 1 '" + _glsSettings.EndpointAddress + "'");
+                if (_glsSettings.Tracing)
+                    _traceMessages.Append("\r\nReady to call GLS at: '" + _glsSettings.EndpointAddress + "'");
+
                 List<PakkeshopData> parcelShops = null;
                 try
                 {
@@ -105,9 +114,14 @@ namespace Nop.Plugin.Shipping.GLS
                     try
                     {
                         // If any errors or no shop found, try to find shops from only zip code
-                        parcelShops = client.GetParcelShopsInZipcodeAsync(zip, glsCountryCode).Result.GetParcelShopsInZipcodeResult.ToList();
+                        parcelShops = client.GetParcelShopsInZipcodeAsync(zip, glsCountryCode).Result.GetParcelShopsInZipcodeResult.ToList();                        
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        response.AddError(ex.ToString());
+                        if (_glsSettings.Tracing)
+                            _traceMessages.Append("\r\nError finding parcelshops: " + ex.ToString());
+                    }
                 }
 
                 if(parcelShops == null || parcelShops.Count == 0)
@@ -116,16 +130,22 @@ namespace Nop.Plugin.Shipping.GLS
                     return response;
                 }
 
+                if (_glsSettings.Tracing && parcelShops != null && parcelShops.Count > 0)
+                {
+                    _traceMessages.Append("\r\n" + parcelShops.Count + " parcelshops found");
+                }
+
                 foreach (var parcelShop in parcelShops)
                 {
                     ShippingOption shippingOption = new ShippingOption()
                     {
                         Name = parcelShop.CompanyName,
                         Description = parcelShop.CityName,                        
-                        ShippingRateComputationMethodSystemName = "GLSComputationMethod"
+                        ShippingRateComputationMethodSystemName = "GLSComputationMethod",
+                        Rate = _glsSettings.SwedishRate
                     };
                     
-                    response.ShippingOptions.Add(shippingOption);
+                    response.ShippingOptions.Add(shippingOption);                    
                 }
 
                 //var requestString = CreateRequest(_glsSettings.AccessKey, _glsSettings.Username, _glsSettings.Password, getShippingOptionRequest,
@@ -191,15 +211,18 @@ namespace Nop.Plugin.Shipping.GLS
             {
                 while (exc.InnerException != null) exc = exc.InnerException;
                 response.AddError($"GLS Service is currently unavailable, try again later. {exc.ToString()}");
+
+                if (_glsSettings.Tracing)
+                    _traceMessages.Append($"\r\nGLS Service is currently unavailable, try again later. {exc.ToString()}");
             }
             finally
             {
-                //if (_upsSettings.Tracing && _traceMessages.Length > 0)
-                //{
-                //    var shortMessage =
-                //        $"UPS Get Shipping Options for customer {getShippingOptionRequest.Customer.Email}.  {getShippingOptionRequest.Items.Count} item(s) in cart";
-                //    _logger.Information(shortMessage, new Exception(_traceMessages.ToString()), getShippingOptionRequest.Customer);
-                //}
+                if (_glsSettings.Tracing && _traceMessages.Length > 0)
+                {
+                    var shortMessage =
+                        $"GLS Shipping Options for customer {getShippingOptionRequest.Customer.Email}.  {getShippingOptionRequest.Items.Count} item(s) in cart";
+                    _logger.Information(shortMessage, new Exception(_traceMessages.ToString()), getShippingOptionRequest.Customer);
+                }
             }
 
             return response;

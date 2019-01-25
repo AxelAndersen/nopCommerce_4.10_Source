@@ -1,5 +1,5 @@
 ﻿@using Nop.Plugin.Admin.OrderManagementList.Models
-@using AO.Services.Orders.Models
+@using Nop.Plugin.Admin.OrderManagementList.Domain
 
 @model OrderManagementListModel
 @{
@@ -42,7 +42,7 @@
                     @order.TotalOrderAmount
                 </div>
                 <div class="divProductInfo">
-                    @foreach (OrderItem item in order.PresentationOrderItems)
+                    @foreach (AOOrderItem item in order.PresentationOrderItems)
                     {
                     <div>
                         <input type="checkbox" name="chkReady" onclick="UpdateProductReadyAjax(@order.OrderId, @item.OrderItemId, @item.ProductId, this.checked);" />&nbsp;Klar&nbsp;&nbsp;
@@ -76,7 +76,7 @@
                 cache: false,
                 type: 'GET',
                 url: '@Url.Action("UpdateProductReady", "OrderManagement")',
-                data: { productId: productId, ready: checked },
+                data: { orderId: orderId, orderItemId: orderItemId, productId: productId, ready: checked },
                 dataType: 'json',
                 success: function (data) {                    
                     var infoId = "#spn-" + orderId + "-" + orderItemId + "-" + productId;

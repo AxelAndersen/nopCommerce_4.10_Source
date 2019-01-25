@@ -82,11 +82,12 @@ namespace Nop.Web.Framework.Infrastructure
             //data layer
             builder.RegisterType<EfDataProviderManager>().As<IDataProviderManager>().InstancePerDependency();
             builder.Register(context => context.Resolve<IDataProviderManager>().DataProvider).As<IDataProvider>().InstancePerDependency();
-            builder.Register(context => new NopObjectContext(context.Resolve<DbContextOptions<NopObjectContext>>()))
-                .As<IDbContext>().InstancePerLifetimeScope();
+            builder.Register(context => new NopObjectContext(context.Resolve<DbContextOptions<NopObjectContext>>())).As<IDbContext>().InstancePerLifetimeScope();
+            //builder.Register(context => new OrderManagementContext(context.Resolve<DbContextOptions<OrderManagementContext>>())).As<IDbContext>().InstancePerLifetimeScope();
 
             //repositories
             builder.RegisterGeneric(typeof(EfRepository<>)).As(typeof(IRepository<>)).InstancePerLifetimeScope();
+            //builder.RegisterGeneric(typeof(AORepository<>)).As(typeof(IAORepository<>)).InstancePerLifetimeScope();
 
             //plugins
             builder.RegisterType<PluginFinder>().As<IPluginFinder>().InstancePerLifetimeScope();
@@ -224,8 +225,7 @@ namespace Nop.Web.Framework.Infrastructure
             builder.RegisterType<ReviewTypeService>().As<IReviewTypeService>().SingleInstance();
             builder.RegisterType<EventPublisher>().As<IEventPublisher>().SingleInstance();
             builder.RegisterType<SubscriptionService>().As<ISubscriptionService>().SingleInstance();
-            builder.RegisterType<SettingService>().As<ISettingService>().InstancePerLifetimeScope();
-
+            builder.RegisterType<SettingService>().As<ISettingService>().InstancePerLifetimeScope();            
 
             builder.RegisterType<ActionContextAccessor>().As<IActionContextAccessor>().InstancePerLifetimeScope();
 
