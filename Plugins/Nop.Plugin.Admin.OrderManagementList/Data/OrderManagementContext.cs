@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Data
 {
@@ -14,6 +15,17 @@ namespace Nop.Plugin.Admin.OrderManagementList.Data
         public OrderManagementContext(DbContextOptions<OrderManagementContext> options) : base(options)
         {
 
+        }
+
+        public DbQuery<AOOrder> AoOrders { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Query<AOOrder>().ToView("OrderManagementList").Property(v => v.OrderId).HasColumnName("OrderId");
+
+            //disable EdmMetadata generation
+            //modelBuilder.Conventions.Remove<IncludeMetadataConvention>();
+            base.OnModelCreating(modelBuilder);
         }
 
         #region Methods

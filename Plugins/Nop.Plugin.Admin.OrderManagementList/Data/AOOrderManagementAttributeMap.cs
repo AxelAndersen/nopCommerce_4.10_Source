@@ -5,7 +5,7 @@ using Nop.Plugin.Admin.OrderManagementList.Domain;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Data
 {
-    public class AOOrderManagementAttributeMap : NopEntityTypeConfiguration<AOOrderManagementAttribute>
+    public partial class AOOrderManagementAttributeMap : NopEntityTypeConfiguration<AOOrderManagementAttribute>
     {
         /// <summary>
         /// Configures the entity

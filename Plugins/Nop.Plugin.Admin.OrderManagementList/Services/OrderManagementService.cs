@@ -1,4 +1,8 @@
-﻿using Nop.Core.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Nop.Core.Data;
+using Nop.Core.Domain.Orders;
+using Nop.Data;
+using Nop.Plugin.Admin.OrderManagementList.Data;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
 using System;
 using System.Collections.Generic;
@@ -12,13 +16,15 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
     public class OrderManagementService : IOrderManagementService
     {
         private readonly IRepository<AOOrderManagementAttribute> _aoOrderManagementAttributeRepository;
-        private readonly IRepository<AOOrder> _aoOrderRepository;
+        private readonly IRepository<Order> _aoOrderRepository;
+        private readonly OrderManagementContext _context;
 
 
-        public OrderManagementService(IRepository<AOOrderManagementAttribute> aoOrderManagementAttributeRepository, IRepository<AOOrder> aoOrderRepository)
+        public OrderManagementService(IRepository<AOOrderManagementAttribute> aoOrderManagementAttributeRepository, IRepository<Order> aoOrderRepository, OrderManagementContext context)
         {
             _aoOrderManagementAttributeRepository = aoOrderManagementAttributeRepository;
             _aoOrderRepository = aoOrderRepository;
+            _context = context;
         }
 
         /// <summary>
@@ -30,22 +36,36 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             _aoOrderManagementAttributeRepository.Insert(att);
         }
 
-        public List<AOPresentationOrder> GetCurrentOrders(bool onlyReadyToShip = false)
+        public List<AOPresentationOrder> GetCurrentOrdersAsync(bool onlyReadyToShip = false)
         {
-            var orders = _aoOrderRepository.Table;
+            var orders = _context.AoOrders.Select(a => new AOOrder()
+            {
+                Id = a.Id,
+                OrderId = a.OrderId,
+                TotalOrderAmount = a.TotalOrderAmount,
+                Currency = a.Currency,
+                OrderDateTime = a.OrderDateTime,
+                CustomerInfo = a.CustomerInfo,
+                CustomerEmail = a.CustomerEmail,
+                ShippingInfo = a.ShippingInfo,
+                CheckoutAttributeDescription = a.CheckoutAttributeDescription,
+                OrderItems = a.OrderItems,
+                OrderNotes = a.OrderNotes
+            }
+            );
 
             List<AOPresentationOrder> presentationOrders = orders.Select(order => new AOPresentationOrder()
-                    {
-                        OrderId = order.OrderId,
-                        CustomerComment = GetCustomerComment(order),
-                        CustomerEmail = order.CustomerEmail,
-                        CustomerInfo = GetCustomerInfo(order),
-                        OrderNotes = GetOrderNotes(order),
-                        OrderDateTime = order.OrderDateTime.ToString("dd-MM-yy H:mm"),
-                        ShippingInfo = order.ShippingInfo,
-                        TotalOrderAmount = GetTotal(order),
-                        PresentationOrderItems = GetProductInfo(order)
-                    })
+            {
+                OrderId = order.Id,
+                CustomerComment = GetCustomerComment(order),
+                CustomerEmail = order.CustomerEmail,
+                CustomerInfo = GetCustomerInfo(order),
+                OrderNotes = GetOrderNotes(order),
+                OrderDateTime = order.OrderDateTime.ToString("dd-MM-yy H:mm"),
+                ShippingInfo = order.ShippingInfo,
+                TotalOrderAmount = GetTotal(order),
+                PresentationOrderItems = GetProductInfo(order)
+            })
                     .ToList();
 
             return presentationOrders;

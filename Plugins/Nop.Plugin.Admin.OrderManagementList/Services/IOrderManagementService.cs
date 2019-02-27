@@ -13,6 +13,6 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         /// <param name="record">The record.</param>
         void Log(AOOrderManagementAttribute att);
 
-        List<AOPresentationOrder> GetCurrentOrders(bool onlyReadyToShip = false);
+        List<AOPresentationOrder> GetCurrentOrdersAsync(bool onlyReadyToShip = false);
     }
 }

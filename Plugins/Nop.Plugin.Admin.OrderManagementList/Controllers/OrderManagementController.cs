@@ -40,26 +40,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
             try
             {
-                List<AOPresentationOrder> orders  = _orderManagementService.GetCurrentOrders();
-
-                model.PresentationOrders = new List<AOPresentationOrder>();
-
-                foreach (AOPresentationOrder order in orders)
-                {
-                    model.PresentationOrders.Add(new AOPresentationOrder()
-                    {
-                        OrderId = order.OrderId,
-                        CustomerComment = order.CustomerComment,
-                        CustomerEmail = order.CustomerEmail,
-                        CustomerInfo = order.CustomerInfo,                        
-                        OrderNotes = order.OrderNotes,
-                        OrderDateTime = order.OrderDateTime,
-                        PresentationOrderItems = order.PresentationOrderItems,
-                        ShippingInfo = order.ShippingInfo,
-                        TotalOrderAmount = order.TotalOrderAmount
-                    }
-                    );                 
-                }
+                model.PresentationOrders = _orderManagementService.GetCurrentOrdersAsync();                
             }
             catch (Exception ex)
             {

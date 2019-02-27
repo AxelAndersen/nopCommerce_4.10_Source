@@ -18,7 +18,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
     public class DependencyRegistrar : IDependencyRegistrar
     {
         public int Order => 1;
-        private const string CONTEXT_NAME = "nop_object_context_order_management";
+        private const string CONTEXT_NAME = "nop_object_context_order_management";        
 
         public virtual void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
         {
@@ -31,6 +31,10 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
             builder.RegisterType<EfRepository<AOOrderManagementAttribute>>().As<IRepository<AOOrderManagementAttribute>>()
             .WithParameter(ResolvedParameter.ForNamed<IDbContext>(CONTEXT_NAME))
             .InstancePerLifetimeScope();
+
+            //builder.RegisterType<EfRepository<AOOrder>>().As<IRepository<AOOrder>>()
+            //.WithParameter(ResolvedParameter.ForNamed<IDbContext>(CONTEXT_NAME_AOORDER))
+            //.InstancePerLifetimeScope();
         }
     }
 }
