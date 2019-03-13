@@ -139,8 +139,8 @@ namespace Nop.Plugin.Shipping.GLS
                 {
                     ShippingOption shippingOption = new ShippingOption()
                     {
-                        Name = parcelShop.CompanyName,
-                        Description = parcelShop.CityName,                        
+                        Name = BuildGLSName(parcelShop), 
+                        Description = BuildGLSDescription(parcelShop),                        
                         ShippingRateComputationMethodSystemName = "GLSComputationMethod",
                         Rate = _glsSettings.SwedishRate
                     };
@@ -226,6 +226,42 @@ namespace Nop.Plugin.Shipping.GLS
             }
 
             return response;
+        }
+
+        private string BuildGLSDescription(PakkeshopData parcelShop)
+        {
+            string desc = "";
+
+            //if (string.IsNullOrEmpty(parcelShop.Telephone) == false)
+            //{
+            //    desc += " Phone: " + parcelShop.Telephone;
+            //}
+
+            //if (string.IsNullOrEmpty(parcelShop.Latitude) == false)
+            //{
+            //    desc += " Latitude: " + parcelShop.Latitude;
+            //}
+
+            //if (string.IsNullOrEmpty(parcelShop.Longitude) == false)
+            //{
+            //    desc += " Longitude: " + parcelShop.Longitude;
+            //}
+
+            //if (parcelShop.DistanceMetersAsTheCrowFlies > 0)
+            //{
+            //    desc += " Distance Meters As The Crow Flies: " + parcelShop.DistanceMetersAsTheCrowFlies;
+            //}
+
+            return desc;
+        }
+
+        private string BuildGLSName(PakkeshopData parcelShop)
+        {
+            string name = parcelShop.CompanyName + " (" + parcelShop.Number + ")<br />"
+                + parcelShop.Streetname + "<br />"
+                + parcelShop.ZipCode + " " + parcelShop.CityName + "<br />";            
+
+            return name;
         }
 
         private bool ValidateShippingInfo(GetShippingOptionRequest getShippingOptionRequest, ref GetShippingOptionResponse response)
