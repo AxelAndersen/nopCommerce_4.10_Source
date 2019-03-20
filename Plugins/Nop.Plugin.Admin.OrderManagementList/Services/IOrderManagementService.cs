@@ -7,8 +7,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
     {
         List<AOPresentationOrder> GetCurrentOrdersAsync(bool onlyReadyToShip = false);
 
-        bool SetProductIsTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside);
+        void SetProductIsTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside, ref string errorMessage);
 
-        bool SetProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered);
+        void SetProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered, ref string errorMessage);
     }
 }

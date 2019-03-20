@@ -64,6 +64,7 @@ namespace Nop.Plugin.Admin.OrderManagementList
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.WelcomeMessage", "Welcome message");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.ErrorMessage", "Error message");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.SuccessUpdate", "Successfull updated");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FailedUpdate", "failed to update");
 
             base.Install();
         }
@@ -81,6 +82,8 @@ namespace Nop.Plugin.Admin.OrderManagementList
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.WelcomeMessage");
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.ErrorMessage");
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.SuccessfullProductReady");
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FailedUpdate");
+            
 
             base.Uninstall();
         }

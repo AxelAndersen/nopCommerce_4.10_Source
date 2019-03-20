@@ -78,13 +78,23 @@
                 url: '@Url.Action("UpdateProductTakenAside", "OrderManagement")',
                 data: { orderId: orderId, orderItemId: orderItemId, productId: productId, isTakenAside: checked },
                 dataType: 'json',
-                success: function (data) {                    
+                success: function (data) 
+                {                    
                     var infoId = "#spn-" + orderId + "-" + orderItemId + "-" + productId;
                     $(infoId).show();
                     $(infoId).html(data);
-                    $(infoId).fadeOut(3000, function () {
-                        // Animation complete.
-                    });                    
+                  
+                    if (data.indexOf("Error:") > -1)
+                    {
+                        $(infoId).css("color", "red");
+                    }
+                    else
+                    {
+                        $(infoId).fadeOut(1500, function ()
+                        {
+                            // Animation complete.
+                        });
+                    }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     if (xhr && xhr.responseText) {
@@ -111,9 +121,18 @@
                     var infoId = "#spn-" + orderId + "-" + orderItemId + "-" + productId;
                     $(infoId).show();
                     $(infoId).html(data);
-                    $(infoId).fadeOut(3000, function () {
-                        // Animation complete.
-                    });                    
+
+                    if (data.indexOf("Error:") > -1)
+                    {
+                        $(infoId).css("color", "red");
+                    }
+                    else
+                    {
+                        $(infoId).fadeOut(1500, function ()
+                        {
+                            // Animation complete.
+                        });
+                    }
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     if (xhr && xhr.responseText) {

@@ -2,6 +2,7 @@
 using Nop.Core.Domain.Orders;
 using Nop.Plugin.Admin.OrderManagementList.Data;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
+using Nop.Services.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,14 +12,16 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 {
 
     public class OrderManagementService : IOrderManagementService
-    {        
+    {
+        private readonly ILogger _logger;
         private readonly IRepository<Order> _aoOrderRepository;
         private readonly OrderManagementContext _context;
 
-        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context)
-        {            
-            _aoOrderRepository = aoOrderRepository;
-            _context = context;
+        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger)
+        {
+            this._logger = logger;
+            this._aoOrderRepository = aoOrderRepository;
+            this._context = context;
         }
 
         #region Public methods
@@ -57,14 +60,70 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             return presentationOrders;
         }
 
-        public bool SetProductIsTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside)
+        public void SetProductIsTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside, ref string errorMessage)
         {
-            throw new NotImplementedException();
+            try
+            {                
+                var orderItemSetting = _context.AOOrderItemSettings.Where(o => o.OrderItemId == orderItemId).FirstOrDefault();
+                if (orderItemSetting == null)
+                {
+                    orderItemSetting = new AOOrderItemSetting()
+                    {
+                        OrderItemId = orderItemId,
+                        IsTakenAside = isTakenAside,
+                        IsTakenAsideDate = DateTime.Now,
+                        IsOrdered = false,
+                        IsOrderedDate = Convert.ToDateTime("01-01-1970")
+                    };
+
+                    _context.Add(orderItemSetting);
+                }
+                else
+                {
+                    orderItemSetting.IsTakenAside = isTakenAside;
+                    orderItemSetting.IsTakenAsideDate = DateTime.Now;
+                    _context.Update(orderItemSetting);
+                }
+                _context.SaveChanges();
+            }
+            catch(Exception ex)
+            {
+                errorMessage = ex.Message;
+                _logger.Error(ex.Message, ex);
+            }            
         }
 
-        public bool SetProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered)
+        public void SetProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered, ref string errorMessage)
         {
-            throw new NotImplementedException();
+            try
+            {                
+                var orderItemSetting = _context.AOOrderItemSettings.Where(o => o.OrderItemId == orderItemId).FirstOrDefault();
+                if (orderItemSetting == null)
+                {
+                    orderItemSetting = new AOOrderItemSetting()
+                    {
+                        OrderItemId = orderItemId,
+                        IsTakenAside = false,
+                        IsTakenAsideDate = Convert.ToDateTime("01-01-1970"),
+                        IsOrdered = isOrdered,
+                        IsOrderedDate = DateTime.Now
+                    };
+
+                    _context.Add(orderItemSetting);
+                }
+                else
+                {
+                    orderItemSetting.IsOrdered = isOrdered;
+                    orderItemSetting.IsOrderedDate = DateTime.Now;
+                    _context.Update(orderItemSetting);
+                }
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+                _logger.Error(ex.Message, ex);
+            }            
         }
         #endregion
 

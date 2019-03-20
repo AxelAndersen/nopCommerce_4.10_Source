@@ -101,16 +101,32 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         [AuthorizeAdmin(false)]
         public IActionResult UpdateProductTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside)
         {
+            bool allwell = false;
             if (isTakenAside)
-            {
-                SuccessNotification(_localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessfullProductReady"));
-                string result = DoUpdateProductTakenAside(orderId, orderItemId, productId, isTakenAside);
-                return Json("Produkt taget fra, " + result);
+            {               
+                string result = DoUpdateProductTakenAside(orderId, orderItemId, productId, isTakenAside, ref allwell);
+                if (allwell)
+                {
+                    SuccessNotification(_localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessfullProductReady"));
+                    return Json("Produkt taget fra, " + result);
+                }
+                else
+                {
+                    return Json("Error: " + result);
+                }
             }
             else
             {
-                string result = DoUpdateProductTakenAside(orderId, orderItemId, productId, isTakenAside);
-                return Json("Produkt IKKE taget fra, " + result);
+                string result = DoUpdateProductTakenAside(orderId, orderItemId, productId, isTakenAside, ref allwell);
+                if (allwell)
+                {
+                    SuccessNotification(_localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessfullProductReady"));
+                    return Json("Produkt IKKE taget fra, " + result);
+                }
+                else
+                {
+                    return Json("Error: " + result);
+                }
             }
         }
 
@@ -118,43 +134,64 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         [AuthorizeAdmin(false)]
         public IActionResult UpdateProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered)
         {
+            bool allwell = false;
             if (isOrdered)
-            {
-                SuccessNotification(_localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessfullProductReady"));
-                string result = DoUpdateProductOrdered(orderId, orderItemId, productId, isOrdered);
-                return Json("Produkt taget fra, " + result);
+            {                
+                string result = DoUpdateProductOrdered(orderId, orderItemId, productId, isOrdered, ref allwell);
+
+                if (allwell)
+                {
+                    SuccessNotification(_localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessfullProductReady"));
+                    return Json("Produkt bestilt, " + result);
+                }
+                else
+                {
+                    return Json("Error: " + result);
+                }
             }
             else
             {
-                string result = DoUpdateProductOrdered(orderId, orderItemId, productId, isOrdered);
-                return Json("Produkt IKKE taget fra, " + result);
+                string result = DoUpdateProductOrdered(orderId, orderItemId, productId, isOrdered, ref allwell);
+                if (allwell)
+                {
+                    SuccessNotification(_localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessfullProductReady"));
+                    return Json("Produkt IKKE bestilt, " + result);
+                }
+                else
+                {
+                    return Json("Error: " + result);
+                }
             }
         }
 
-        private string DoUpdateProductTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside)
+        private string DoUpdateProductTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside, ref bool allwell)
         {
             string errorMessage = "";
-            bool allwell = _orderManagementService.SetProductIsTakenAside(orderId, orderItemId, productId, isTakenAside);
-            if (allwell && string.IsNullOrEmpty(errorMessage))
+            _orderManagementService.SetProductIsTakenAside(orderId, orderItemId, productId, isTakenAside, ref errorMessage);
+            if (string.IsNullOrEmpty(errorMessage))
             {
+                allwell = true;
                 return _localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessUpdate");
             }
             else
             {
-                return _localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.FailedUpdate: " + errorMessage);
+                allwell = false;
+                return _localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.FailedUpdate") + ": " + errorMessage;
             }
         }
 
-        private string DoUpdateProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered)
+        private string DoUpdateProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered, ref bool allwell)
         {
             string errorMessage = "";
-            bool allwell = _orderManagementService.SetProductOrdered(orderId, orderItemId, productId, isOrdered);
-            if (allwell && string.IsNullOrEmpty(errorMessage))
+           _orderManagementService.SetProductOrdered(orderId, orderItemId, productId, isOrdered, ref errorMessage);
+            if (string.IsNullOrEmpty(errorMessage))
             {
+                allwell = true;
                 return _localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessUpdate");
             }
             else
             {
+                allwell = false;
                 return _localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.FailedUpdate: " + errorMessage);
             }
         }
