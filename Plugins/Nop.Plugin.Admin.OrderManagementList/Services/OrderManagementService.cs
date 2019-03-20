@@ -1,41 +1,27 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Nop.Core.Data;
+﻿using Nop.Core.Data;
 using Nop.Core.Domain.Orders;
-using Nop.Data;
 using Nop.Plugin.Admin.OrderManagementList.Data;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Services
 {
 
     public class OrderManagementService : IOrderManagementService
-    {
-        private readonly IRepository<AOOrderManagementAttribute> _aoOrderManagementAttributeRepository;
+    {        
         private readonly IRepository<Order> _aoOrderRepository;
         private readonly OrderManagementContext _context;
 
-        public OrderManagementService(IRepository<AOOrderManagementAttribute> aoOrderManagementAttributeRepository, IRepository<Order> aoOrderRepository, OrderManagementContext context)
-        {
-            _aoOrderManagementAttributeRepository = aoOrderManagementAttributeRepository;
+        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context)
+        {            
             _aoOrderRepository = aoOrderRepository;
             _context = context;
         }
 
         #region Public methods
-        /// <summary>
-        /// Logs the specified record.
-        /// </summary>
-        /// <param name="record">The record.</param>
-        public void Log(AOOrderManagementAttribute att)
-        {
-            _aoOrderManagementAttributeRepository.Insert(att);
-        }
-
         public List<AOPresentationOrder> GetCurrentOrdersAsync(bool onlyReadyToShip = false)
         {
             var orders = _context.AoOrders.Select(a => new AOOrder()
@@ -72,6 +58,11 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         }
 
         public bool SetProductIsTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool SetProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered)
         {
             throw new NotImplementedException();
         }
@@ -168,7 +159,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             item[0] = "0";
             item[1] = message;
             return item;
-        } 
+        }
         #endregion
     }
 }

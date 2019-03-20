@@ -1,7 +1,5 @@
 ﻿using Nop.Plugin.Admin.OrderManagementList.Domain;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Models
 {

@@ -3,10 +3,7 @@ using Nop.Core;
 using Nop.Data;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Data
 {
@@ -23,8 +20,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Data
         {
             modelBuilder.Query<AOOrder>().ToView("OrderManagementList").Property(v => v.OrderId).HasColumnName("OrderId");
 
-            //disable EdmMetadata generation
-            //modelBuilder.Conventions.Remove<IncludeMetadataConvention>();
+
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -102,6 +99,5 @@ namespace Nop.Plugin.Admin.OrderManagementList.Data
         }
 
         #endregion
-
     }
 }
