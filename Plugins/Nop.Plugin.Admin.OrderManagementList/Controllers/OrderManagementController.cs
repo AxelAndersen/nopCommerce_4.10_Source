@@ -101,25 +101,25 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
         [HttpGet]
         [AuthorizeAdmin(false)]
-        public IActionResult UpdateProductReady(int orderId, int orderItemId, int productId, bool isReady)
+        public IActionResult UpdateProductTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside)
         {
-            if (isReady)
+            if (isTakenAside)
             {
                 SuccessNotification(_localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessfullProductReady"));
-                string result = DoUpdateProductReady(orderId, orderItemId, productId, isReady);
-                return Json("Produkt klar, " + result);
+                string result = DoUpdateProductTakenAside(orderId, orderItemId, productId, isTakenAside);
+                return Json("Produkt taget fra, " + result);
             }
             else
             {
-                string result = DoUpdateProductReady(orderId, orderItemId, productId, isReady);
-                return Json("Produkt IKKE klar, " + result);
+                string result = DoUpdateProductTakenAside(orderId, orderItemId, productId, isTakenAside);
+                return Json("Produkt IKKE taget fra, " + result);
             }
         }
 
-        private string DoUpdateProductReady(int orderId, int orderItemId, int productId, bool isReady)
+        private string DoUpdateProductTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside)
         {
             string errorMessage = "";
-            bool allwell = false; // _aoOrderService.SetProductIsReady(orderId, orderItemId, productId, isReady);
+            bool allwell = _orderManagementService.SetProductIsTakenAside(orderId, orderItemId, productId, isTakenAside);
             if (allwell && string.IsNullOrEmpty(errorMessage))
             {                
                 return _localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessUpdate");

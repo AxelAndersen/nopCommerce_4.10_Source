@@ -19,7 +19,6 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         private readonly IRepository<Order> _aoOrderRepository;
         private readonly OrderManagementContext _context;
 
-
         public OrderManagementService(IRepository<AOOrderManagementAttribute> aoOrderManagementAttributeRepository, IRepository<Order> aoOrderRepository, OrderManagementContext context)
         {
             _aoOrderManagementAttributeRepository = aoOrderManagementAttributeRepository;
@@ -27,6 +26,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             _context = context;
         }
 
+        #region Public methods
         /// <summary>
         /// Logs the specified record.
         /// </summary>
@@ -71,6 +71,13 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             return presentationOrders;
         }
 
+        public bool SetProductIsTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region Private methods
         private string GetCustomerComment(AOOrder order)
         {
             return string.IsNullOrEmpty(order.CheckoutAttributeDescription) ? "&nbsp;" : order.CheckoutAttributeDescription;
@@ -161,6 +168,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             item[0] = "0";
             item[1] = message;
             return item;
-        }
+        } 
+        #endregion
     }
 }

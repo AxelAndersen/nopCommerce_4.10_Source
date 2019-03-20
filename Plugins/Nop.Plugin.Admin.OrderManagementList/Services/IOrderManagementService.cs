@@ -14,5 +14,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         void Log(AOOrderManagementAttribute att);
 
         List<AOPresentationOrder> GetCurrentOrdersAsync(bool onlyReadyToShip = false);
+
+        bool SetProductIsTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside);
     }
 }

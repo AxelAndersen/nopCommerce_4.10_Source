@@ -73,7 +73,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Shipping.GLS", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AO.SharedServices", "AO.SharedServices\AO.SharedServices.csproj", "{8D31ED9D-5605-4FE4-A3D9-0E8952ABEC83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Admin.OrderManagementList", "Plugins\Nop.Plugin.Admin.OrderManagementList\Nop.Plugin.Admin.OrderManagementList.csproj", "{24553EFF-BB87-4C5E-8250-64C2849EFF8A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Admin.OrderManagementList", "Plugins\Nop.Plugin.Admin.OrderManagementList\Nop.Plugin.Admin.OrderManagementList.csproj", "{24553EFF-BB87-4C5E-8250-64C2849EFF8A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
