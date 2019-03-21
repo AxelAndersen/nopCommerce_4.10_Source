@@ -1,4 +1,5 @@
-﻿using Nop.Core.Data;
+﻿using Nop.Core;
+using Nop.Core.Data;
 using Nop.Core.Domain.Orders;
 using Nop.Plugin.Admin.OrderManagementList.Data;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
@@ -6,6 +7,7 @@ using Nop.Services.Catalog;
 using Nop.Services.Logging;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Xml;
 
@@ -18,13 +20,17 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         private readonly IRepository<Order> _aoOrderRepository;
         private readonly OrderManagementContext _context;
         private readonly IProductAttributeService _productAttributeService;
+        private readonly IWorkContext _workContext;
+        private readonly CultureInfo _workikngCultureInfo;
 
-        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger, IProductAttributeService productAttributeService)
+        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger, IProductAttributeService productAttributeService, IWorkContext workContext)
         {
             this._logger = logger;
             this._aoOrderRepository = aoOrderRepository;
             this._context = context;
             this._productAttributeService = productAttributeService;
+            this._workContext = workContext;
+            this._workikngCultureInfo = new CultureInfo(_workContext.WorkingLanguage.UniqueSeoCode);
         }
 
         #region Public methods
@@ -141,8 +147,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         }
 
         private string GetTotal(AOOrder order)
-        {
-            return order.TotalOrderAmount.ToString("N2") + " " + order.Currency;
+        {            
+            return order.TotalOrderAmount.ToString("N2", _workikngCultureInfo) + " " + order.Currency;
         }
 
         private string GetOrderNotes(AOOrder order)
@@ -188,7 +194,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 {
                     ProductId = Convert.ToInt32(itemContent[0]),
                     OrderItemId = Convert.ToInt32(itemContent[1]),
-                    ProductName = itemContent[2].ToString() + " " + GetAttributeInfo(itemContent[3].ToString()),
+                    ProductName = itemContent[2].ToString() + GetAttributeInfo(itemContent[3].ToString()),
                     IstakenAside = itemContent[4] == "1" ? true : false,
                     IsOrdered = itemContent[5] == "1" ? true : false
                 });
