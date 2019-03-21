@@ -2,6 +2,7 @@
 using Nop.Core.Domain.Orders;
 using Nop.Plugin.Admin.OrderManagementList.Data;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
+using Nop.Services.Catalog;
 using Nop.Services.Logging;
 using System;
 using System.Collections.Generic;
@@ -16,12 +17,14 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         private readonly ILogger _logger;
         private readonly IRepository<Order> _aoOrderRepository;
         private readonly OrderManagementContext _context;
+        private readonly IProductAttributeService _productAttributeService;
 
-        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger)
+        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger, IProductAttributeService productAttributeService)
         {
             this._logger = logger;
             this._aoOrderRepository = aoOrderRepository;
             this._context = context;
+            this._productAttributeService = productAttributeService;
         }
 
         #region Public methods
@@ -54,8 +57,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 ShippingInfo = order.ShippingInfo,
                 TotalOrderAmount = GetTotal(order),
                 PresentationOrderItems = GetProductInfo(order)
-            })
-                    .ToList();
+            }).ToList();
 
             return presentationOrders;
         }
@@ -150,7 +152,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 return "&nbsp;";
             }
 
-            var orderNotes = order.OrderNotes.TrimStart(',').Replace(",", "<hr class='hrOrderManagement' /><br />").Replace("#", "<br />");
+            var orderNotes = order.OrderNotes.TrimStart(',').Replace(",", "<hr class='hrSmall' /><br />").Replace("#", "<br />");
             return orderNotes;
         }
 
@@ -186,7 +188,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 {
                     ProductId = Convert.ToInt32(itemContent[0]),
                     OrderItemId = Convert.ToInt32(itemContent[1]),
-                    ProductName = itemContent[2].ToString() + " " + GetAttributeInfo(itemContent[3].ToString())
+                    ProductName = itemContent[2].ToString() + " " + GetAttributeInfo(itemContent[3].ToString()),
+                    IstakenAside = itemContent[4] == "1" ? true : false,
+                    IsOrdered = itemContent[5] == "1" ? true : false
                 });
             }
 
@@ -197,19 +201,18 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         {
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(attributeXml);
-            List<int> ids = new List<int>();
+            string attributeInfo = "";
 
             foreach (XmlNode node in doc.DocumentElement.ChildNodes)
             {
-                ids.Add(Convert.ToInt32(node.ChildNodes[0].InnerText));
+                var productAttribute = _productAttributeService.GetProductAttributeValueById(Convert.ToInt32(node.ChildNodes[0].InnerText));
+
+                if (productAttribute != null)
+                {
+                    attributeInfo += ", " + productAttribute.Name;                
+                }
             }
-
-            //List<AOProductAttributeValue> attributes = _orderContext.AOProductAttributeValues(ids.ToArray());
-            //string res = attributes.Select(a => a.Name).Aggregate(
-            //    "", // start with empty string to handle empty list case.
-            //         (current, next) => current + ", " + next);
-
-            return ""; // res;
+            return attributeInfo;
         }
 
         private static string[] NoOrderItem(string message)

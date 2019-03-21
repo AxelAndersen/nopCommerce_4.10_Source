@@ -7,5 +7,9 @@
         public int OrderItemId { get; set; }
 
         public string ProductName { get; set; }
+
+        public bool IstakenAside { get; set; }
+
+        public bool IsOrdered { get; set; }
     }
 }
