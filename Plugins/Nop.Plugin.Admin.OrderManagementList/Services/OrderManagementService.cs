@@ -1,6 +1,7 @@
 ﻿using Nop.Core;
 using Nop.Core.Data;
 using Nop.Core.Domain.Orders;
+using Nop.Core.Domain.Payments;
 using Nop.Plugin.Admin.OrderManagementList.Data;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
 using Nop.Services.Catalog;
@@ -48,7 +49,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 ShippingInfo = a.ShippingInfo,
                 CheckoutAttributeDescription = a.CheckoutAttributeDescription,
                 OrderItems = a.OrderItems,
-                OrderNotes = a.OrderNotes
+                OrderNotes = a.OrderNotes,
+                PaymentStatusId = a.PaymentStatusId
             }
             );
 
@@ -60,9 +62,10 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 CustomerInfo = GetCustomerInfo(order),
                 OrderNotes = GetOrderNotes(order),
                 OrderDateTime = order.OrderDateTime.ToString("dd-MM-yy H:mm"),
-                ShippingInfo = order.ShippingInfo,
+                ShippingInfo = GetShippingInfo(order),
                 TotalOrderAmount = GetTotal(order),
-                PresentationOrderItems = GetProductInfo(order)
+                PresentationOrderItems = GetProductInfo(order),
+                FormattedPaymentStatus = GetPaymentStatus(order.PaymentStatusId)
             }).ToList();
 
             return presentationOrders;
@@ -151,6 +154,17 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             return order.TotalOrderAmount.ToString("N2", _workikngCultureInfo) + " " + order.Currency;
         }
 
+        private string GetShippingInfo(AOOrder order)
+        {
+            if (string.IsNullOrEmpty(order.ShippingInfo))
+            {
+                return "&nbsp;";
+            }
+
+            var shippingInfo = order.ShippingInfo.Replace("#", "<br />");
+            return shippingInfo;
+        }
+
         private string GetOrderNotes(AOOrder order)
         {
             if (string.IsNullOrEmpty(order.OrderNotes))
@@ -194,7 +208,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 {
                     ProductId = Convert.ToInt32(itemContent[0]),
                     OrderItemId = Convert.ToInt32(itemContent[1]),
-                    ProductName = itemContent[2].ToString() + GetAttributeInfo(itemContent[3].ToString()),
+                    ProductName = itemContent[2].ToString() + GetAttributeInfo(itemContent[3].ToString()) + " <span class='spnQuantity'>("  + itemContent[6] + " stk.)</span>",
                     IstakenAside = itemContent[4] == "1" ? true : false,
                     IsOrdered = itemContent[5] == "1" ? true : false
                 });
@@ -227,6 +241,54 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             item[0] = "0";
             item[1] = message;
             return item;
+        }
+
+        private string GetPaymentStatus(int paymentStatusId)
+        {
+            PaymentStatus paymentStatus = (PaymentStatus)paymentStatusId;
+            string formattedStatus = "";
+            string mask = "<span class='{0}'>{1}</span>";
+
+            switch(paymentStatus)
+            {
+                case PaymentStatus.Pending:
+                    {
+                        formattedStatus = string.Format(mask, "paymentstatus-red", "Ikke betalt");
+                        break;
+                    }
+                case PaymentStatus.Authorized:
+                    {
+                        formattedStatus = string.Format(mask, "paymentstatus-red", "Ikke betalt");
+                        break;
+                    }
+                case PaymentStatus.Paid:
+                    {
+                        formattedStatus = string.Format(mask, "paymentstatus-green", "Betalt");
+                        break;
+                    }
+                case PaymentStatus.PartiallyRefunded:
+                    {
+                        formattedStatus = string.Format(mask, "paymentstatus-yellow", "Delvist refunderet");
+                        break;
+                    }
+                case PaymentStatus.Refunded:
+                    {
+                        formattedStatus = string.Format(mask, "paymentstatus-yellow", "Refunderet");
+                        break;
+                    }
+                case PaymentStatus.Voided:
+                    {
+                        formattedStatus = string.Format(mask, "paymentstatus-yellow", "Annulleret");
+                        break;
+                    }
+                default:
+                    {
+                        formattedStatus = string.Format(mask, "paymentstatus-red", "Betaling fejlet");
+                        break;
+                    }
+            }
+
+            return formattedStatus;
         }
         #endregion
     }

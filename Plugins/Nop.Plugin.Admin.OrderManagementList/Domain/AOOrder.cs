@@ -25,6 +25,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Domain
 
         public virtual string OrderItems { get; set; }
 
-        public virtual string OrderNotes { get; set; }        
+        public virtual string OrderNotes { get; set; }
+
+        public virtual int PaymentStatusId { get; set; }
     }
 }

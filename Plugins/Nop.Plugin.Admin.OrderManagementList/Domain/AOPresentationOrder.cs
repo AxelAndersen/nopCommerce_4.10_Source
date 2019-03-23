@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Nop.Core.Domain.Payments;
+using System.Collections.Generic;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Domain
 {
@@ -21,5 +22,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Domain
         public string OrderNotes { get; set; }        
 
         public List<AOOrderItem> PresentationOrderItems { get; set; }
+
+        public string FormattedPaymentStatus { get; set; }
     }
 }

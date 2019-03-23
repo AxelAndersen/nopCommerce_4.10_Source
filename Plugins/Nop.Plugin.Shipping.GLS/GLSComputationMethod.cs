@@ -141,7 +141,7 @@ namespace Nop.Plugin.Shipping.GLS
                     {
                         Name = BuildGLSName(parcelShop), 
                         Description = BuildGLSDescription(parcelShop),                        
-                        ShippingRateComputationMethodSystemName = "GLSComputationMethod",
+                        ShippingRateComputationMethodSystemName = "GLS",
                         Rate = _glsSettings.SwedishRate
                     };
                     

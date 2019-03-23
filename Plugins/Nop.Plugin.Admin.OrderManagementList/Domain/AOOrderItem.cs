@@ -10,6 +10,6 @@
 
         public bool IstakenAside { get; set; }
 
-        public bool IsOrdered { get; set; }
+        public bool IsOrdered { get; set; }        
     }
 }

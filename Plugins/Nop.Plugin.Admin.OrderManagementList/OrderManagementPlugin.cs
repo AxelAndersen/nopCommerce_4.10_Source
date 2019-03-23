@@ -28,7 +28,7 @@ namespace Nop.Plugin.Admin.OrderManagementList
             var menuItem = new SiteMapNode()
             {
                 SystemName = "Admin.OrderManagementList",
-                Title = "Order management",
+                Title = "Ordrehåndtering",
                 ControllerName = "OrderManagement",
                 ActionName = "List",
                 Visible = true,
@@ -38,7 +38,7 @@ namespace Nop.Plugin.Admin.OrderManagementList
             };
             var pluginNode = rootNode.ChildNodes.FirstOrDefault(x => x.SystemName == "Sales");
             if (pluginNode != null)
-                pluginNode.ChildNodes.Add(menuItem);
+                pluginNode.ChildNodes.Insert(0, menuItem);
             else
                 rootNode.ChildNodes.Add(menuItem);
         }
