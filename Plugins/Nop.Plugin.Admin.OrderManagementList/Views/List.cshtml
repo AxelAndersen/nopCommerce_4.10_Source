@@ -6,9 +6,7 @@
 @{
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     Html.AddCssFileParts("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Content/OrderStyles.css");
-    Html.AddTitleParts("Ordrehåndtering");
-
-    //ViewData["Title"] = "Ordrehåndtering";
+    ViewData["Title"] = "Ordrehåndtering";
 }
 
 <form asp-controller="OrderManagement" asp-action="List" method="post">
