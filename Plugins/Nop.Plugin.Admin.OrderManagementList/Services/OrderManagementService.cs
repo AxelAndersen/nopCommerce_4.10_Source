@@ -74,7 +74,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         public void SetProductIsTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside, ref string errorMessage)
         {
             try
-            {                
+            {
                 var orderItemSetting = _context.AOOrderItemSettings.Where(o => o.OrderItemId == orderItemId).FirstOrDefault();
                 if (orderItemSetting == null)
                 {
@@ -97,17 +97,17 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 }
                 _context.SaveChanges();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 errorMessage = ex.Message;
                 _logger.Error(ex.Message, ex);
-            }            
+            }
         }
 
         public void SetProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered, ref string errorMessage)
         {
             try
-            {                
+            {
                 var orderItemSetting = _context.AOOrderItemSettings.Where(o => o.OrderItemId == orderItemId).FirstOrDefault();
                 if (orderItemSetting == null)
                 {
@@ -134,7 +134,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             {
                 errorMessage = ex.Message;
                 _logger.Error(ex.Message, ex);
-            }            
+            }
         }
         #endregion
 
@@ -150,7 +150,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         }
 
         private string GetTotal(AOOrder order)
-        {            
+        {
             return order.TotalOrderAmount.ToString("N2", _workikngCultureInfo) + " " + order.Currency;
         }
 
@@ -208,7 +208,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 {
                     ProductId = Convert.ToInt32(itemContent[0]),
                     OrderItemId = Convert.ToInt32(itemContent[1]),
-                    ProductName = itemContent[2].ToString() + GetAttributeInfo(itemContent[3].ToString()) + " <span class='spnQuantity'>("  + itemContent[6] + " stk.)</span>",
+                    ProductName = itemContent[2].ToString() + GetAttributeInfo(itemContent[3].ToString()) + " <span class='spnQuantity'>(" + itemContent[6] + " stk.)</span>",
                     IstakenAside = itemContent[4] == "1" ? true : false,
                     IsOrdered = itemContent[5] == "1" ? true : false
                 });
@@ -229,7 +229,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 
                 if (productAttribute != null)
                 {
-                    attributeInfo += ", " + productAttribute.Name;                
+                    attributeInfo += ", " + productAttribute.Name;
                 }
             }
             return attributeInfo;
@@ -249,7 +249,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             string formattedStatus = "";
             string mask = "<span class='{0}'>{1}</span>";
 
-            switch(paymentStatus)
+            switch (paymentStatus)
             {
                 case PaymentStatus.Pending:
                     {
