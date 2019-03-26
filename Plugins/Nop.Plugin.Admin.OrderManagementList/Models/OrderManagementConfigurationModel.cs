@@ -1,8 +1,5 @@
 ﻿using Nop.Web.Framework.Mvc.ModelBinding;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Models
 {
@@ -11,12 +8,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Models
         [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.ListActive")]
         public bool ListActive { get; set; }
 
-        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.WelcomeMessage")]
-        public string WelcomeMessage { get; set; }
-
         [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.ErrorMessage")]
         public string ErrorMessage { get; set; }
-
 
         [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.FTPHost")]
         public string FTPHost { get; set; }
@@ -45,5 +38,12 @@ namespace Nop.Plugin.Admin.OrderManagementList.Models
         /// "Labels/GLS"
         /// </summary>
         public string FTPRemoteFolderPath { get; set; }
+
+        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.FTPPrinterName")]
+        /// <summary>
+        /// 21: Pxx = Printer no. in GLS file
+        /// http://www.gls.dk/information/Folder/InterLine%20Silent%20mode_EN.pdf
+        /// </summary>
+        public string FTPPrinterName { get; set; }
     }
 }

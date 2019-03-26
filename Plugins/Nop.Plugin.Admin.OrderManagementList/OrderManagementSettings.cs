@@ -1,14 +1,10 @@
 ﻿using Nop.Core.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Nop.Plugin.Admin.OrderManagementList
 {
     public class OrderManagementSettings : ISettings
     {
-        public bool ListActive { get; set; }
-        public string WelcomeMessage { get; set; }
+        public bool ListActive { get; set; }        
         public string ErrorMessage { get; set; }
 
         public string FTPHost { get; set; }
@@ -29,5 +25,11 @@ namespace Nop.Plugin.Admin.OrderManagementList
         /// "Labels/GLS"
         /// </summary>
         public string FTPRemoteFolderPath { get; set; }
+
+        /// <summary>
+        /// 21: Pxx = Printer no. in GLS file
+        /// http://www.gls.dk/information/Folder/InterLine%20Silent%20mode_EN.pdf
+        /// </summary>
+        public string FTPPrinterName { get; set; }
     }
 }

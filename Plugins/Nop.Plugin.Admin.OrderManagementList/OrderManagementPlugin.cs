@@ -72,6 +72,7 @@ namespace Nop.Plugin.Admin.OrderManagementList
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPLocalFilePath", "Local filepath");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPLocalFileName", "Local filename");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPRemoteFolderPath", "Remote folderpath");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPPrinterName", "Printer name"); 
 
             base.Install();
         }
@@ -97,6 +98,7 @@ namespace Nop.Plugin.Admin.OrderManagementList
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPLocalFilePath");
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPLocalFileName");
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPRemoteFolderPath");
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPPrinterName"); 
 
             base.Uninstall();
         }

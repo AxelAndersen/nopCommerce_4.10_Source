@@ -20,7 +20,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
     public class OrderManagementController : BaseAdminController
     {
         private readonly ILogger _logger;
-        private readonly OrderManagementSettings _orderManagementSettings;
+        private readonly OrderManagementSettings _settings;
         private readonly IOrderManagementService _orderManagementService;
         private readonly ISettingService _settingService;
         private readonly ILocalizationService _localizationService;
@@ -30,7 +30,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         public OrderManagementController(ILogger logger, OrderManagementSettings orderManagementSettings, ILocalizationService localizationService, ISettingService settingService, IOrderManagementService orderManagementService, IFTPService ftpService, IGLSService glsService)
         {
             this._logger = logger;
-            this._orderManagementSettings = orderManagementSettings;
+            this._settings = orderManagementSettings;
             this._settingService = settingService;
             this._orderManagementService = orderManagementService;
             this._localizationService = localizationService;
@@ -89,21 +89,21 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
             try
             {
-                _orderManagementSettings.ListActive = model.ListActive;
-                _orderManagementSettings.WelcomeMessage = model.WelcomeMessage;
-                _orderManagementSettings.ErrorMessage = model.ErrorMessage;
+                _settings.ListActive = model.ListActive;                
+                _settings.ErrorMessage = model.ErrorMessage;
 
-                _orderManagementSettings.FTPHost = model.FTPHost;
-                _orderManagementSettings.FTPUsername = model.FTPUsername;
+                _settings.FTPHost = model.FTPHost;
+                _settings.FTPUsername = model.FTPUsername;
                 if (string.IsNullOrEmpty(model.FTPPassword) == false)
                 {
-                    _orderManagementSettings.FTPPassword = model.FTPPassword;
+                    _settings.FTPPassword = model.FTPPassword;
                 }
-                _orderManagementSettings.FTPLocalFilePath = model.FTPLocalFilePath;
-                _orderManagementSettings.FTPLocalFileName = model.FTPLocalFileName;
-                _orderManagementSettings.FTPRemoteFolderPath = model.FTPRemoteFolderPath;
+                _settings.FTPLocalFilePath = model.FTPLocalFilePath;
+                _settings.FTPLocalFileName = model.FTPLocalFileName;
+                _settings.FTPRemoteFolderPath = model.FTPRemoteFolderPath;
+                _settings.FTPPrinterName = model.FTPPrinterName;
 
-                _settingService.SaveSetting(_orderManagementSettings);
+                _settingService.SaveSetting(_settings);
             }
             catch (Exception ex)
             {
@@ -189,17 +189,17 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             try
             {
                 _ftpService.Initialize(
-                                _orderManagementSettings.FTPHost,
-                                _orderManagementSettings.FTPUsername,
-                                _orderManagementSettings.FTPPassword);
+                                _settings.FTPHost,
+                                _settings.FTPUsername,
+                                _settings.FTPPassword);
 
                 AOOrder order = _orderManagementService.GetOrder(orderId);
 
-                string localFilepath = _orderManagementSettings.FTPLocalFilePath + "\\" + _orderManagementSettings.FTPLocalFileName;
+                string localFilepath = _settings.FTPLocalFilePath + "\\" + _settings.FTPLocalFileName;
 
                 System.IO.File.WriteAllText(localFilepath, CreateSingleLine(order), Encoding.UTF8);
 
-                _ftpService.SendFile(localFilepath, _orderManagementSettings.FTPRemoteFolderPath + "/" + _orderManagementSettings.FTPLocalFileName);
+                _ftpService.SendFile(localFilepath, _settings.FTPRemoteFolderPath + "/" + _settings.FTPLocalFileName);
             }
             catch (Exception ex)
             {
@@ -243,7 +243,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             sb.Append(",\"" + order.CustomerEmail + "\"");              // 18 Customer mail address
             sb.Append(",\"" + order.PhoneNumber + "\"");                // 19 Customer mobile number
             sb.Append(",\"\"E");                                        // 20 Notification: E = Email
-            sb.Append(",\"\"");                                         // 21 Pxx = Printer no
+            sb.Append(",\"\"" + _settings.FTPPrinterName + "\"");       // 21 Pxx = Printer no
             sb.Append(",\"\"");                                         // 22
             sb.Append(",\"\"");                                         // 23
             sb.Append(",\"\"");                                         // 24
@@ -293,15 +293,15 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         {
             return new OrderManagementConfigurationModel
             {
-                ListActive = _orderManagementSettings.ListActive,
-                WelcomeMessage = _orderManagementSettings.WelcomeMessage,
-                ErrorMessage = _orderManagementSettings.ErrorMessage,
-                FTPHost = _orderManagementSettings.FTPHost,
-                FTPUsername = _orderManagementSettings.FTPUsername,
-                FTPPassword = _orderManagementSettings.FTPPassword,
-                FTPLocalFilePath = _orderManagementSettings.FTPLocalFilePath,
-                FTPLocalFileName = _orderManagementSettings.FTPLocalFileName,
-                FTPRemoteFolderPath = _orderManagementSettings.FTPRemoteFolderPath
+                ListActive = _settings.ListActive,                
+                ErrorMessage = _settings.ErrorMessage,
+                FTPHost = _settings.FTPHost,
+                FTPUsername = _settings.FTPUsername,
+                FTPPassword = _settings.FTPPassword,
+                FTPLocalFilePath = _settings.FTPLocalFilePath,
+                FTPLocalFileName = _settings.FTPLocalFileName,
+                FTPRemoteFolderPath = _settings.FTPRemoteFolderPath,
+                FTPPrinterName = _settings.FTPPrinterName
             };
         }
     }
