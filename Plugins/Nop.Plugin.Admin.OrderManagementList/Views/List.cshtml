@@ -59,7 +59,7 @@
                 <br /><br />
                 <a class="btn bg-purple large-text" href="/Admin/Order/PdfPackagingSlip?shipmentId=6">Følgeseddel</a>
                 <br /><br />
-                <a class="btn bg-green large-text" href="/Admin/Order/InvoiceAndCapture/@order.OrderId">Afslut ordre</a>
+                <a class="btn bg-green large-text" onclick="javascript:CompleteOrderAjax(@order.OrderId);">Afslut ordre</a>
                 <br /><br />
                 @order.OrderDateTime
                 <br />
@@ -71,8 +71,8 @@
                 @foreach (AOOrderItem item in order.PresentationOrderItems)
                 {
                     <div>
-                        <input type="checkbox" name="chkIsTakenAside" @(item.IstakenAside ? "checked" : "") onclick="UpdateProductTakenAsideAjax(@order.OrderId, @item.OrderItemId, @item.ProductId, this.checked);" />&nbsp;Er taget fra&nbsp;&nbsp;
-                        <input type="checkbox" name="chkOrdered" @(item.IsOrdered ? "checked" : "") onclick="UpdateProductOrderedAjax(@order.OrderId, @item.OrderItemId, @item.ProductId, this.checked);" value="@item.ProductId" />&nbsp;Er bestilt
+                        <input type="checkbox" name="chkIsTakenAside" @(item.IstakenAside ? "checked" : "") onclick="javascript:UpdateProductTakenAsideAjax(@order.OrderId, @item.OrderItemId, @item.ProductId, this.checked);" />&nbsp;Er taget fra&nbsp;&nbsp;
+                        <input type="checkbox" name="chkOrdered" @(item.IsOrdered ? "checked" : "") onclick="javascript:UpdateProductOrderedAjax(@order.OrderId, @item.OrderItemId, @item.ProductId, this.checked);" value="@item.ProductId" />&nbsp;Er bestilt
                         <span id="spn-@order.OrderId-@item.OrderItemId-@item.ProductId" class="success" style="display:none;"></span>
                         <br />
                         <span>@Html.Raw(item.ProductName)</span>
@@ -172,6 +172,39 @@
             });
             return false;
         }
+
+
+        function CompleteOrderAjax(orderId)
+        {
+            $.ajax({
+                cache: false,
+                type: 'GET',
+                url: '@Url.Action("CompleteOrder", "OrderManagement")',
+                data: { orderId: orderId },
+                dataType: 'json',
+                success: function (data) 
+                {
+                    if (data.indexOf("Error:") > -1)
+                    {
+                        alert('ARRHHGGG: ' + data);
+                    }
+                    else
+                    {
+                        alert('yeaaa: data=' + data);
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    if (xhr && xhr.responseText) {
+                        var err = eval("(" + xhr.responseText + ")");
+                        alert('Error while saving.' + err.Message);
+                    }
+                    else {
+                        alert('Error while saving.');
+                    }
+                }
+            });
+            return false;
+        }        
     </script>
 
 </form>

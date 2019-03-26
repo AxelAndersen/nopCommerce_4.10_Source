@@ -142,7 +142,7 @@ namespace Nop.Plugin.Shipping.GLS
                         Name = BuildGLSName(parcelShop), 
                         Description = BuildGLSDescription(parcelShop),                        
                         ShippingRateComputationMethodSystemName = "GLS",
-                        Rate = _glsSettings.SwedishRate
+                        Rate = _glsSettings.SwedishRate                        
                     };
                     
                     response.ShippingOptions.Add(shippingOption);                    
@@ -226,7 +226,7 @@ namespace Nop.Plugin.Shipping.GLS
             }
 
             return response;
-        }
+        }        
 
         private string BuildGLSDescription(PakkeshopData parcelShop)
         {

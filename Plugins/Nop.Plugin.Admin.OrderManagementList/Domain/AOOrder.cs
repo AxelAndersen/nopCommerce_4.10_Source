@@ -15,9 +15,13 @@ namespace Nop.Plugin.Admin.OrderManagementList.Domain
 
         public virtual DateTime OrderDateTime { get; set; }
 
+        public virtual string UserName { get; set; }
+
         public virtual string CustomerInfo { get; set; }
 
         public virtual string CustomerEmail { get; set; }
+
+        public virtual string PhoneNumber { get; set; }
 
         public virtual string ShippingInfo { get; set; }
 

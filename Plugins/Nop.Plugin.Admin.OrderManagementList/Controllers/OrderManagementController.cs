@@ -1,13 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using GLSReference;
+using Microsoft.AspNetCore.Mvc;
+using Nop.Plugin.Admin.OrderManagementList.Domain;
 using Nop.Plugin.Admin.OrderManagementList.Models;
 using Nop.Plugin.Admin.OrderManagementList.Services;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
+using Nop.Services.Shipping;
 using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Mvc.Filters;
 using System;
+using System.Text;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 {
@@ -20,14 +24,18 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         private readonly IOrderManagementService _orderManagementService;
         private readonly ISettingService _settingService;
         private readonly ILocalizationService _localizationService;
+        private readonly IFTPService _ftpService;
+        private readonly IGLSService _glsService;
 
-        public OrderManagementController(ILogger logger, OrderManagementSettings orderManagementSettings, ILocalizationService localizationService, ISettingService settingService, IOrderManagementService orderManagementService)
+        public OrderManagementController(ILogger logger, OrderManagementSettings orderManagementSettings, ILocalizationService localizationService, ISettingService settingService, IOrderManagementService orderManagementService, IFTPService ftpService, IGLSService glsService)
         {
             this._logger = logger;
             this._orderManagementSettings = orderManagementSettings;
             this._settingService = settingService;
             this._orderManagementService = orderManagementService;
             this._localizationService = localizationService;
+            this._ftpService = ftpService;
+            this._glsService = glsService;
         }
 
         [AuthorizeAdmin]
@@ -85,6 +93,16 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 _orderManagementSettings.WelcomeMessage = model.WelcomeMessage;
                 _orderManagementSettings.ErrorMessage = model.ErrorMessage;
 
+                _orderManagementSettings.FTPHost = model.FTPHost;
+                _orderManagementSettings.FTPUsername = model.FTPUsername;
+                if (string.IsNullOrEmpty(model.FTPPassword) == false)
+                {
+                    _orderManagementSettings.FTPPassword = model.FTPPassword;
+                }
+                _orderManagementSettings.FTPLocalFilePath = model.FTPLocalFilePath;
+                _orderManagementSettings.FTPLocalFileName = model.FTPLocalFileName;
+                _orderManagementSettings.FTPRemoteFolderPath = model.FTPRemoteFolderPath;
+
                 _settingService.SaveSetting(_orderManagementSettings);
             }
             catch (Exception ex)
@@ -103,7 +121,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         {
             bool allwell = false;
             if (isTakenAside)
-            {               
+            {
                 string result = DoUpdateProductTakenAside(orderId, orderItemId, productId, isTakenAside, ref allwell);
                 if (allwell)
                 {
@@ -136,7 +154,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         {
             bool allwell = false;
             if (isOrdered)
-            {                
+            {
                 string result = DoUpdateProductOrdered(orderId, orderItemId, productId, isOrdered, ref allwell);
 
                 if (allwell)
@@ -164,6 +182,81 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             }
         }
 
+        [HttpGet]
+        [AuthorizeAdmin(false)]
+        public IActionResult CompleteOrder(int orderId)
+        {
+            try
+            {
+                _ftpService.Initialize(
+                                _orderManagementSettings.FTPHost,
+                                _orderManagementSettings.FTPUsername,
+                                _orderManagementSettings.FTPPassword);
+
+                AOOrder order = _orderManagementService.GetOrder(orderId);
+
+                string localFilepath = _orderManagementSettings.FTPLocalFilePath + "\\" + _orderManagementSettings.FTPLocalFileName;
+
+                System.IO.File.WriteAllText(localFilepath, CreateSingleLine(order), Encoding.UTF8);
+
+                _ftpService.SendFile(localFilepath, _orderManagementSettings.FTPRemoteFolderPath + "/" + _orderManagementSettings.FTPLocalFileName);
+            }
+            catch (Exception ex)
+            {
+                while (ex.InnerException != null) ex = ex.InnerException;
+
+                _logger.Error(ex.Message, ex);
+                return Json("Error: " + ex.Message);
+            }
+            return Json("Done");
+        }
+
+        private string CreateSingleLine(AOOrder order)
+        {                                  
+            string glsShopnumber = "";
+            if(order.ShippingInfo.Contains("("))
+            {
+                glsShopnumber = order.ShippingInfo.Substring(order.ShippingInfo.IndexOf("(") + 1);
+                glsShopnumber = glsShopnumber.Substring(0, glsShopnumber.IndexOf(")"));                             
+            }
+
+            PakkeshopData pakkeshopData = _glsService.GetParcelShopData(glsShopnumber);
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("\"" + order.Id.ToString() + "\"");               // 1 Order number            
+            sb.Append(",\"" + pakkeshopData.CompanyName + "\"");        // 2 Consignee name (Name of parcelshop)
+            sb.Append(",\"" + order.CustomerInfo + "\"");               // 3 Recipient address
+            sb.Append(",\"" + pakkeshopData.Number + "\"");             // 4 Parcelshop number
+            sb.Append(",\"" + pakkeshopData.ZipCode + "\"");            // 5 Zipcode of recipient        
+            sb.Append(",\"" + pakkeshopData.CityName + "\"");           // 6 Postal district of recipient 
+            sb.Append(",\"" + pakkeshopData.CountryCode + "\"");        // 7 Country of recipient
+            sb.Append(",\"" + DateTime.Now.ToString("dd-MM-yy") + "\"");// 8 Date 
+            sb.Append(",\"1\"");                                        // 9 Parcel weight 
+            sb.Append(",\"1\"");                                        // 10 Number of parcels 
+            sb.Append(",\"\"");                                         // 11 COD Amount (Order amount?)
+            sb.Append(",\"\"");                                         // 12 Parcel value amount (Total parcel value)
+            sb.Append(",\"A\"");                                        // 13 Parcel type
+            sb.Append(",\"Z\"");                                        // 14 Shipment type             
+            sb.Append(",\"" + order.UserName + "\"");                   // 15 Name of recipient to pick up parcel            
+            sb.Append(",\"\"");                                         // 16 Customer note (not the one for friliv.dk)
+            sb.Append(",\"90022\"");                                    // 17 Customer number (vores GLS kundenummer)
+            sb.Append(",\"" + order.CustomerEmail + "\"");              // 18 Customer mail address
+            sb.Append(",\"" + order.PhoneNumber + "\"");                // 19 Customer mobile number
+            sb.Append(",\"\"E");                                        // 20 Notification: E = Email
+            sb.Append(",\"\"");                                         // 21 Pxx = Printer no
+            sb.Append(",\"\"");                                         // 22
+            sb.Append(",\"\"");                                         // 23
+            sb.Append(",\"\"");                                         // 24
+            sb.Append(",\"\"");                                         // 25
+            sb.Append(",\"\"");                                         // 26
+            sb.Append(",\"\"");                                         // 27
+            sb.Append(",\"\"");                                         // 28
+            sb.Append(",\"\"");                                         // 29
+
+            string info = sb.ToString();
+            return info;            
+        }
+
         private string DoUpdateProductTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside, ref bool allwell)
         {
             string errorMessage = "";
@@ -183,7 +276,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         private string DoUpdateProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered, ref bool allwell)
         {
             string errorMessage = "";
-           _orderManagementService.SetProductOrdered(orderId, orderItemId, productId, isOrdered, ref errorMessage);
+            _orderManagementService.SetProductOrdered(orderId, orderItemId, productId, isOrdered, ref errorMessage);
             if (string.IsNullOrEmpty(errorMessage))
             {
                 allwell = true;
@@ -202,7 +295,13 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             {
                 ListActive = _orderManagementSettings.ListActive,
                 WelcomeMessage = _orderManagementSettings.WelcomeMessage,
-                ErrorMessage = _orderManagementSettings.ErrorMessage
+                ErrorMessage = _orderManagementSettings.ErrorMessage,
+                FTPHost = _orderManagementSettings.FTPHost,
+                FTPUsername = _orderManagementSettings.FTPUsername,
+                FTPPassword = _orderManagementSettings.FTPPassword,
+                FTPLocalFilePath = _orderManagementSettings.FTPLocalFilePath,
+                FTPLocalFileName = _orderManagementSettings.FTPLocalFileName,
+                FTPRemoteFolderPath = _orderManagementSettings.FTPRemoteFolderPath
             };
         }
     }

@@ -66,6 +66,13 @@ namespace Nop.Plugin.Admin.OrderManagementList
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.SuccessUpdate", "Successfull updated");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FailedUpdate", "failed to update");
 
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPHost", "FTP Host");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPUsername", "FTP Username");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPPassword", "FTP Password");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPLocalFilePath", "Local filepath");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPLocalFileName", "Local filename");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPRemoteFolderPath", "Remote folderpath");
+
             base.Install();
         }
 
@@ -83,7 +90,13 @@ namespace Nop.Plugin.Admin.OrderManagementList
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.ErrorMessage");
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.SuccessfullProductReady");
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FailedUpdate");
-            
+
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPHost");
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPUsername");
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPPassword");
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPLocalFilePath");
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPLocalFileName");
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPRemoteFolderPath");
 
             base.Uninstall();
         }

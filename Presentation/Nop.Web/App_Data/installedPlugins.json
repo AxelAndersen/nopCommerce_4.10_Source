@@ -20,6 +20,6 @@
   "Nop.Plugin.Api",
   "Shipping.GLS",
   "POS.Kaching",
-  "Admin.OrderManagementList",
-  "Payments.QuickPayV10"
+  "Payments.QuickPayV10",
+  "Admin.OrderManagementList"
 ]

@@ -37,24 +37,24 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         #region Public methods
         public List<AOPresentationOrder> GetCurrentOrdersAsync(bool onlyReadyToShip = false)
         {
-            var orders = _context.AoOrders.Select(a => new AOOrder()
-            {
-                Id = a.Id,
-                OrderId = a.OrderId,
-                TotalOrderAmount = a.TotalOrderAmount,
-                Currency = a.Currency,
-                OrderDateTime = a.OrderDateTime,
-                CustomerInfo = a.CustomerInfo,
-                CustomerEmail = a.CustomerEmail,
-                ShippingInfo = a.ShippingInfo,
-                CheckoutAttributeDescription = a.CheckoutAttributeDescription,
-                OrderItems = a.OrderItems,
-                OrderNotes = a.OrderNotes,
-                PaymentStatusId = a.PaymentStatusId
-            }
-            );
+            //var orders = _context.AoOrders.Select(a => new AOOrder()
+            //{
+            //    Id = a.Id,
+            //    OrderId = a.OrderId,
+            //    TotalOrderAmount = a.TotalOrderAmount,
+            //    Currency = a.Currency,
+            //    OrderDateTime = a.OrderDateTime,
+            //    CustomerInfo = a.CustomerInfo,
+            //    CustomerEmail = a.CustomerEmail,
+            //    ShippingInfo = a.ShippingInfo,
+            //    CheckoutAttributeDescription = a.CheckoutAttributeDescription,
+            //    OrderItems = a.OrderItems,
+            //    OrderNotes = a.OrderNotes,
+            //    PaymentStatusId = a.PaymentStatusId
+            //}
+            //);
 
-            List<AOPresentationOrder> presentationOrders = orders.Select(order => new AOPresentationOrder()
+            List<AOPresentationOrder> presentationOrders = _context.AoOrders.Select(order => new AOPresentationOrder()
             {
                 OrderId = order.Id,
                 CustomerComment = GetCustomerComment(order),
@@ -136,6 +136,22 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 _logger.Error(ex.Message, ex);
             }
         }
+
+        public AOOrder GetOrder(int orderId)
+        {
+            if (orderId <= 0)
+            {
+                throw new ArgumentException("No proper orderId: " + orderId);
+            }
+
+            AOOrder order =  _context.AoOrders.Where(o => o.Id == orderId).FirstOrDefault();
+            if(order == null)
+            {
+                throw new ArgumentException("No order found with id: " + orderId);
+            }
+
+            return order;
+        }
         #endregion
 
         #region Private methods
@@ -146,7 +162,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 
         private string GetCustomerInfo(AOOrder order)
         {
-            return order.CustomerInfo.Replace("#", "<br />");
+            return order.UserName + "<br />" + order.CustomerInfo.Replace("#", "<br />");
         }
 
         private string GetTotal(AOOrder order)
