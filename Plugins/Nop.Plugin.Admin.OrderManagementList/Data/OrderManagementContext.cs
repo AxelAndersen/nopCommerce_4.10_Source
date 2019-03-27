@@ -18,15 +18,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Data
 
         public DbSet<AOOrderItemSetting> AOOrderItemSettings { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Query<AOOrder>().ToView("OrderManagementList").Property(v => v.OrderId).HasColumnName("OrderId");
-
-            //modelBuilder.Entity<AOOrderItemSetting>(entity =>
-            //{
-            //    entity.ToTable("AOOrderItemSettings");
-            //});
 
             base.OnModelCreating(modelBuilder);
         }

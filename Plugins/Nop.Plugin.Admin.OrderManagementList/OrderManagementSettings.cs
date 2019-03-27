@@ -3,8 +3,7 @@
 namespace Nop.Plugin.Admin.OrderManagementList
 {
     public class OrderManagementSettings : ISettings
-    {
-        public bool ListActive { get; set; }        
+    {            
         public string ErrorMessage { get; set; }
 
         public string FTPHost { get; set; }
@@ -27,9 +26,19 @@ namespace Nop.Plugin.Admin.OrderManagementList
         public string FTPRemoteFolderPath { get; set; }
 
         /// <summary>
+        /// "Labels/GLS/Status"
+        /// </summary>
+        public string FTPRemoteStatusFilePath { get; set; }
+
+        /// <summary>
         /// 21: Pxx = Printer no. in GLS file
         /// http://www.gls.dk/information/Folder/InterLine%20Silent%20mode_EN.pdf
         /// </summary>
         public string FTPPrinterName { get; set; }
+
+        /// <summary>
+        /// Folder to keep all status files while searching for the right one for tracking number
+        /// </summary>
+        public string FTPTempFolder { get; set; }
     }
 }

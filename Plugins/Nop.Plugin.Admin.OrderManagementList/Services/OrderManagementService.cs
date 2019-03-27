@@ -2,10 +2,12 @@
 using Nop.Core.Data;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
+using Nop.Core.Domain.Shipping;
 using Nop.Plugin.Admin.OrderManagementList.Data;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
 using Nop.Services.Catalog;
 using Nop.Services.Logging;
+using Nop.Services.Shipping;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -23,8 +25,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         private readonly IProductAttributeService _productAttributeService;
         private readonly IWorkContext _workContext;
         private readonly CultureInfo _workikngCultureInfo;
+        private readonly IShipmentService _shipmentService;
 
-        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger, IProductAttributeService productAttributeService, IWorkContext workContext)
+        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger, IProductAttributeService productAttributeService, IWorkContext workContext, IShipmentService shipmentService)
         {
             this._logger = logger;
             this._aoOrderRepository = aoOrderRepository;
@@ -32,28 +35,12 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             this._productAttributeService = productAttributeService;
             this._workContext = workContext;
             this._workikngCultureInfo = new CultureInfo(_workContext.WorkingLanguage.UniqueSeoCode);
+            this._shipmentService = shipmentService;
         }
 
         #region Public methods
         public List<AOPresentationOrder> GetCurrentOrdersAsync(bool onlyReadyToShip = false)
         {
-            //var orders = _context.AoOrders.Select(a => new AOOrder()
-            //{
-            //    Id = a.Id,
-            //    OrderId = a.OrderId,
-            //    TotalOrderAmount = a.TotalOrderAmount,
-            //    Currency = a.Currency,
-            //    OrderDateTime = a.OrderDateTime,
-            //    CustomerInfo = a.CustomerInfo,
-            //    CustomerEmail = a.CustomerEmail,
-            //    ShippingInfo = a.ShippingInfo,
-            //    CheckoutAttributeDescription = a.CheckoutAttributeDescription,
-            //    OrderItems = a.OrderItems,
-            //    OrderNotes = a.OrderNotes,
-            //    PaymentStatusId = a.PaymentStatusId
-            //}
-            //);
-
             List<AOPresentationOrder> presentationOrders = _context.AoOrders.Select(order => new AOPresentationOrder()
             {
                 OrderId = order.Id,
@@ -151,6 +138,19 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             }
 
             return order;
+        }
+
+        public void SetTrackingNumberOnShipment(int shipmentId, string trackingNumber)
+        {            
+            Shipment shipment = _shipmentService.GetShipmentById(shipmentId);
+
+            if (shipment == null)
+            {
+                throw new ArgumentException("No Shipment found with shipmentId: " + shipmentId);
+            }
+
+            shipment.TrackingNumber = trackingNumber;
+            _shipmentService.UpdateShipment(shipment);
         }
         #endregion
 

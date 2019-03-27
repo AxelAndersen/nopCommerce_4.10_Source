@@ -6,7 +6,6 @@ using Nop.Plugin.Admin.OrderManagementList.Services;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
-using Nop.Services.Shipping;
 using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Mvc.Filters;
@@ -88,8 +87,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 return Configure();
 
             try
-            {
-                _settings.ListActive = model.ListActive;                
+            {                             
                 _settings.ErrorMessage = model.ErrorMessage;
 
                 _settings.FTPHost = model.FTPHost;
@@ -101,7 +99,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 _settings.FTPLocalFilePath = model.FTPLocalFilePath;
                 _settings.FTPLocalFileName = model.FTPLocalFileName;
                 _settings.FTPRemoteFolderPath = model.FTPRemoteFolderPath;
+                _settings.FTPRemoteStatusFilePath = model.FTPRemoteStatusFilePath;
                 _settings.FTPPrinterName = model.FTPPrinterName;
+                _settings.FTPTempFolder = model.FTPTempFolder;
 
                 _settingService.SaveSetting(_settings);
             }
@@ -188,18 +188,14 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         {
             try
             {
-                _ftpService.Initialize(
-                                _settings.FTPHost,
-                                _settings.FTPUsername,
-                                _settings.FTPPassword);
-
                 AOOrder order = _orderManagementService.GetOrder(orderId);
+                if (order == null)
+                {
+                    throw new ArgumentException("No order found with id: " + orderId);
+                }
 
-                string localFilepath = _settings.FTPLocalFilePath + "\\" + _settings.FTPLocalFileName;
-
-                System.IO.File.WriteAllText(localFilepath, CreateSingleLine(order), Encoding.UTF8);
-
-                _ftpService.SendFile(localFilepath, _settings.FTPRemoteFolderPath + "/" + _settings.FTPLocalFileName);
+                HandleGLSLabel(order);
+                SetTrackingNumber(orderId, order);
             }
             catch (Exception ex)
             {
@@ -209,6 +205,31 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 return Json("Error: " + ex.Message);
             }
             return Json("Done");
+        }
+
+        private void SetTrackingNumber(int orderId, AOOrder order)
+        {
+            string trackingNumber = _ftpService.GetTrackingNumber(_settings.FTPTempFolder, _settings.FTPRemoteStatusFilePath, orderId);
+            if(string.IsNullOrEmpty(trackingNumber))
+            {
+                throw new ArgumentException("No tracking number found for orderid: " + orderId);
+            }
+
+            _orderManagementService.SetTrackingNumberOnShipment(order.ShipmentId, trackingNumber);
+        }
+
+        private void HandleGLSLabel(AOOrder order)
+        {
+            _ftpService.Initialize(
+                            _settings.FTPHost,
+                            _settings.FTPUsername,
+                            _settings.FTPPassword);           
+
+            string localFilepath = _settings.FTPLocalFilePath + "\\" + _settings.FTPLocalFileName;
+
+            System.IO.File.WriteAllText(localFilepath, CreateSingleLine(order), Encoding.UTF8);
+
+            _ftpService.SendFile(localFilepath, _settings.FTPRemoteFolderPath + "/" + _settings.FTPLocalFileName);
         }
 
         private string CreateSingleLine(AOOrder order)
@@ -292,8 +313,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         private OrderManagementConfigurationModel GetBaseModel()
         {
             return new OrderManagementConfigurationModel
-            {
-                ListActive = _settings.ListActive,                
+            {                          
                 ErrorMessage = _settings.ErrorMessage,
                 FTPHost = _settings.FTPHost,
                 FTPUsername = _settings.FTPUsername,
@@ -301,7 +321,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 FTPLocalFilePath = _settings.FTPLocalFilePath,
                 FTPLocalFileName = _settings.FTPLocalFileName,
                 FTPRemoteFolderPath = _settings.FTPRemoteFolderPath,
-                FTPPrinterName = _settings.FTPPrinterName
+                FTPPrinterName = _settings.FTPPrinterName,
+                FTPRemoteStatusFilePath = _settings.FTPRemoteStatusFilePath,
+                FTPTempFolder = _settings.FTPTempFolder
             };
         }
     }

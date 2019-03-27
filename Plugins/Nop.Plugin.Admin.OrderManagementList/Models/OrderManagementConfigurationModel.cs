@@ -5,9 +5,6 @@ namespace Nop.Plugin.Admin.OrderManagementList.Models
 {
     public class OrderManagementConfigurationModel
     {
-        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.ListActive")]
-        public bool ListActive { get; set; }
-
         [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.ErrorMessage")]
         public string ErrorMessage { get; set; }
 
@@ -38,6 +35,18 @@ namespace Nop.Plugin.Admin.OrderManagementList.Models
         /// "Labels/GLS"
         /// </summary>
         public string FTPRemoteFolderPath { get; set; }
+
+        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.FTPRemoteStatusFilePath")]
+        /// <summary>
+        /// "Labels/GLS/Status"
+        /// </summary>
+        public string FTPRemoteStatusFilePath { get; set; }
+
+        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.FTPTempFolder")]
+        /// <summary>
+        /// Folder to keep all status files while searching for the right one for tracking number
+        /// </summary>
+        public string FTPTempFolder { get; set; }
 
         [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.FTPPrinterName")]
         /// <summary>

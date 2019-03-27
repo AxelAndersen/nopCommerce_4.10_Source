@@ -8,21 +8,12 @@
     <div class="panel-group">
         <div class="panel panel-default">
             <div class="panel-body">
-                <h4>Order management settings</h4>
-                <br /><br />
-
-                <div class="form-group">
-                    <div class="col-md-3">
-                        <nop-label asp-for="ListActive" />
-                    </div>
-                    <div class="col-md-9">
-                        <nop-editor asp-for="ListActive" />
-                        <span asp-validation-for="ListActive"></span>
-                    </div>
-                </div>
-
+                <h2>Order management settings</h2>
+                <br />
                 <hr />
-
+                <h3>
+                    GLS Settings
+                </h3>
                 <div class="form-group">
                     <div class="col-md-3">
                         <nop-label asp-for="FTPHost" />
@@ -80,6 +71,26 @@
                     <div class="col-md-9">
                         <nop-editor asp-for="FTPRemoteFolderPath" />
                         <span asp-validation-for="FTPRemoteFolderPath"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="FTPRemoteStatusFilePath" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="FTPRemoteStatusFilePath" />
+                        <span asp-validation-for="FTPRemoteStatusFilePath"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="FTPTempFolder" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="FTPTempFolder" />
+                        <span asp-validation-for="FTPTempFolder"></span>
                     </div>
                 </div>
 
