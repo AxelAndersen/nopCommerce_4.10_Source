@@ -210,7 +210,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
                 HandleGLSLabel(order);
 
-                Capture(orderId, order);                
+                //Capture(orderId, order);                
 
                 _glsStatusFileRetries = 0;
                 SetTrackingNumber(order);
@@ -247,16 +247,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         {
             Thread.Sleep(_settings.GLSStatusFileWaitSeconds * 1000);
             _trackingNumber = _ftpService.GetTrackingNumber(_settings.FTPTempFolder, _settings.FTPRemoteStatusFilePath, order.Id);
-
-
-
-            _trackingNumber = "";
-            if(_glsStatusFileRetries >= 1)
-            {
-                _trackingNumber = "140485928";
-            }
-
-
+            
             if (string.IsNullOrEmpty(_trackingNumber))
             {
                 if (_glsStatusFileRetries < _settings.GLSStatusFileRetries)
