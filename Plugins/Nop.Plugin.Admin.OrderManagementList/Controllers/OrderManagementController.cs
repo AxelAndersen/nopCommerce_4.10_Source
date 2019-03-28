@@ -212,7 +212,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 HandleGLSLabel(order);
 
                 var test = Convert.ToInt32(order.TotalOrderAmount);
-                PaymentApiStatus captureStatus = _quickPayService.CapturePaymentTest(order.AuthorizationTransactionId, Convert.ToInt32(order.TotalOrderAmount));
+                PaymentApiStatus captureStatus = _quickPayService.CapturePayment(order.AuthorizationTransactionId, Convert.ToInt32(order.TotalOrderAmount));
 
                 if (captureStatus.HttpResponse.IsSuccessStatusCode == false)
                 {

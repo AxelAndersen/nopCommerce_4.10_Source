@@ -30,3 +30,5 @@
 .hrSmall { margin-top: 2px; margin-bottom: 2px; border: 0; border-top: 1px solid #c0c0c0; }
 
 .success { color: green; padding: 4px; }
+
+div.singleLineError { display: none; color: red; font-weight: bold; font-size: 16px; float: none; height: 40px; min-height: 40px; }

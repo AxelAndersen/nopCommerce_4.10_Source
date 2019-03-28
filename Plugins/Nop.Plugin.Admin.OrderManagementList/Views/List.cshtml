@@ -54,6 +54,9 @@
         @foreach (AOPresentationOrder order in Model.PresentationOrders)
         {
         <div class="divSingleOrder">
+            <div class="singleLineError">
+                <span id="@order.OrderId-error-spn"></span>
+            </div>
             <div class="divOrderInfo">
                 <a class="btn bg-yellow large-text" href="/Admin/Order/Edit/@order.OrderId">Ordrenr.:&nbsp;@order.OrderId</a>
                 <br /><br />
@@ -122,13 +125,16 @@
                         });
                     }
                 },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    if (xhr && xhr.responseText) {
+                error: function (xhr, ajaxOptions, thrownError)
+                {
+                    if (xhr && xhr.responseText)
+                    {
                         var err = eval("(" + xhr.responseText + ")");
-                        alert('Error while saving.' + err.Message);
+                        ShowError(orderId, err.Message);
                     }
-                    else {
-                        alert('Error while saving.');
+                    else
+                    {
+                        ShowError(orderId, "Error while saving.");
                     }
                 }
             });
@@ -143,7 +149,8 @@
                 url: '@Url.Action("UpdateProductOrdered", "OrderManagement")',
                 data: { orderId: orderId, orderItemId: orderItemId, productId: productId, isOrdered: checked },
                 dataType: 'json',
-                success: function (data) {
+                success: function (data)
+                {
                     var infoId = "#spn-" + orderId + "-" + orderItemId + "-" + productId;
                     $(infoId).show();
                     $(infoId).html(data);
@@ -160,19 +167,21 @@
                         });
                     }
                 },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    if (xhr && xhr.responseText) {
+                error: function (xhr, ajaxOptions, thrownError)
+                {
+                    if (xhr && xhr.responseText)
+                    {
                         var err = eval("(" + xhr.responseText + ")");
-                        alert('Error while saving.' + err.Message);
+                        ShowError(orderId, err.Message);
                     }
-                    else {
-                        alert('Error while saving.');
+                    else
+                    {
+                        ShowError(orderId, "Error while saving.");
                     }
                 }
             });
             return false;
         }
-
 
         function CompleteOrderAjax(orderId)
         {
@@ -186,7 +195,7 @@
                 {
                     if (data.indexOf("Error:") > -1)
                     {
-                        alert('ARRHHGGG: ' + data);
+                        ShowError(orderId, data);
                     }
                     else
                     {
@@ -204,7 +213,14 @@
                 }
             });
             return false;
-        }        
+        }     
+
+        function ShowError(orderId, msg)
+        {
+            $("#" + orderId + "-error-spn").html(msg);
+            $("#" + orderId + "-error-spn").parent().css("display", "block");
+        }
+
     </script>
 
 </form>
