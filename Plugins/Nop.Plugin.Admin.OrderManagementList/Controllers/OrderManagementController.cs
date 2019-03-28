@@ -13,6 +13,7 @@ using Nop.Web.Framework;
 using Nop.Web.Framework.Mvc.Filters;
 using System;
 using System.Text;
+using System.Threading;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 {
@@ -28,6 +29,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         private readonly IFTPService _ftpService;
         private readonly IGLSService _glsService;
         private readonly IQuickPayApiServices _quickPayService;
+        private int _glsStatusFileRetries = 0;
+        private string _trackingNumber;
 
         public OrderManagementController(ILogger logger, OrderManagementSettings orderManagementSettings, ILocalizationService localizationService, ISettingService settingService, IOrderManagementService orderManagementService, IFTPService ftpService, IGLSService glsService, IQuickPayApiServices quickPayService)
         {
@@ -106,6 +109,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 _settings.FTPRemoteStatusFilePath = model.FTPRemoteStatusFilePath;
                 _settings.FTPPrinterName = model.FTPPrinterName;
                 _settings.FTPTempFolder = model.FTPTempFolder;
+                _settings.GLSStatusFileRetries = model.GLSStatusFileRetries;
+                _settings.GLSStatusFileWaitSeconds = model.GLSStatusFileWaitSeconds;
 
                 _settingService.SaveSetting(_settings);
             }
@@ -198,28 +203,19 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                     throw new ArgumentException("No order found with id: " + orderId);
                 }
 
-                if(string.IsNullOrEmpty(order.AuthorizationTransactionId))
+                if (string.IsNullOrEmpty(order.AuthorizationTransactionId))
                 {
                     throw new ArgumentException("No payment id found with orderid: " + orderId);
-                }                
-                
-                PaymentApiStatus paymentApiStatus = _quickPayService.GetPayment(order.AuthorizationTransactionId);
-                if (paymentApiStatus.Payment == null || paymentApiStatus.HttpResponse.StatusCode != System.Net.HttpStatusCode.OK)
-                {
-                    throw new ArgumentException("No payment found with orderid: " + orderId + " and AuthorizationTransactionId: " + order.AuthorizationTransactionId);
                 }
 
                 HandleGLSLabel(order);
 
-                var test = Convert.ToInt32(order.TotalOrderAmount);
-                PaymentApiStatus captureStatus = _quickPayService.CapturePayment(order.AuthorizationTransactionId, Convert.ToInt32(order.TotalOrderAmount));
+                Capture(orderId, order);                
 
-                if (captureStatus.HttpResponse.IsSuccessStatusCode == false)
-                {
-                    throw new ArgumentException("Error capturing money on orderid: " + orderId + ", Error: " + captureStatus.HttpResponse.ReasonPhrase);
-                }
+                _glsStatusFileRetries = 0;
+                SetTrackingNumber(order);
 
-                SetTrackingNumber(orderId, order);
+                _orderManagementService.ChangeOrderStatus(orderId);
             }
             catch (Exception ex)
             {
@@ -231,15 +227,52 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             return Json("Done");
         }
 
-        private void SetTrackingNumber(int orderId, AOOrder order)
+        private void Capture(int orderId, AOOrder order)
         {
-            string trackingNumber = _ftpService.GetTrackingNumber(_settings.FTPTempFolder, _settings.FTPRemoteStatusFilePath, orderId);
-            if(string.IsNullOrEmpty(trackingNumber))
+            PaymentApiStatus paymentApiStatus = _quickPayService.GetPayment(order.AuthorizationTransactionId);
+            if (paymentApiStatus.Payment == null || paymentApiStatus.HttpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                throw new ArgumentException("No tracking number found for orderid: " + orderId);
+                throw new ArgumentException("No payment found with orderid: " + orderId + " and AuthorizationTransactionId: " + order.AuthorizationTransactionId);
             }
 
-            _orderManagementService.SetTrackingNumberOnShipment(order.ShipmentId, trackingNumber);
+            PaymentApiStatus captureStatus = _quickPayService.CapturePayment(order.AuthorizationTransactionId, Convert.ToInt32(order.TotalOrderAmount));
+
+            if (captureStatus.HttpResponse.IsSuccessStatusCode == false)
+            {
+                throw new ArgumentException("Error capturing money on orderid: " + orderId + ", Error: " + captureStatus.HttpResponse.ReasonPhrase);
+            }
+        }
+
+        private void SetTrackingNumber(AOOrder order)
+        {
+            Thread.Sleep(_settings.GLSStatusFileWaitSeconds * 1000);
+            _trackingNumber = _ftpService.GetTrackingNumber(_settings.FTPTempFolder, _settings.FTPRemoteStatusFilePath, order.Id);
+
+
+
+            _trackingNumber = "";
+            if(_glsStatusFileRetries >= 1)
+            {
+                _trackingNumber = "140485928";
+            }
+
+
+            if (string.IsNullOrEmpty(_trackingNumber))
+            {
+                if (_glsStatusFileRetries < _settings.GLSStatusFileRetries)
+                {
+                    _glsStatusFileRetries++;
+                    SetTrackingNumber(order);
+                }
+
+                if (string.IsNullOrEmpty(_trackingNumber))
+                {
+                    // This extra check is important!
+                    throw new ArgumentException("No tracking number found for orderid: " + order.Id + ". Maybe number of retries should be increased.");
+                }
+            }
+
+            _orderManagementService.SetTrackingNumberOnShipment(order.ShipmentId, _trackingNumber);
         }
 
         private void HandleGLSLabel(AOOrder order)
@@ -347,7 +380,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 FTPRemoteFolderPath = _settings.FTPRemoteFolderPath,
                 FTPPrinterName = _settings.FTPPrinterName,
                 FTPRemoteStatusFilePath = _settings.FTPRemoteStatusFilePath,
-                FTPTempFolder = _settings.FTPTempFolder
+                FTPTempFolder = _settings.FTPTempFolder,
+                GLSStatusFileRetries = _settings.GLSStatusFileRetries,
+                GLSStatusFileWaitSeconds = _settings.GLSStatusFileWaitSeconds
             };
         }
     }

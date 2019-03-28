@@ -7,6 +7,7 @@ using Nop.Plugin.Admin.OrderManagementList.Data;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
 using Nop.Services.Catalog;
 using Nop.Services.Logging;
+using Nop.Services.Orders;
 using Nop.Services.Shipping;
 using System;
 using System.Collections.Generic;
@@ -26,8 +27,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         private readonly IWorkContext _workContext;
         private readonly CultureInfo _workikngCultureInfo;
         private readonly IShipmentService _shipmentService;
+        private readonly IOrderService _orderService;
 
-        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger, IProductAttributeService productAttributeService, IWorkContext workContext, IShipmentService shipmentService)
+        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger, IProductAttributeService productAttributeService, IWorkContext workContext, IShipmentService shipmentService, IOrderService orderService)
         {
             this._logger = logger;
             this._aoOrderRepository = aoOrderRepository;
@@ -36,7 +38,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             this._workContext = workContext;
             this._workikngCultureInfo = new CultureInfo(_workContext.WorkingLanguage.UniqueSeoCode);
             this._shipmentService = shipmentService;
+            this._orderService = orderService;
         }
+
 
         #region Public methods
         public List<AOPresentationOrder> GetCurrentOrdersAsync(bool onlyReadyToShip = false)
@@ -151,6 +155,19 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 
             shipment.TrackingNumber = trackingNumber;
             _shipmentService.UpdateShipment(shipment);
+        }
+
+        public void ChangeOrderStatus(int orderId)
+        {
+            Order order = _orderService.GetOrderById(orderId);
+            if(order == null)
+            {
+                throw new ArgumentException("No order found with id: " + orderId);
+            }
+
+            order.OrderStatusId = (int)OrderStatus.Complete;
+
+            _orderService.UpdateOrder(order);
         }
         #endregion
 

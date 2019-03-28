@@ -40,5 +40,15 @@ namespace Nop.Plugin.Admin.OrderManagementList
         /// Folder to keep all status files while searching for the right one for tracking number
         /// </summary>
         public string FTPTempFolder { get; set; }
+
+        /// <summary>
+        /// Number of seconds to wait in each retry for the status file
+        /// </summary>
+        public int GLSStatusFileWaitSeconds { get; set; }
+
+        /// <summary>
+        /// Number of retries to perform for status file
+        /// </summary>
+        public int GLSStatusFileRetries { get; set; }        
     }
 }

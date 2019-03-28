@@ -73,7 +73,10 @@ namespace Nop.Plugin.Admin.OrderManagementList
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPRemoteFolderPath", "Remote folderpath");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPPrinterName", "Printer name");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPRemoteStatusFilePath", "Remote status filepath");
-            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPTempFolder", "Temp Folder"); 
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPTempFolder", "Temp Folder");
+
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.GLSStatusFileRetries", "GLS Status file retries");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.GLSStatusFileWaitSeconds", "GLS Status file wait sec.");
 
             base.Install();
         }
@@ -100,7 +103,10 @@ namespace Nop.Plugin.Admin.OrderManagementList
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPRemoteFolderPath");
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPPrinterName");
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPRemoteStatusFilePath");
-            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPTempFolder"); 
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.FTPTempFolder");
+
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.GLSStatusFileRetries");
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.GLSStatusFileWaitSeconds");
 
             base.Uninstall();
         }

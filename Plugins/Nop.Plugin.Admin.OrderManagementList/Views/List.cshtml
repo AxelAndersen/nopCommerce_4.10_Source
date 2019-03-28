@@ -199,16 +199,19 @@
                     }
                     else
                     {
-                        alert('yeaaa: data=' + data);
+                        location.reload();
                     }
                 },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    if (xhr && xhr.responseText) {
+                error: function (xhr, ajaxOptions, thrownError)
+                {
+                    if (xhr && xhr.responseText)
+                    {
                         var err = eval("(" + xhr.responseText + ")");
-                        alert('Error while saving.' + err.Message);
+                        ShowError(orderId, err.Message);
                     }
-                    else {
-                        alert('Error while saving.');
+                    else
+                    {
+                        ShowError(orderId, "Error while saving.");
                     }
                 }
             });

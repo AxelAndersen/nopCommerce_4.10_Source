@@ -105,6 +105,28 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="GLSStatusFileRetries" />
+                    </div>
+                    <div class="col-md-9">
+                        <span>Number of retries to perform for status file</span>
+                        <nop-editor asp-for="GLSStatusFileRetries" />
+                        <span asp-validation-for="GLSStatusFileRetries"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="GLSStatusFileWaitSeconds" />
+                    </div>
+                    <div class="col-md-9">
+                        <span>Number of seconds to wait in each retry for the status file</span>
+                        <nop-editor asp-for="GLSStatusFileWaitSeconds" />
+                        <span asp-validation-for="GLSStatusFileWaitSeconds"></span>
+                    </div>
+                </div>
+
                 <hr />
 
                 <div class="form-group">

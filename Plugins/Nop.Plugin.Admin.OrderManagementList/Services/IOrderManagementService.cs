@@ -15,5 +15,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         AOOrder GetOrder(int orderId);
         
         void SetTrackingNumberOnShipment(int orderId, string trackingNumber);
+
+        void ChangeOrderStatus(int orderId);
     }
 }

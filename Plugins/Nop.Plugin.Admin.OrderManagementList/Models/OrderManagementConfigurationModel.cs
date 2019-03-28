@@ -54,5 +54,17 @@ namespace Nop.Plugin.Admin.OrderManagementList.Models
         /// http://www.gls.dk/information/Folder/InterLine%20Silent%20mode_EN.pdf
         /// </summary>
         public string FTPPrinterName { get; set; }
+
+        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.GLSStatusFileWaitSeconds")]
+        /// <summary>
+        /// Number of seconds to wait in each retry for the status file
+        /// </summary>
+        public int GLSStatusFileWaitSeconds { get; set; }
+
+        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.GLSStatusFileRetries")]
+        /// <summary>
+        /// Number of retries to perform for status file
+        /// </summary>
+        public int GLSStatusFileRetries { get; set; }
     }
 }
