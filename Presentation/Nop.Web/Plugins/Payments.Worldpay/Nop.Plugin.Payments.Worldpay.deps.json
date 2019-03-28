@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.1",
-    "signature": "845d9cdcc51d1aa54f2f7b10b33f466f95a20380"
+    "signature": "b4400e27bf3c47fe586c59de69b0cbdca9bf8490"
   },
   "compilationOptions": {},
   "targets": {
@@ -109,24 +109,6 @@
           "lib/netstandard2.0/EPPlus.dll": {
             "assemblyVersion": "4.5.2.1",
             "fileVersion": "4.5.2.1"
-          }
-        }
-      },
-      "FluentFTP/23.1.0": {
-        "dependencies": {
-          "System.Console": "4.3.0",
-          "System.IO": "4.3.0",
-          "System.Net.NameResolution": "4.3.0",
-          "System.Net.Security": "4.3.0",
-          "System.Net.Sockets": "4.3.0",
-          "System.Runtime": "4.3.0",
-          "System.Threading.Tasks": "4.3.0",
-          "System.Threading.Thread": "4.3.0"
-        },
-        "runtime": {
-          "lib/netstandard1.6/FluentFTP.dll": {
-            "assemblyVersion": "23.1.0.0",
-            "fileVersion": "23.1.0.0"
           }
         }
       },
@@ -4081,7 +4063,6 @@
       },
       "Nop.Web/4.1.0": {
         "dependencies": {
-          "FluentFTP": "23.1.0",
           "Nop.Core": "4.1.0",
           "Nop.Data": "4.1.0",
           "Nop.Services": "4.1.0",
@@ -4160,13 +4141,6 @@
       "sha512": "sha512-/OzYn/n982Ozu+ARWISjn9REIb3PA5KN8qPfp3JKOoSnBezN3loGCQ2k0nLNL5K8+b+3boinsNiRbm5ovEfeog==",
       "path": "epplus/4.5.2.1",
       "hashPath": "epplus.4.5.2.1.nupkg.sha512"
-    },
-    "FluentFTP/23.1.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-y1hjTYV83CrmvV7LZe6JTynpYelnq5BXkb2r47GqpvEAI74aYBIX+qTMpRSabLsEL2+tGNCnqQJH8SiK44cRGw==",
-      "path": "fluentftp/23.1.0",
-      "hashPath": "fluentftp.23.1.0.nupkg.sha512"
     },
     "FluentValidation/7.6.104": {
       "type": "package",

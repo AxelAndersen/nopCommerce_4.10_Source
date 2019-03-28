@@ -260,6 +260,8 @@ paket-files/
 __pycache__/
 *.pyc
 
+Presentation/
+/Presentation/
 /Presentation/Nop.Web/Plugins/
 /Presentation/Nop.Web/wwwroot/images/thumbs/0000004_ada-teltet.png
 /Presentation/Nop.Web/wwwroot/images/thumbs/0000004_ada-teltet_75.png

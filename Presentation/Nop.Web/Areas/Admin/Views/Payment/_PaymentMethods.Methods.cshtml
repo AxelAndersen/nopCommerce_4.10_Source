@@ -87,7 +87,7 @@
                                 field: "LogoUrl",
                                 title: "@T("Admin.Configuration.Payment.Methods.Fields.Logo")",
                                 width: 100,
-                                template: '<img src="#=LogoUrl#" />'
+                                template: '<img src="#:LogoUrl#" />'
                             }, {
                                 field: "SupportCapture",
                                 title: "@T("Admin.Configuration.Payment.Methods.Fields.SupportCapture")",
@@ -143,7 +143,7 @@
                                 title: "@T("Admin.Configuration.Payment.Methods.Configure")",
                                 width: 150,
                                 template:
-                                    '# if(ConfigurationUrl && ConfigurationUrl.length > 0) {# <a class="btn btn-default" href="#=ConfigurationUrl#"><i class="fa fa-cog"></i>@T("Admin.Configuration.Payment.Methods.Configure")</a>#} #'
+                                    '# if(ConfigurationUrl && ConfigurationUrl.length > 0) {# <a class="btn btn-default" href="#:ConfigurationUrl#"><i class="fa fa-cog"></i>@T("Admin.Configuration.Payment.Methods.Configure")</a>#} #'
                             }, {
                                 command: {
                                     name: "edit",

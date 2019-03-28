@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
 using Nop.Plugin.Admin.OrderManagementList.Models;
 using Nop.Plugin.Admin.OrderManagementList.Services;
+using Nop.Plugin.Payments.QuickPayV10.Models;
+using Nop.Plugin.Payments.QuickPayV10.Services;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
@@ -25,8 +27,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         private readonly ILocalizationService _localizationService;
         private readonly IFTPService _ftpService;
         private readonly IGLSService _glsService;
+        private readonly IQuickPayApiServices _quickPayService;
 
-        public OrderManagementController(ILogger logger, OrderManagementSettings orderManagementSettings, ILocalizationService localizationService, ISettingService settingService, IOrderManagementService orderManagementService, IFTPService ftpService, IGLSService glsService)
+        public OrderManagementController(ILogger logger, OrderManagementSettings orderManagementSettings, ILocalizationService localizationService, ISettingService settingService, IOrderManagementService orderManagementService, IFTPService ftpService, IGLSService glsService, IQuickPayApiServices quickPayService)
         {
             this._logger = logger;
             this._settings = orderManagementSettings;
@@ -35,6 +38,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             this._localizationService = localizationService;
             this._ftpService = ftpService;
             this._glsService = glsService;
+            this._quickPayService = quickPayService;
         }
 
         [AuthorizeAdmin]
@@ -194,7 +198,27 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                     throw new ArgumentException("No order found with id: " + orderId);
                 }
 
+                if(string.IsNullOrEmpty(order.AuthorizationTransactionId))
+                {
+                    throw new ArgumentException("No payment id found with orderid: " + orderId);
+                }                
+                
+                PaymentApiStatus paymentApiStatus = _quickPayService.GetPayment(order.AuthorizationTransactionId);
+                if (paymentApiStatus.Payment == null || paymentApiStatus.HttpResponse.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    throw new ArgumentException("No payment found with orderid: " + orderId + " and AuthorizationTransactionId: " + order.AuthorizationTransactionId);
+                }
+
                 HandleGLSLabel(order);
+
+                var test = Convert.ToInt32(order.TotalOrderAmount);
+                PaymentApiStatus captureStatus = _quickPayService.CapturePaymentTest(order.AuthorizationTransactionId, Convert.ToInt32(order.TotalOrderAmount));
+
+                if (captureStatus.HttpResponse.IsSuccessStatusCode == false)
+                {
+                    throw new ArgumentException("Error capturing money on orderid: " + orderId + ", Error: " + captureStatus.HttpResponse.ReasonPhrase);
+                }
+
                 SetTrackingNumber(orderId, order);
             }
             catch (Exception ex)

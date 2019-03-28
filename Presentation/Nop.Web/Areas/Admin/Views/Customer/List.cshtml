@@ -286,7 +286,7 @@
                     headerTemplate: "<input id='mastercheckbox' type='checkbox'/>",
                     headerAttributes: { style: "text-align:center" },
                     attributes: { style: "text-align:center" },
-                    template: "<input type='checkbox' value='#=Id#' class='checkboxGroups'/>",
+                    template: "<input type='checkbox' value='#:Id#' class='checkboxGroups'/>",
                     width: 50
                 }, {
                     field: "Email",
@@ -299,7 +299,7 @@
                     field: "AvatarUrl",
                     title: "@T("Admin.Customers.Customers.Fields.Avatar")",
                     width: @(_mediaSettings.AvatarPictureSize),
-                    template: "# if(AvatarUrl) {# <img src='#=AvatarUrl#' class='avatar-img' alt='@T("Admin.Customers.Customers.Fields.Avatar")'/> #} #"
+                    template: "# if(AvatarUrl) {# <img src='#:AvatarUrl#' class='avatar-img' alt='@T("Admin.Customers.Customers.Fields.Avatar")'/> #} #"
                 },</text>
                 }
                 @if (Model.UsernamesEnabled)

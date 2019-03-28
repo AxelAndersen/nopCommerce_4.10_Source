@@ -53,11 +53,17 @@
     <ProjectReference Include="..\Nop.Plugin.Shipping.GLS\Nop.Plugin.Shipping.GLS.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Nop.Plugin.Payments.QuickPayV10">
+      <HintPath>..\..\..\..\..\tmp\Nop.Plugin.Payments.QuickPayV10.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web">
       <HintPath>System.Web</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Components\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentFTP" Version="23.1.0" />
   </ItemGroup>
 </Project>

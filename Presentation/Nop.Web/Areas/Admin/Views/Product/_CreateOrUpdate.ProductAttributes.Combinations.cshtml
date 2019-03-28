@@ -79,7 +79,7 @@
                             field: "AttributesXml",
                             title: "@T("Admin.Catalog.Products.ProductAttributes.AttributeCombinations.Fields.Attributes")",
                             width: 400,
-                            template: "#=AttributesXml# # if(Warnings !== null) {# <div><span style=\"color: red\">#=Warnings#</span></div> #}  #",
+                            template: "#:AttributesXml# # if(Warnings !== null) {# <div><span style=\"color: red\">#:Warnings#</span></div> #}  #",
                             encoded: false
                         }, {
                             field: "StockQuantity",
@@ -127,7 +127,7 @@
                         }, {
                             field: "PictureThumbnailUrl",
                             title: "@T("Admin.Catalog.Products.ProductAttributes.AttributeCombinations.Fields.Picture")",
-                            template: '<img src="#=PictureThumbnailUrl#" />',
+                            template: '<img src="#:PictureThumbnailUrl#" />',
                             width: 200
                         }, {
                             field: "Id",

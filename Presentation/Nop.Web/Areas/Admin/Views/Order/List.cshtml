@@ -338,7 +338,7 @@
                                             headerTemplate: "<input id='mastercheckbox' type='checkbox'/>",
                                             headerAttributes: { style: "text-align:center" },
                                             attributes: { style: "text-align:center" },
-                                            template: "<input type='checkbox' value='#=Id#' class='checkboxGroups'/>",
+                                            template: "<input type='checkbox' value='#:Id#' class='checkboxGroups'/>",
                                             width: 50
                                         }, {
                                             field: "CustomOrderNumber",
@@ -378,7 +378,7 @@
                                             field: "CustomerEmail",
                                             title: "@T("Admin.Orders.Fields.Customer")",
                                             width: 250,
-                                            template: '#=CustomerFullName# (#=CustomerEmail#)'
+                                            template: '#:CustomerFullName# (#:CustomerEmail#)'
                                         },
                                         {
                                             field: "StoreName",

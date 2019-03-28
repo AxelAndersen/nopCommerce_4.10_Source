@@ -100,7 +100,7 @@
                                     field: "LogoUrl",
                                     title: "@T("Admin.Configuration.Payment.Methods.Fields.Logo")",
                                     width: 100,
-                                    template: '<img src="#=LogoUrl#" />'
+                                    template: '<img src="#:LogoUrl#" />'
                                 }, {
                                     field: "DisplayOrder",
                                     title: "@T("Admin.Configuration.Shipping.Providers.Fields.DisplayOrder")",
@@ -120,7 +120,7 @@
                                     width: 150,
                                     headerAttributes: { style: "text-align:center" },
                                     attributes: { style: "text-align:center" },
-                                    template: '# if(ConfigurationUrl && ConfigurationUrl.length > 0) {# <a class="btn btn-default" href="#=ConfigurationUrl#"><i class="fa fa-cog"></i>@T("Admin.Configuration.Shipping.Providers.Configure")</a>#} #'
+                                    template: '# if(ConfigurationUrl && ConfigurationUrl.length > 0) {# <a class="btn btn-default" href="#:ConfigurationUrl#"><i class="fa fa-cog"></i>@T("Admin.Configuration.Shipping.Providers.Configure")</a>#} #'
                                 }, {
                                     command: {
                                         name: "edit",
