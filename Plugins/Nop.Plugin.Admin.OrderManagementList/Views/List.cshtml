@@ -28,6 +28,14 @@
     }
     else
     {
+
+        <div id="divSearch">
+            <div class="divSearchBox">
+                <input id="txtSearch" type="text" />
+                <button value="1" onclick="javascript: DoSearch();">Search</button>
+            </div>
+        </div>
+
         <div class="divSingleOrderHeader">
             <div class="divOrderInfo">
                 Ordre info
@@ -197,6 +205,10 @@
                     {
                         ShowError(orderId, data);
                     }
+                    else if (data.indexOf("Warning:") > -1)
+                    {
+                        ShowWarning(orderId, data);
+                    }
                     else
                     {
                         // SUCCESS, now reload page to remove handled order
@@ -225,6 +237,17 @@
             $("#" + orderId + "-error-spn").parent().css("display", "block");
         }
 
+        function ShowWarning(orderId, msg)
+        {
+            $("#" + orderId + "-error-spn").html(msg);
+            $("#" + orderId + "-error-spn").css("color", "#FFBB11");
+            $("#" + orderId + "-error-spn").parent().css("display", "block");
+        }
+
+        function DoSearch()
+        {
+            alert($("#txtSearch").val());
+        }
     </script>
 
 </form>

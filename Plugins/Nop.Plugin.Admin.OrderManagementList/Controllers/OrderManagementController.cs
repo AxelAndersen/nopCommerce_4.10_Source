@@ -8,6 +8,7 @@ using Nop.Plugin.Payments.QuickPayV10.Services;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
+using Nop.Services.Messages;
 using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Mvc.Filters;
@@ -28,9 +29,10 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         private readonly ILocalizationService _localizationService;
         private readonly IFTPService _ftpService;
         private readonly IGLSService _glsService;
-        private readonly IQuickPayApiServices _quickPayService;
+        private readonly IQuickPayApiServices _quickPayService;        
         private int _glsStatusFileRetries = 0;
         private string _trackingNumber;
+        private bool _anyChangesDone;
 
         public OrderManagementController(ILogger logger, OrderManagementSettings orderManagementSettings, ILocalizationService localizationService, ISettingService settingService, IOrderManagementService orderManagementService, IFTPService ftpService, IGLSService glsService, IQuickPayApiServices quickPayService)
         {
@@ -41,7 +43,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             this._localizationService = localizationService;
             this._ftpService = ftpService;
             this._glsService = glsService;
-            this._quickPayService = quickPayService;
+            this._quickPayService = quickPayService;            
         }
 
         [AuthorizeAdmin]
@@ -111,6 +113,10 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 _settings.FTPTempFolder = model.FTPTempFolder;
                 _settings.GLSStatusFileRetries = model.GLSStatusFileRetries;
                 _settings.GLSStatusFileWaitSeconds = model.GLSStatusFileWaitSeconds;
+                _settings.DoCapture = model.DoCapture;
+                _settings.DoSendEmails = model.DoSendEmails;
+                _settings.ChangeOrderStatus = model.ChangeOrderStatus;
+                _settings.DoPrintLabel = model.DoPrintLabel;
 
                 _settingService.SaveSetting(_settings);
             }
@@ -197,6 +203,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         {
             try
             {
+                _anyChangesDone = false;
                 AOOrder order = _orderManagementService.GetOrder(orderId);
                 if (order == null)
                 {
@@ -210,12 +217,19 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
                 HandleGLSLabel(order);
 
-                //Capture(orderId, order);                
+                Capture(order);
+
+                SendMails(order);
 
                 _glsStatusFileRetries = 0;
                 SetTrackingNumber(order);
 
-                _orderManagementService.ChangeOrderStatus(orderId);
+                ChangeOrderStatus(orderId);   
+                
+                if(_anyChangesDone == false)
+                {
+                    return Json("Warning: No changes done. Maybe change settings for this plugin.");
+                }
             }
             catch (Exception ex)
             {
@@ -227,57 +241,89 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             return Json("Done");
         }
 
-        private void Capture(int orderId, AOOrder order)
+        private void ChangeOrderStatus(int orderId)
         {
-            PaymentApiStatus paymentApiStatus = _quickPayService.GetPayment(order.AuthorizationTransactionId);
-            if (paymentApiStatus.Payment == null || paymentApiStatus.HttpResponse.StatusCode != System.Net.HttpStatusCode.OK)
+            if (_settings.ChangeOrderStatus)
             {
-                throw new ArgumentException("No payment found with orderid: " + orderId + " and AuthorizationTransactionId: " + order.AuthorizationTransactionId);
+                _orderManagementService.ChangeOrderStatus(orderId);
+                _anyChangesDone = true;
             }
+        }
 
-            PaymentApiStatus captureStatus = _quickPayService.CapturePayment(order.AuthorizationTransactionId, Convert.ToInt32(order.TotalOrderAmount));
-
-            if (captureStatus.HttpResponse.IsSuccessStatusCode == false)
+        private void SendMails(AOOrder order)
+        {
+            if (_settings.DoSendEmails)
             {
-                throw new ArgumentException("Error capturing money on orderid: " + orderId + ", Error: " + captureStatus.HttpResponse.ReasonPhrase);
+                _orderManagementService.SendShipmentMail(order);
+                _anyChangesDone = true;
+            }
+        }
+
+        private void Capture(AOOrder order)
+        {
+            if (_settings.DoCapture)
+            {
+                PaymentApiStatus paymentApiStatus = _quickPayService.GetPayment(order.AuthorizationTransactionId);
+                if (paymentApiStatus.Payment == null || paymentApiStatus.HttpResponse.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    throw new ArgumentException("No payment found with orderid: " + order.Id + " and AuthorizationTransactionId: " + order.AuthorizationTransactionId);
+                }
+
+                PaymentApiStatus captureStatus = _quickPayService.CapturePayment(order.AuthorizationTransactionId, Convert.ToInt32(order.TotalOrderAmount));
+
+                if (captureStatus.HttpResponse.IsSuccessStatusCode == false)
+                {
+                    throw new ArgumentException("Error capturing money on orderid: " + order.Id + ", Error: " + captureStatus.HttpResponse.ReasonPhrase);
+                }
+
+                _anyChangesDone = true;
             }
         }
 
         private void SetTrackingNumber(AOOrder order)
         {
-            Thread.Sleep(_settings.GLSStatusFileWaitSeconds * 1000);
-            _trackingNumber = _ftpService.GetTrackingNumber(_settings.FTPTempFolder, _settings.FTPRemoteStatusFilePath, order.Id);
-            
-            if (string.IsNullOrEmpty(_trackingNumber))
+            if (_settings.DoPrintLabel)
             {
-                if (_glsStatusFileRetries < _settings.GLSStatusFileRetries)
-                {
-                    _glsStatusFileRetries++;
-                    SetTrackingNumber(order);
-                }
+                Thread.Sleep(_settings.GLSStatusFileWaitSeconds * 1000);
+                _trackingNumber = _ftpService.GetTrackingNumber(_settings.FTPTempFolder, _settings.FTPRemoteStatusFilePath, order.Id);
 
                 if (string.IsNullOrEmpty(_trackingNumber))
                 {
-                    // This extra check is important!
-                    throw new ArgumentException("No tracking number found for orderid: " + order.Id + ". Maybe number of retries should be increased.");
-                }
-            }
+                    if (_glsStatusFileRetries < _settings.GLSStatusFileRetries)
+                    {
+                        _glsStatusFileRetries++;
+                        SetTrackingNumber(order);
+                    }
 
-            _orderManagementService.SetTrackingNumberOnShipment(order.ShipmentId, _trackingNumber);
+                    if (string.IsNullOrEmpty(_trackingNumber))
+                    {
+                        // This extra check is important!
+                        throw new ArgumentException("No tracking number found for orderid: " + order.Id + ". Maybe number of retries should be increased.");
+                    }
+                }
+
+                _orderManagementService.SetTrackingNumberOnShipment(order.Shipment, _trackingNumber);
+                _anyChangesDone = true;
+            }
         }
 
         private void HandleGLSLabel(AOOrder order)
         {
-            _ftpService.Initialize(
+            if (_settings.DoPrintLabel)
+            {
+                _ftpService.Initialize(
                             _settings.FTPHost,
                             _settings.FTPUsername,
-                            _settings.FTPPassword);           
+                            _settings.FTPPassword);
 
-            string localFilepath = _settings.FTPLocalFilePath + "\\" + _settings.FTPLocalFileName;
+                string localFilepath = _settings.FTPLocalFilePath + "\\" + _settings.FTPLocalFileName;
 
-            System.IO.File.WriteAllText(localFilepath, CreateSingleLine(order), Encoding.UTF8);
+                System.IO.File.WriteAllText(localFilepath, CreateSingleLine(order), Encoding.UTF8);
 
-            _ftpService.SendFile(localFilepath, _settings.FTPRemoteFolderPath + "/" + _settings.FTPLocalFileName);
+                _ftpService.SendFile(localFilepath, _settings.FTPRemoteFolderPath + "/" + _settings.FTPLocalFileName);
+
+                _anyChangesDone = true;
+            }
         }
 
         private string CreateSingleLine(AOOrder order)
@@ -373,7 +419,11 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 FTPRemoteStatusFilePath = _settings.FTPRemoteStatusFilePath,
                 FTPTempFolder = _settings.FTPTempFolder,
                 GLSStatusFileRetries = _settings.GLSStatusFileRetries,
-                GLSStatusFileWaitSeconds = _settings.GLSStatusFileWaitSeconds
+                GLSStatusFileWaitSeconds = _settings.GLSStatusFileWaitSeconds,
+                DoCapture = _settings.DoCapture,
+                DoSendEmails = _settings.DoSendEmails,
+                ChangeOrderStatus = _settings.ChangeOrderStatus,
+                DoPrintLabel = _settings.DoPrintLabel
             };
         }
     }

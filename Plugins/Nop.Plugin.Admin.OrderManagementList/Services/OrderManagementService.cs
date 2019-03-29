@@ -7,6 +7,7 @@ using Nop.Plugin.Admin.OrderManagementList.Data;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
 using Nop.Services.Catalog;
 using Nop.Services.Logging;
+using Nop.Services.Messages;
 using Nop.Services.Orders;
 using Nop.Services.Shipping;
 using System;
@@ -28,8 +29,10 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         private readonly CultureInfo _workikngCultureInfo;
         private readonly IShipmentService _shipmentService;
         private readonly IOrderService _orderService;
+        private readonly IWorkflowMessageService _workflowMessageService;
+        private Shipment _shipment;
 
-        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger, IProductAttributeService productAttributeService, IWorkContext workContext, IShipmentService shipmentService, IOrderService orderService)
+        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger, IProductAttributeService productAttributeService, IWorkContext workContext, IShipmentService shipmentService, IOrderService orderService, IWorkflowMessageService workflowMessageService)
         {
             this._logger = logger;
             this._aoOrderRepository = aoOrderRepository;
@@ -39,6 +42,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             this._workikngCultureInfo = new CultureInfo(_workContext.WorkingLanguage.UniqueSeoCode);
             this._shipmentService = shipmentService;
             this._orderService = orderService;
+            this._workflowMessageService = workflowMessageService;
         }
 
 
@@ -144,17 +148,47 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             return order;
         }
 
-        public void SetTrackingNumberOnShipment(int shipmentId, string trackingNumber)
-        {            
-            Shipment shipment = _shipmentService.GetShipmentById(shipmentId);
+        public void SetTrackingNumberOnShipment(string shipmentStr, string trackingNumber)
+        {
+            int shipmentId = GetShipmentId(shipmentStr);
+            _shipment = _shipmentService.GetShipmentById(shipmentId);
 
-            if (shipment == null)
+            if (_shipment == null)
             {
                 throw new ArgumentException("No Shipment found with shipmentId: " + shipmentId);
             }
 
-            shipment.TrackingNumber = trackingNumber;
-            _shipmentService.UpdateShipment(shipment);
+            _shipment.TrackingNumber = trackingNumber;
+            _shipmentService.UpdateShipment(_shipment);
+        }
+
+        public void SendShipmentMail(AOOrder order)
+        {
+            if(_shipment == null)
+            {
+                int shipmentId = GetShipmentId(order.Shipment);
+                _shipment = _shipmentService.GetShipmentById(shipmentId);
+            }
+
+            _workflowMessageService.SendShipmentSentCustomerNotification(_shipment, _workContext.WorkingLanguage.Id);
+        }
+
+
+        private static int GetShipmentId(string shipmentStr)
+        {
+            if (shipmentStr.Contains(";") == false)
+            {
+                throw new ArgumentException("Shipment string missing shipmentId: '" + shipmentStr + "'");
+            }
+
+            int shipmentId = 0;
+            bool ok = int.TryParse(shipmentStr.Substring(0, shipmentStr.IndexOf(";")), out shipmentId);
+            if (ok == false ||shipmentId == 0)
+            {
+                throw new ArgumentException("Shipment string missing proper shipmentId: '" + shipmentStr + "'");
+            }
+
+            return shipmentId;
         }
 
         public void ChangeOrderStatus(int orderId)
@@ -195,6 +229,14 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             }
 
             var shippingInfo = order.ShippingInfo.Replace("#", "<br />");
+
+            string ship = order.Shipment;
+            if(ship.Contains(";"))
+            {
+                shippingInfo += "<br /><br />Admin comment:<br />";
+                shippingInfo += ship.Substring(ship.IndexOf(";") + 1);
+            }
+            
             return shippingInfo;
         }
 

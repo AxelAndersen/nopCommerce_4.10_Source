@@ -66,5 +66,17 @@ namespace Nop.Plugin.Admin.OrderManagementList.Models
         /// Number of retries to perform for status file
         /// </summary>
         public int GLSStatusFileRetries { get; set; }
+
+        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.DoPrintLabel")]
+        public bool DoPrintLabel { get; set; }
+
+        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.DoCapture")]
+        public bool DoCapture { get; set; }
+
+        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.DoSendEmails")]
+        public bool DoSendEmails { get; set; }
+
+        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.ChangeOrderStatus")]
+        public bool ChangeOrderStatus { get; set; }        
     }
 }

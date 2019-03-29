@@ -78,6 +78,11 @@ namespace Nop.Plugin.Admin.OrderManagementList
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.GLSStatusFileRetries", "GLS Status file retries");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.GLSStatusFileWaitSeconds", "GLS Status file wait sec.");
 
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoPrintLabel", "Print label");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoCapture", "Capture payment from list");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoSendEmails", "Send email to customer");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.ChangeOrderStatus", "Change order status");            
+
             base.Install();
         }
 
@@ -107,6 +112,11 @@ namespace Nop.Plugin.Admin.OrderManagementList
 
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.GLSStatusFileRetries");
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.GLSStatusFileWaitSeconds");
+
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoPrintLabel");
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoCapture");
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoSendEmails");
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.ChangeOrderStatus");            
 
             base.Uninstall();
         }

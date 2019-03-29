@@ -13,9 +13,11 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         void SetProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered, ref string errorMessage);
 
         AOOrder GetOrder(int orderId);
-        
-        void SetTrackingNumberOnShipment(int orderId, string trackingNumber);
+
+        void SetTrackingNumberOnShipment(string shipmentStr, string trackingNumber);
 
         void ChangeOrderStatus(int orderId);
+
+        void SendShipmentMail(AOOrder order);
     }
 }

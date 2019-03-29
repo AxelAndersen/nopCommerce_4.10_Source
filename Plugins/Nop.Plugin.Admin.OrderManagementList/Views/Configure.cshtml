@@ -11,9 +11,10 @@
                 <h2>Order management settings</h2>
                 <br />
                 <hr />
-                <h3>
+                <h4>
                     GLS Settings
-                </h3>
+                </h4>
+                <br />
                 <div class="form-group">
                     <div class="col-md-3">
                         <nop-label asp-for="FTPHost" />
@@ -124,6 +125,52 @@
                         <span>Number of seconds to wait in each retry for the status file</span>
                         <nop-editor asp-for="GLSStatusFileWaitSeconds" />
                         <span asp-validation-for="GLSStatusFileWaitSeconds"></span>
+                    </div>
+                </div>
+
+                <hr />
+
+                <h4>
+                    General Settings
+                </h4>
+                <br />
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="DoCapture" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="DoCapture" />
+                        <span asp-validation-for="DoCapture"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="DoSendEmails" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="DoSendEmails" />
+                        <span asp-validation-for="DoSendEmails"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="ChangeOrderStatus" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ChangeOrderStatus" />
+                        <span asp-validation-for="ChangeOrderStatus"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="DoPrintLabel" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="DoPrintLabel" />
+                        <span asp-validation-for="DoPrintLabel"></span>
                     </div>
                 </div>
 
