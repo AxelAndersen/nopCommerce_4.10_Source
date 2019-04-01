@@ -29,7 +29,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         private readonly ILocalizationService _localizationService;
         private readonly IFTPService _ftpService;
         private readonly IGLSService _glsService;
-        private readonly IQuickPayApiServices _quickPayService;        
+        private readonly IQuickPayApiServices _quickPayService;
         private int _glsStatusFileRetries = 0;
         private string _trackingNumber;
         private bool _anyChangesDone;
@@ -43,18 +43,21 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             this._localizationService = localizationService;
             this._ftpService = ftpService;
             this._glsService = glsService;
-            this._quickPayService = quickPayService;            
+            this._quickPayService = quickPayService;
         }
 
         [AuthorizeAdmin]
-        [Area(AreaNames.Admin)]
-        public IActionResult List()
+        [Area(AreaNames.Admin)]        
+        public IActionResult List(string searchphrase = "")
         {
             OrderManagementListModel model = new OrderManagementListModel();
 
             try
             {
-                model.PresentationOrders = _orderManagementService.GetCurrentOrdersAsync();
+                int markedProductId = 0;
+                model.PresentationOrders = _orderManagementService.GetCurrentOrders(ref markedProductId, searchphrase);
+                model.MarkedProductId = markedProductId;
+                model.SearchPhrase = searchphrase;
             }
             catch (Exception ex)
             {
@@ -239,7 +242,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 return Json("Error: " + ex.Message);
             }
             return Json("Done");
-        }
+        }     
 
         private void ChangeOrderStatus(int orderId)
         {

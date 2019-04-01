@@ -1,5 +1,6 @@
 ﻿using Nop.Core;
 using Nop.Core.Data;
+using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
 using Nop.Core.Domain.Shipping;
@@ -30,9 +31,10 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         private readonly IShipmentService _shipmentService;
         private readonly IOrderService _orderService;
         private readonly IWorkflowMessageService _workflowMessageService;
+        private readonly IRepository<ProductAttributeCombination> _productAttributeCombinationRepository;
         private Shipment _shipment;
 
-        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger, IProductAttributeService productAttributeService, IWorkContext workContext, IShipmentService shipmentService, IOrderService orderService, IWorkflowMessageService workflowMessageService)
+        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger, IProductAttributeService productAttributeService, IWorkContext workContext, IShipmentService shipmentService, IOrderService orderService, IWorkflowMessageService workflowMessageService, IRepository<ProductAttributeCombination> productAttributeCombinationRepository)
         {
             this._logger = logger;
             this._aoOrderRepository = aoOrderRepository;
@@ -43,27 +45,49 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             this._shipmentService = shipmentService;
             this._orderService = orderService;
             this._workflowMessageService = workflowMessageService;
+            this._productAttributeCombinationRepository = productAttributeCombinationRepository;
         }
 
-
         #region Public methods
-        public List<AOPresentationOrder> GetCurrentOrdersAsync(bool onlyReadyToShip = false)
+        public List<AOPresentationOrder> GetCurrentOrders(ref int markedProductId, string searchphrase = "")
         {
-            List<AOPresentationOrder> presentationOrders = _context.AoOrders.Select(order => new AOPresentationOrder()
+            List<AOPresentationOrder> orders = GetOrders();
+            if (string.IsNullOrEmpty(searchphrase))
             {
-                OrderId = order.Id,
-                CustomerComment = GetCustomerComment(order),
-                CustomerEmail = order.CustomerEmail,
-                CustomerInfo = GetCustomerInfo(order),
-                OrderNotes = GetOrderNotes(order),
-                OrderDateTime = order.OrderDateTime.ToString("dd-MM-yy H:mm"),
-                ShippingInfo = GetShippingInfo(order),
-                TotalOrderAmount = GetTotal(order),
-                PresentationOrderItems = GetProductInfo(order),
-                FormattedPaymentStatus = GetPaymentStatus(order.PaymentStatusId)
-            }).ToList();
+                return orders;
+            }
 
-            return presentationOrders;
+            long num = 0;
+            bool isNumber = long.TryParse(searchphrase, out num);
+            if (isNumber)
+            {
+                if(searchphrase.Length <= 8)
+                {
+                    orders = orders.Where(o => o.OrderId == num).ToList();
+                }
+                else
+                {
+                    ProductAttributeCombination productAttributeCombination = GetProductAttributeCombinationByGtin(searchphrase);
+                    if (productAttributeCombination != null)
+                    {
+                        markedProductId = productAttributeCombination.ProductId;
+                        orders = orders.Where(o => o.PresentationOrderItems.Any(p => p.ProductId == productAttributeCombination.ProductId)).ToList();
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+            else
+            {
+                orders = orders
+                    .Where(o => o.PresentationOrderItems
+                    .Any(p => p.ProductName.ToLower().Contains(searchphrase.ToLower())))
+                    .ToList();
+            }
+
+            return orders;
         }
 
         public void SetProductIsTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside, ref string errorMessage)
@@ -173,23 +197,13 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             _workflowMessageService.SendShipmentSentCustomerNotification(_shipment, _workContext.WorkingLanguage.Id);
         }
 
+        //public List<AOPresentationOrder> SearchList(string searchPhrase)
+        //{
+        //    List<AOPresentationOrder> orders = GetOrders();
+        //    orders = orders.Where(o => o.PresentationOrderItems.Any(p => p.ProductName.Contains(searchPhrase))).ToList();
 
-        private static int GetShipmentId(string shipmentStr)
-        {
-            if (shipmentStr.Contains(";") == false)
-            {
-                throw new ArgumentException("Shipment string missing shipmentId: '" + shipmentStr + "'");
-            }
-
-            int shipmentId = 0;
-            bool ok = int.TryParse(shipmentStr.Substring(0, shipmentStr.IndexOf(";")), out shipmentId);
-            if (ok == false ||shipmentId == 0)
-            {
-                throw new ArgumentException("Shipment string missing proper shipmentId: '" + shipmentStr + "'");
-            }
-
-            return shipmentId;
-        }
+        //    return orders;
+        //}        
 
         public void ChangeOrderStatus(int orderId)
         {
@@ -203,9 +217,65 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 
             _orderService.UpdateOrder(order);
         }
+
+        /// <summary>
+        /// Gets a product attribute combination by SKU
+        /// </summary>
+        /// <param name="sku">SKU</param>
+        /// <returns>Product attribute combination</returns>
+        public virtual ProductAttributeCombination GetProductAttributeCombinationByGtin(string ean)
+        {
+            if (string.IsNullOrEmpty(ean))
+                return null;
+
+            ean = ean.Trim();
+
+            var query = from pac in _productAttributeCombinationRepository.Table
+                        orderby pac.Id
+                        where pac.Gtin == ean
+                        select pac;
+            var combination = query.FirstOrDefault();
+            return combination;
+        }
         #endregion
 
         #region Private methods
+        private List<AOPresentationOrder> GetOrders()
+        {
+            List<AOPresentationOrder> presentationOrders = _context.AoOrders.Select(order => new AOPresentationOrder()
+            {
+                OrderId = order.Id,
+                CustomerComment = GetCustomerComment(order),
+                CustomerEmail = order.CustomerEmail,
+                CustomerInfo = GetCustomerInfo(order),
+                OrderNotes = GetOrderNotes(order),
+                OrderDateTime = order.OrderDateTime.ToString("dd-MM-yy H:mm"),
+                ShippingInfo = GetShippingInfo(order),
+                TotalOrderAmount = GetTotal(order),
+                PresentationOrderItems = GetProductInfo(order),
+                FormattedPaymentStatus = GetPaymentStatus(order.PaymentStatusId)
+            }).ToList();
+
+            return presentationOrders;
+        }
+
+        private static int GetShipmentId(string shipmentStr)
+        {
+            if (shipmentStr.Contains(";") == false)
+            {
+                throw new ArgumentException("Shipment string missing shipmentId: '" + shipmentStr + "'");
+            }
+
+            int shipmentId = 0;
+            bool ok = int.TryParse(shipmentStr.Substring(0, shipmentStr.IndexOf(";")), out shipmentId);
+            if (ok == false || shipmentId == 0)
+            {
+                throw new ArgumentException("Shipment string missing proper shipmentId: '" + shipmentStr + "'");
+            }
+
+            return shipmentId;
+        }
+
         private string GetCustomerComment(AOOrder order)
         {
             return string.IsNullOrEmpty(order.CheckoutAttributeDescription) ? "&nbsp;" : order.CheckoutAttributeDescription;

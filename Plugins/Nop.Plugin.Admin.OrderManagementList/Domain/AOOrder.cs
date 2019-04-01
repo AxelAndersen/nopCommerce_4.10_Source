@@ -39,5 +39,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Domain
         public virtual string Shipment { get; set; }
 
         public virtual string AuthorizationTransactionId { get; set; }
+
+        //public string EAN { get; set; }
     }
 }

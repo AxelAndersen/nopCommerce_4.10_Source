@@ -11,6 +11,10 @@ namespace Nop.Plugin.Admin.OrderManagementList.Models
 
         public string ErrorMessage { get; set; }
 
+        public int MarkedProductId { get; set; }
+
+        public string SearchPhrase { get; set; }
+
         public List<AOPresentationOrder> PresentationOrders { get; set; }
     }
 }

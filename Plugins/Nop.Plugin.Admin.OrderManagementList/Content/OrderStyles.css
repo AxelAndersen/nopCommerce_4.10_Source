@@ -22,6 +22,7 @@
     .divSingleOrder .paymentstatus-red { color: red; font-size: 18px; font-weight: bold; }
     .divSingleOrder .paymentstatus-yellow { color: #ffbb00; font-size: 16px; font-weight:bold; }
     .divSingleOrder .paymentstatus-green { color: green; font-size: 16px; font-weight:bold; }
+    .divSingleOrder .spnMarkedProduct{ background-color: #ffbb00; }
 
     #divErrorMessage { color: red; padding: 15px; }
 
@@ -32,3 +33,6 @@
 .success { color: green; padding: 4px; }
 
 div.singleLineError { display: none; color: red; font-weight: bold; font-size: 16px; float: none; height: 40px; min-height: 40px; }
+
+#divSearch { height: 50px; }
+    #divSearch .divSearchBox{ float:left; width: 320px; margin: 0 0 0 20px; }
