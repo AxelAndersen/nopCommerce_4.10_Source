@@ -27,14 +27,13 @@ namespace Nop.Plugin.Admin.OrderManagementList
         {
             var menuItem = new SiteMapNode()
             {
-                SystemName = "Admin.OrderManagementList",
+                SystemName = "Sales",
                 Title = "Ordrehåndtering",
                 ControllerName = "OrderManagement",
                 ActionName = "List",
                 Visible = true,
                 IconClass = "fa fa-dot-circle-o", 
-                Url = $"{_webHelper.GetStoreLocation()}Admin/OrderManagement/List.cshtml",
-
+                Url = $"{_webHelper.GetStoreLocation()}Admin/OrderManagement/List.cshtml"                
             };
             var pluginNode = rootNode.ChildNodes.FirstOrDefault(x => x.SystemName == "Sales");
             if (pluginNode != null)

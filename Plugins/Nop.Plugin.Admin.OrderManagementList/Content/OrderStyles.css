@@ -1,20 +1,20 @@
 ﻿.divSingleOrderHeader { margin: 0 10px 0 10px; }
     .divSingleOrderHeader > div { float: left; margin: 0 10px 0 10px; font-size: 16px; font-weight: bold; }
-    .divSingleOrderHeader .divOrderInfo { width: 10%; }
-    .divSingleOrderHeader .divProductInfo { width: 30%; }
+    .divSingleOrderHeader .divOrderInfo { width: 10%; min-width: 140px; }
+    .divSingleOrderHeader .divProductInfo { width: 28%; }
     .divSingleOrderHeader .divOrderNote { width: 15%; }
-    .divSingleOrderHeader .divCustomerComment { width: 12%; }
+    .divSingleOrderHeader .divCustomerComment { width: 10%; }
     .divSingleOrderHeader .divShippingInfo { width: 15%; }
     .divSingleOrderHeader .divCustomerInfo { width: 10%; }
 
 .divSingleOrder { margin: 40px 10px 2px 10px; }
     .divSingleOrder > div { float: left; margin: 0 10px 0 10px; min-height: 100px; }
-    .divSingleOrder .divOrderInfo { width: 10%; }
-    .divSingleOrder .divProductInfo { width: 30%; }
+    .divSingleOrder .divOrderInfo { width: 10%; min-width: 140px; }
+    .divSingleOrder .divProductInfo { width: 28%; }
         .divSingleOrder .divProductInfo span { font-size: 16px; }
         .divSingleOrder .divProductInfo > div { margin: 0 0 10px 0; }
     .divSingleOrder .divOrderNote { width: 15%; font-size: 10px; min-height: 120px; max-height: 245px; overflow-y: scroll; }
-    .divSingleOrder .divCustomerComment { width: 12%; }
+    .divSingleOrder .divCustomerComment { width: 10%; }
     .divSingleOrder .divShippingInfo { width: 15%; }
     .divSingleOrder .divCustomerInfo { width: 10%; }
     .divSingleOrder .spnQuantity { font-weight: bold; }

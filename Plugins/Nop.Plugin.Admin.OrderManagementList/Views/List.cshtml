@@ -7,6 +7,7 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     Html.AddCssFileParts("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Content/OrderStyles.css");
     ViewData["Title"] = "Ordrehåndtering";
+    Html.SetActiveMenuItemSystemName("Sales");
 }
 
 <form asp-controller="OrderManagement" asp-action="List" method="post">
@@ -68,7 +69,7 @@
             <div class="divOrderInfo">
                 <a class="btn bg-yellow large-text" href="/Admin/Order/Edit/@order.OrderId">Ordrenr.:&nbsp;@order.OrderId</a>
                 <br /><br />
-                <a class="btn bg-purple large-text" href="/Admin/Order/PdfPackagingSlip?shipmentId=6">Følgeseddel</a>
+                <a class="btn bg-purple large-text" onclick="javascript: ResetMessages();" href="/Admin/Order/PdfPackagingSlip?shipmentId=6">Følgeseddel</a>
                 <br /><br />
                 <a class="btn bg-green large-text" onclick="javascript:CompleteOrderAjax(@order.OrderId);">Afslut ordre</a>
                 <br /><br />
@@ -265,6 +266,12 @@
                 location.href = location.href + "?searchphrase=" + $("#txtSearch").val();
             }
             return false;
+        }
+
+        function ResetMessages()
+        {            
+            $("[id$=error-spn]").hide();                               
+            return true;
         }
     </script>
 
