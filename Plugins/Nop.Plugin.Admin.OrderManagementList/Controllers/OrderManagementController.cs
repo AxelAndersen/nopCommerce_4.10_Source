@@ -22,6 +22,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
     [Area(AreaNames.Admin)]
     public class OrderManagementController : BaseAdminController
     {
+        #region Private variables
         private readonly ILogger _logger;
         private readonly OrderManagementSettings _settings;
         private readonly IOrderManagementService _orderManagementService;
@@ -32,9 +33,17 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         private readonly IQuickPayApiServices _quickPayService;
         private int _glsStatusFileRetries = 0;
         private string _trackingNumber;
-        private bool _anyChangesDone;
+        private bool _anyChangesDone; 
+        #endregion
 
-        public OrderManagementController(ILogger logger, OrderManagementSettings orderManagementSettings, ILocalizationService localizationService, ISettingService settingService, IOrderManagementService orderManagementService, IFTPService ftpService, IGLSService glsService, IQuickPayApiServices quickPayService)
+        public OrderManagementController(ILogger logger, 
+                                         OrderManagementSettings orderManagementSettings, 
+                                         ILocalizationService localizationService, 
+                                         ISettingService settingService, 
+                                         IOrderManagementService orderManagementService, 
+                                         IFTPService ftpService, 
+                                         IGLSService glsService, 
+                                         IQuickPayApiServices quickPayService)
         {
             this._logger = logger;
             this._settings = orderManagementSettings;
@@ -46,8 +55,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             this._quickPayService = quickPayService;
         }
 
+        #region Public methods
         [AuthorizeAdmin]
-        [Area(AreaNames.Admin)]        
+        [Area(AreaNames.Admin)]
         public IActionResult List(string searchphrase = "")
         {
             OrderManagementListModel model = new OrderManagementListModel();
@@ -99,7 +109,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 return Configure();
 
             try
-            {                             
+            {
                 _settings.ErrorMessage = model.ErrorMessage;
 
                 _settings.FTPHost = model.FTPHost;
@@ -227,9 +237,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 _glsStatusFileRetries = 0;
                 SetTrackingNumber(order);
 
-                ChangeOrderStatus(orderId);   
-                
-                if(_anyChangesDone == false)
+                ChangeOrderStatus(orderId);
+
+                if (_anyChangesDone == false)
                 {
                     return Json("Warning: No changes done. Maybe change settings for this plugin.");
                 }
@@ -242,8 +252,10 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 return Json("Error: " + ex.Message);
             }
             return Json("Done");
-        }     
+        }
+        #endregion
 
+        #region Private methods
         private void ChangeOrderStatus(int orderId)
         {
             if (_settings.ChangeOrderStatus)
@@ -330,12 +342,12 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         }
 
         private string CreateSingleLine(AOOrder order)
-        {                                  
+        {
             string glsShopnumber = "";
-            if(order.ShippingInfo.Contains("("))
+            if (order.ShippingInfo.Contains("("))
             {
                 glsShopnumber = order.ShippingInfo.Substring(order.ShippingInfo.IndexOf("(") + 1);
-                glsShopnumber = glsShopnumber.Substring(0, glsShopnumber.IndexOf(")"));                             
+                glsShopnumber = glsShopnumber.Substring(0, glsShopnumber.IndexOf(")"));
             }
 
             PakkeshopData pakkeshopData = _glsService.GetParcelShopData(glsShopnumber);
@@ -372,7 +384,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             sb.Append(",\"\"");                                         // 29
 
             string info = sb.ToString();
-            return info;            
+            return info;
         }
 
         private string DoUpdateProductTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside, ref bool allwell)
@@ -410,7 +422,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         private OrderManagementConfigurationModel GetBaseModel()
         {
             return new OrderManagementConfigurationModel
-            {                          
+            {
                 ErrorMessage = _settings.ErrorMessage,
                 FTPHost = _settings.FTPHost,
                 FTPUsername = _settings.FTPUsername,
@@ -428,6 +440,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 ChangeOrderStatus = _settings.ChangeOrderStatus,
                 DoPrintLabel = _settings.DoPrintLabel
             };
-        }
+        } 
+        #endregion
     }
 }

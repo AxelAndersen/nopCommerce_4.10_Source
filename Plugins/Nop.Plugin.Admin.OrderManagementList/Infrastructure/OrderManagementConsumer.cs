@@ -32,11 +32,28 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
                     return;
                 }
 
-                if (order.Shipments.Count > 0)
-                {
-                    return;
-                }
+                AddShipment(order);
 
+                AddToReOrderList(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+            }
+        }
+
+        private static void AddToReOrderList(Order order)
+        {
+            if (order.PaymentStatus == Core.Domain.Payments.PaymentStatus.Paid)
+            {
+
+            }
+        }
+
+        private void AddShipment(Order order)
+        {
+            if (order.Shipments == null || order.Shipments.Count <= 0)
+            {
                 Shipment shipment = new Shipment()
                 {
                     OrderId = order.Id,
@@ -45,10 +62,6 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
                 };
 
                 _shipmentService.InsertShipment(shipment);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex.Message, ex);
             }
         }
     }
