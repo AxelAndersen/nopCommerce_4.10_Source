@@ -34,7 +34,15 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         private readonly IRepository<ProductAttributeCombination> _productAttributeCombinationRepository;
         private Shipment _shipment;
 
-        public OrderManagementService(IRepository<Order> aoOrderRepository, OrderManagementContext context, ILogger logger, IProductAttributeService productAttributeService, IWorkContext workContext, IShipmentService shipmentService, IOrderService orderService, IWorkflowMessageService workflowMessageService, IRepository<ProductAttributeCombination> productAttributeCombinationRepository)
+        public OrderManagementService(IRepository<Order> aoOrderRepository, 
+                                      OrderManagementContext context, 
+                                      ILogger logger, 
+                                      IProductAttributeService productAttributeService, 
+                                      IWorkContext workContext, 
+                                      IShipmentService shipmentService, 
+                                      IOrderService orderService, 
+                                      IWorkflowMessageService workflowMessageService, 
+                                      IRepository<ProductAttributeCombination> productAttributeCombinationRepository)
         {
             this._logger = logger;
             this._aoOrderRepository = aoOrderRepository;
@@ -380,13 +388,13 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             return attributeInfo;
         }
 
-        private static string[] NoOrderItem(string message)
-        {
-            string[] item = new string[2];
-            item[0] = "0";
-            item[1] = message;
-            return item;
-        }
+        //private static string[] NoOrderItem(string message)
+        //{
+        //    string[] item = new string[2];
+        //    item[0] = "0";
+        //    item[1] = message;
+        //    return item;
+        //}
 
         private string GetPaymentStatus(int paymentStatusId)
         {
