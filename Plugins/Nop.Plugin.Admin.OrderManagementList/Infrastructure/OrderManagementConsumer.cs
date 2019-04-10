@@ -24,6 +24,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
         private readonly IProductService _productService;
         private readonly IManufacturerService _manufacturerService;
         private readonly IRepository<ProductAttributeCombination> _productAttributeCombinationRepository;
+        private int _handledOrderItems = 0;
 
 
         public OrderManagementConsumer(ILogger logger, 
@@ -56,10 +57,22 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
                 AddShipment(order);
 
                 AddToReOrderList(order);
+
+                ValidateReordering(order);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message, ex);
+                Exception inner = ex;
+                while (inner.InnerException != null) inner = inner.InnerException;
+                _logger.Error("OrderManagementConsumer HandleEvent: " + inner.Message, ex);                
+            }
+        }
+
+        private void ValidateReordering(Order order)
+        {
+            if(_handledOrderItems != order.OrderItems.Count)
+            {
+                throw new Exception("Wrong number of reordering items: " + _handledOrderItems + " should have been " + order.OrderItems.Count);
             }
         }
 
@@ -68,11 +81,13 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
         {
             if (order.PaymentStatus == Core.Domain.Payments.PaymentStatus.Pending) // Pending is only for testing. should be Paid
             {
+                _handledOrderItems = 0;
                 foreach (OrderItem orderItem in order.OrderItems)
                 {
                     var reOrderItem = _context.AOReOrderItems.Where(o => o.OrderItemId == orderItem.Id).FirstOrDefault();
                     if (reOrderItem != null)
                     {
+                        _handledOrderItems++;
                         // We already added this item to reorder list
                         continue;
                     }
@@ -138,6 +153,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
             {
                 UpdateItem(orderItem, reOrderItem);
             }
+            _handledOrderItems++;
         }
 
         private void UpdateItem(OrderItem orderItem, Domain.AOReOrderItem reOrderItem)
