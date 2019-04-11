@@ -188,7 +188,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 if (allwell)
                 {
                     SuccessNotification(_localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessfullProductReady"));
-                    return Json("Produkt bestilt, " + result);
+                    return Json("Produkt bestilt" + result);
                 }
                 else
                 {
@@ -201,7 +201,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 if (allwell)
                 {
                     SuccessNotification(_localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessfullProductReady"));
-                    return Json("Produkt IKKE bestilt, " + result);
+                    return Json("Produkt IKKE bestilt" + result);
                 }
                 else
                 {
@@ -394,7 +394,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             if (string.IsNullOrEmpty(errorMessage))
             {
                 allwell = true;
-                return _localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessUpdate");
+                return "";
             }
             else
             {
@@ -410,7 +410,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             if (string.IsNullOrEmpty(errorMessage))
             {
                 allwell = true;
-                return _localizationService.GetResource("Nop.Plugin.Admin.OrderManagementList.SuccessUpdate");
+                return "";
             }
             else
             {

@@ -307,12 +307,15 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             }
 
             var shippingInfo = order.ShippingInfo.Replace("#", "<br />");
-
             string ship = order.Shipment;
-            if(ship.Contains(";"))
-            {
-                shippingInfo += "<br /><br />Admin comment:<br />";
-                shippingInfo += ship.Substring(ship.IndexOf(";") + 1);
+
+            if (string.IsNullOrEmpty(ship) == false)
+            {                
+                if (ship.Contains(";"))
+                {
+                    shippingInfo += "<br /><br />Admin comment:<br />";
+                    shippingInfo += ship.Substring(ship.IndexOf(";") + 1);
+                }
             }
             
             return shippingInfo;
@@ -411,12 +414,12 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                     }
                 case PaymentStatus.Authorized:
                     {
-                        formattedStatus = string.Format(mask, "paymentstatus-red", "Ikke betalt");
+                        formattedStatus = string.Format(mask, "paymentstatus-green", "Betalt");
                         break;
                     }
                 case PaymentStatus.Paid:
                     {
-                        formattedStatus = string.Format(mask, "paymentstatus-green", "Betalt");
+                        formattedStatus = string.Format(mask, "paymentstatus-green", "Betalt og captured");
                         break;
                     }
                 case PaymentStatus.PartiallyRefunded:
