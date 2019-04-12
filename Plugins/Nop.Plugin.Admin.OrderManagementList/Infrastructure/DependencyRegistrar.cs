@@ -18,6 +18,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
             builder.RegisterType<OrderManagementService>().As<IOrderManagementService>().InstancePerLifetimeScope();
             builder.RegisterType<FTPService>().As<IFTPService>().InstancePerLifetimeScope();
             builder.RegisterType<GLSService>().As<IGLSService>().InstancePerLifetimeScope();
+            builder.RegisterType<ReOrderService>().As<IReOrderService>().InstancePerLifetimeScope();
 
             //data context
             builder.RegisterPluginDataContext<OrderManagementContext>(CONTEXT_NAME);

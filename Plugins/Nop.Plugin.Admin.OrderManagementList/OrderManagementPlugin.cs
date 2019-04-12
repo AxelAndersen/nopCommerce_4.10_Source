@@ -25,7 +25,26 @@ namespace Nop.Plugin.Admin.OrderManagementList
 
         public void ManageSiteMap(SiteMapNode rootNode)
         {
+            var pluginNode = rootNode.ChildNodes.FirstOrDefault(x => x.SystemName == "Sales");
+
+            // Add Reorder list            
             var menuItem = new SiteMapNode()
+                {
+                    SystemName = "Sales",
+                    Title = "Bestillingsliste",
+                    ControllerName = "ReOrder",
+                    ActionName = "ReOrderList",
+                    Visible = true,
+                    IconClass = "fa fa-dot-circle-o",
+                    Url = $"{_webHelper.GetStoreLocation()}Admin/OrderManagement/ReOrderList.cshtml"
+                };
+            if (pluginNode != null)
+                pluginNode.ChildNodes.Insert(0, menuItem);
+            else
+                rootNode.ChildNodes.Add(menuItem);
+
+            // Add order management list
+            menuItem = new SiteMapNode()
             {
                 SystemName = "Sales",
                 Title = "Ordrehåndtering",
@@ -35,7 +54,7 @@ namespace Nop.Plugin.Admin.OrderManagementList
                 IconClass = "fa fa-dot-circle-o", 
                 Url = $"{_webHelper.GetStoreLocation()}Admin/OrderManagement/List.cshtml"                
             };
-            var pluginNode = rootNode.ChildNodes.FirstOrDefault(x => x.SystemName == "Sales");
+            
             if (pluginNode != null)
                 pluginNode.ChildNodes.Insert(0, menuItem);
             else

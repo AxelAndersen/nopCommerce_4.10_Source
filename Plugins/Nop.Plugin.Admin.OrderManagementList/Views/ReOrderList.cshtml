@@ -1,0 +1,70 @@
+﻿@using Nop.Plugin.Admin.OrderManagementList.Models
+@using Nop.Plugin.Admin.OrderManagementList.Domain
+@using Nop.Web.Framework.UI;
+
+@model ReOrderListModel
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    Html.AddCssFileParts("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Content/OrderStyles.css");
+    ViewData["Title"] = "Bestillingsliste";
+    Html.SetActiveMenuItemSystemName("Sales");
+}
+
+<form asp-controller="ReOrderController" asp-action="ReOrderList" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h1>Bestillingsliste</h1>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+    @if (string.IsNullOrEmpty(Model.ErrorMessage) == false)
+    {
+        <div id="divErrorMessage">
+            <h3>Error occurred:</h3>
+            <h4>@Model.ErrorMessage</h4>
+        </div>
+    }
+    else
+    {
+
+        <div id="divSearch">
+            <div class="divSearchBox">
+                <input id="txtSearch" type="text" value="@Model.SearchPhrase" autofocus />
+                <button value="1" onclick="javascript: return DoSearch();">Søg</button>                                
+            </div>
+        </div>
+
+        <div class="divSingleOrderHeader">
+            <div class="divOrderInfo">
+                Ordre info
+            </div>
+            <div class="divProductInfo">
+                Produkt info
+            </div>
+           
+        </div>
+        <div style="clear:both;"></div>
+        <hr class="hrOrderManagement" />
+
+        @foreach (AOReOrderItem reOrderItem in Model.ReOrderItems)
+        {
+        <div class="divSingleOrder">
+            <div class="singleLineError">
+                <span id="@reOrderItem.Id-error-spn"></span>
+            </div>
+           
+           
+            <div class="divCustomerInfo">
+                @Html.Raw(reOrderItem.ProductName)
+                <br />
+                @reOrderItem.Quantity
+            </div>            
+        </div>
+            <div style="clear:both;"></div>
+            <hr class="hrOrderManagement" />
+        }
+    }
+</form>
