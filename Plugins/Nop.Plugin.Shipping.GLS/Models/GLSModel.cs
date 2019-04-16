@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Nop.Plugin.Shipping.GLS.Models
 {
@@ -10,8 +11,7 @@ namespace Nop.Plugin.Shipping.GLS.Models
         [Display(Name = "Amount of suggested shops for customer")]
         public int AmountNearestShops { get; set; }
 
-        [Display(Name = "Shipping fee with GLS to Sweden")]
-        public decimal SwedishRate { get; set; }
+        public List<AOGLSCountry> GLSCountries { get; set; }
 
         public bool Tracing { get; set; }
 

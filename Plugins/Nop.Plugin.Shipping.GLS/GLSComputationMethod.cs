@@ -95,8 +95,8 @@ namespace Nop.Plugin.Shipping.GLS
 
                 wsShopFinderSoapClient client = new wsShopFinderSoapClient(EndpointConfiguration.wsShopFinderSoap12, _glsSettings.EndpointAddress);
                 string zip = getShippingOptionRequest.ShippingAddress.ZipPostalCode;
-                string street = getShippingOptionRequest.ShippingAddress.Address1;               
-                string glsCountryCode = Associations.GLSCountryCode[getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode];
+                string street = getShippingOptionRequest.ShippingAddress.Address1;
+                string glsCountryCode = Associations.GLSCountryCode[getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode.ToUpper()];               
 
                 if (_glsSettings.Tracing)
                     _traceMessages.Append("\r\nReady to call GLS at: '" + _glsSettings.EndpointAddress + "'");
@@ -126,7 +126,7 @@ namespace Nop.Plugin.Shipping.GLS
 
                 if(parcelShops == null || parcelShops.Count == 0)
                 {
-                    response.AddError($"GLS Service could not find any shops with the given information: {street} {zip}");
+                    response.AddError($"GLS Service could not find any shops with the given information: {street} {zip} {glsCountryCode}");
                     return response;
                 }
 
@@ -297,7 +297,7 @@ namespace Nop.Plugin.Shipping.GLS
 
             if (!Associations.GLSCountryCode.ContainsKey(getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode))
             {
-                response.AddError($"Zip iso code '{getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode}' not found in asscociations");
+                response.AddError("Not possible to send to " + getShippingOptionRequest.ShippingAddress.Country.Name + " (" + getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode + ")");                
                 return false;
             }
 

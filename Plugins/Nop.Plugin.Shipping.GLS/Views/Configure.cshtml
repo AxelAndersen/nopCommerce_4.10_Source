@@ -1,4 +1,5 @@
-﻿@model Nop.Plugin.Shipping.GLS.Models.GLSModel
+﻿@using Nop.Plugin.Shipping.GLS.Models
+@model Nop.Plugin.Shipping.GLS.Models.GLSModel
 @{
     Layout = "_ConfigurePlugin";
 }
@@ -28,15 +29,6 @@
                 </div>
                 <div class="form-group">
                     <div class="col-md-3">
-                        <nop-label asp-for="SwedishRate" />
-                    </div>
-                    <div class="col-md-9">
-                        <nop-editor asp-for="SwedishRate" />
-                        <span asp-validation-for="SwedishRate"></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-3">
                         <nop-label asp-for="Tracing" />
                     </div>
                     <div class="col-md-9">
@@ -44,6 +36,52 @@
                         <span asp-validation-for="Tracing"></span>
                     </div>
                 </div>
+
+                <hr />
+                <h3>Prices (EURO)</h3>
+                @for (int i = 0; i < Model.GLSCountries.Count; i++)
+                {
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">@Model.GLSCountries[i].CountryName</label>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        Parcelshops
+                        <nop-editor asp-for="@Model.GLSCountries[i].SupportParcelShop" />
+                    </div>
+                    <div class="col-md-1">
+                        0&nbsp;-&nbsp;1&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_0_1" />
+                    </div>
+                    <div class="col-md-1">
+                        1&nbsp;-&nbsp;5&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_1_5" />
+                    </div>
+                    <div class="col-md-1">
+                        5&nbsp;-&nbsp;10&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_5_10" />
+                    </div>
+                    <div class="col-md-1">
+                        10&nbsp;-&nbsp;15&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_10_15" />
+                    </div>
+                    <div class="col-md-1">
+                        15&nbsp;-&nbsp;20&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_15_20" />
+                    </div>
+                    <div class="col-md-1">
+                        20&nbsp;-&nbsp;25&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_20_25" />
+                    </div>
+                    <div class="col-md-1">
+                        25&nbsp;-&nbsp;30&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_25_30" />
+                    </div>                    
+                </div>
+
+                @Html.HiddenFor(modelItem => Model.GLSCountries[i].ThreeLetterISOCode)
+                @Html.HiddenFor(modelItem => Model.GLSCountries[i].TwoLetterGLSCode)
+                @Html.HiddenFor(modelItem => Model.GLSCountries[i].CountryName)
+                @Html.HiddenFor(modelItem => Model.GLSCountries[i].GLSNumber)
+                }
+
+                <br />
+                <hr />
                 <div class="form-group">
                     <div class="col-md-9 col-md-offset-3">
                         <input type="submit" name="save" class="btn bg-primary" value="@T("Admin.Common.Save")" />

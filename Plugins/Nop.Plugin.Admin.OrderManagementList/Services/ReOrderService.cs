@@ -18,7 +18,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 
         public List<AOReOrderItem> GetCurrentReOrderList(ref int markedProductId, string searchphrase = "")
         {
-            List<AOReOrderItem> reOrders = _context.AOReOrderItems.ToList();
+            List<AOReOrderItem> reOrders = _context.AOReOrderItems.OrderBy(o => o.VendorId).ThenBy(o => o.ManufacturerId).ThenBy(o => o.ManufacturerProductId).ToList();
 
             return reOrders;
         }

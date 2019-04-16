@@ -29,7 +29,6 @@
     }
     else
     {
-
         <div id="divSearch">
             <div class="divSearchBox">
                 <input id="txtSearch" type="text" value="@Model.SearchPhrase" autofocus />
@@ -37,16 +36,6 @@
             </div>
         </div>
 
-        <div class="divSingleOrderHeader">
-            <div class="divOrderInfo">
-                Ordre info
-            </div>
-            <div class="divProductInfo">
-                Produkt info
-            </div>
-           
-        </div>
-        <div style="clear:both;"></div>
         <hr class="hrOrderManagement" />
 
         @foreach (AOReOrderItem reOrderItem in Model.ReOrderItems)
@@ -56,6 +45,7 @@
                 <span id="@reOrderItem.Id-error-spn"></span>
             </div>
            
+            <div>VendorId: @reOrderItem.VendorId</div>
            
             <div class="divCustomerInfo">
                 @Html.Raw(reOrderItem.ProductName)
