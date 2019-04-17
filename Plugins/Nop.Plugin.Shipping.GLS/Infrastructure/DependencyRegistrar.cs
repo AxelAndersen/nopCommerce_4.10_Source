@@ -3,6 +3,7 @@ using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
 using Nop.Core.Infrastructure.DependencyManagement;
 using Nop.Plugin.Shipping.GLS.Data;
+using Nop.Plugin.Shipping.GLS.Services;
 using Nop.Web.Framework.Infrastructure.Extensions;
 
 namespace Nop.Plugin.Shipping.GLS.Infrastructure
@@ -14,6 +15,8 @@ namespace Nop.Plugin.Shipping.GLS.Infrastructure
 
         public void Register(ContainerBuilder builder, ITypeFinder typeFinder, NopConfig config)
         {
+            builder.RegisterType<GLSService>().As<IGLSService>().InstancePerLifetimeScope();
+
             //data context
             builder.RegisterPluginDataContext<GLSContext>(CONTEXT_NAME);
         }

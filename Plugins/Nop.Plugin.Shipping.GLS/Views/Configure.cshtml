@@ -38,46 +38,79 @@
                 </div>
 
                 <hr />
-                <h3>Prices (EURO)</h3>
-                @for (int i = 0; i < Model.GLSCountries.Count; i++)
-                {
+                <h4>Prices (EURO)</h4>
                 <div class="form-group">
                     <div class="col-md-3">
-                        <div class="label-wrapper">
-                            <label class="control-label">@Model.GLSCountries[i].CountryName</label>
+                        <div class="label-wrapper"></div>
+                    </div>
+                    <div class="col-md-1 text-center">
+                        Parcelshops
+                    </div>
+                    <div class="col-md-1 text-center">
+                        0&nbsp;-&nbsp;1&nbsp;kg&nbsp;
+                    </div>
+                    <div class="col-md-1 text-center">
+                        1&nbsp;-&nbsp;5&nbsp;kg&nbsp;
+                    </div>
+                    <div class="col-md-1 text-center">
+                        5&nbsp;-&nbsp;10&nbsp;kg&nbsp;
+                    </div>
+                    <div class="col-md-1 text-center">
+                        10&nbsp;-&nbsp;15&nbsp;kg&nbsp;
+                    </div>
+                    <div class="col-md-1 text-center">
+                        15&nbsp;-&nbsp;20&nbsp;kg&nbsp;
+                    </div>
+                    <div class="col-md-1 text-center">
+                        20&nbsp;-&nbsp;25&nbsp;kg&nbsp;
+                    </div>
+                    <div class="col-md-1 text-center">
+                        25&nbsp;-&nbsp;30&nbsp;kg&nbsp;
+                    </div>
+                </div>
+                @for (int i = 0; i < Model.GLSCountries.Count; i++)
+                {
+                    <div class="form-group">
+                        @if (Model.GLSCountries[i].SortOrder == 10000) // Other (XXX)
+                        {
+                            <br /><br />
+                        }
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">@Model.GLSCountries[i].CountryName</label>
+                            </div>
+                        </div>
+                        <div class="col-md-1 text-center">
+                            <nop-editor asp-for="@Model.GLSCountries[i].SupportParcelShop" />
+                        </div>
+                        <div class="col-md-1">
+                            <nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_0_1" />
+                        </div>
+                        <div class="col-md-1">
+                            <nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_1_5" />
+                        </div>
+                        <div class="col-md-1">
+                            <nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_5_10" />
+                        </div>
+                        <div class="col-md-1">
+                            <nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_10_15" />
+                        </div>
+                        <div class="col-md-1">
+                            <nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_15_20" />
+                        </div>
+                        <div class="col-md-1">
+                            <nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_20_25" />
+                        </div>
+                        <div class="col-md-1">
+                            <nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_25_30" />
                         </div>
                     </div>
-                    <div class="col-md-1">
-                        Parcelshops
-                        <nop-editor asp-for="@Model.GLSCountries[i].SupportParcelShop" />
-                    </div>
-                    <div class="col-md-1">
-                        0&nbsp;-&nbsp;1&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_0_1" />
-                    </div>
-                    <div class="col-md-1">
-                        1&nbsp;-&nbsp;5&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_1_5" />
-                    </div>
-                    <div class="col-md-1">
-                        5&nbsp;-&nbsp;10&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_5_10" />
-                    </div>
-                    <div class="col-md-1">
-                        10&nbsp;-&nbsp;15&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_10_15" />
-                    </div>
-                    <div class="col-md-1">
-                        15&nbsp;-&nbsp;20&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_15_20" />
-                    </div>
-                    <div class="col-md-1">
-                        20&nbsp;-&nbsp;25&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_20_25" />
-                    </div>
-                    <div class="col-md-1">
-                        25&nbsp;-&nbsp;30&nbsp;kg&nbsp;<nop-editor asp-for="@Model.GLSCountries[i].ShippingPrice_25_30" />
-                    </div>                    
-                </div>
 
-                @Html.HiddenFor(modelItem => Model.GLSCountries[i].ThreeLetterISOCode)
-                @Html.HiddenFor(modelItem => Model.GLSCountries[i].TwoLetterGLSCode)
-                @Html.HiddenFor(modelItem => Model.GLSCountries[i].CountryName)
-                @Html.HiddenFor(modelItem => Model.GLSCountries[i].GLSNumber)
+                    @Html.HiddenFor(modelItem => Model.GLSCountries[i].ThreeLetterISOCode)
+                    @Html.HiddenFor(modelItem => Model.GLSCountries[i].TwoLetterGLSCode)
+                    @Html.HiddenFor(modelItem => Model.GLSCountries[i].CountryName)
+                    @Html.HiddenFor(modelItem => Model.GLSCountries[i].GLSNumber)
+                    @Html.HiddenFor(modelItem => Model.GLSCountries[i].SortOrder)
                 }
 
                 <br />

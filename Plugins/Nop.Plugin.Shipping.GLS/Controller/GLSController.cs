@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Nop.Plugin.Shipping.GLS.Data;
 using Nop.Plugin.Shipping.GLS.Models;
+using Nop.Plugin.Shipping.GLS.Services;
 using Nop.Plugin.Shipping.GLS.Settings;
 using Nop.Services.Configuration;
 using Nop.Services.Logging;
@@ -8,8 +8,6 @@ using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Mvc.Filters;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Nop.Plugin.Shipping.GLS.Controller
@@ -19,14 +17,14 @@ namespace Nop.Plugin.Shipping.GLS.Controller
         private readonly ILogger _logger;
         private readonly GLSSettings _glsSettings;
         private readonly ISettingService _settingService;
-        private readonly GLSContext _context;
+        private readonly IGLSService _glsService;
 
-        public GLSController(ILogger logger, GLSSettings glsSettings, ISettingService settingService, GLSContext context)
+        public GLSController(ILogger logger, GLSSettings glsSettings, ISettingService settingService, IGLSService glsService)
         {
             this._logger = logger;
             this._glsSettings = glsSettings;
             this._settingService = settingService;
-            this._context = context;
+            this._glsService = glsService;
         }
 
         [AuthorizeAdmin]
@@ -66,7 +64,7 @@ namespace Nop.Plugin.Shipping.GLS.Controller
                 _glsSettings.Tracing = model.Tracing;
                 _settingService.SaveSetting(_glsSettings);
 
-                UpdateCountryPrices(model.GLSCountries);                
+                _glsService.UpdateCountries(model.GLSCountries);                
             }
             catch (Exception ex)
             {
@@ -79,23 +77,13 @@ namespace Nop.Plugin.Shipping.GLS.Controller
             return View("~/Plugins/Shipping.GLS/Views/Configure.cshtml", model);
         }
 
-        private void UpdateCountryPrices(List<AOGLSCountry> gLSCountries)
-        {
-            foreach(AOGLSCountry country in gLSCountries)
-            {
-                _context.AOGLSCountries.Update(country);
-            }
-            _context.SaveChanges();
-        }
-
         private GLSModel GetBaseModel()
         {
             return new GLSModel
             {
                 EndpointAddress = _glsSettings.EndpointAddress,
                 AmountNearestShops = _glsSettings.AmountNearestShops,
-                GLSCountries = _context.AOGLSCountries.ToList(),
-                //SwedishRate = _glsSettings.SwedishRate,
+                GLSCountries = _glsService.GetAllCountries(),
                 Tracing = _glsSettings.Tracing
             };
         }
