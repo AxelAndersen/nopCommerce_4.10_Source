@@ -62,7 +62,10 @@ namespace Nop.Plugin.Shipping.GLS.Controller
                 _glsSettings.EndpointAddress = model.EndpointAddress;
                 _glsSettings.AmountNearestShops = model.AmountNearestShops;                
                 _glsSettings.Tracing = model.Tracing;
-                _settingService.SaveSetting(_glsSettings);
+                _glsSettings.PricesEndsWith = model.PricesEndsWith;
+                _glsSettings.FreeShippingLimit = model.FreeShippingLimit;
+
+                _settingService.SaveSetting(_glsSettings);                
 
                 _glsService.UpdateCountries(model.GLSCountries);                
             }
@@ -84,7 +87,9 @@ namespace Nop.Plugin.Shipping.GLS.Controller
                 EndpointAddress = _glsSettings.EndpointAddress,
                 AmountNearestShops = _glsSettings.AmountNearestShops,
                 GLSCountries = _glsService.GetAllCountries(),
-                Tracing = _glsSettings.Tracing
+                Tracing = _glsSettings.Tracing,
+                PricesEndsWith = _glsSettings.PricesEndsWith,
+                FreeShippingLimit = _glsSettings.FreeShippingLimit
             };
         }
     }

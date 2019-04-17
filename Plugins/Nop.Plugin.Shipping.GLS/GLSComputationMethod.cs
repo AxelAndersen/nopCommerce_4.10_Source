@@ -1,21 +1,25 @@
-﻿using GLSReference;
+﻿using AO.Services.Extensions;
+using GLSReference;
 using Nop.Core;
+using Nop.Core.Domain.Common;
+using Nop.Core.Domain.Directory;
+using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Shipping;
 using Nop.Core.Plugins;
-using Nop.Plugin.Shipping.GLS.Components;
+using Nop.Plugin.Shipping.GLS.Models;
+using Nop.Plugin.Shipping.GLS.Services;
 using Nop.Plugin.Shipping.GLS.Settings;
 using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Directory;
-using Nop.Services.Localization;
 using Nop.Services.Logging;
+using Nop.Services.Orders;
 using Nop.Services.Shipping;
 using Nop.Services.Shipping.Tracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using static GLSReference.wsShopFinderSoapClient;
 
 namespace Nop.Plugin.Shipping.GLS
@@ -24,20 +28,24 @@ namespace Nop.Plugin.Shipping.GLS
     {
         private readonly IWebHelper _webHelper;
         private readonly ISettingService _settingService;
-        private readonly ILocalizationService _localizationService;
-        private readonly ICountryService _countryService;
+        private readonly IWorkContext _workContext;
         private readonly GLSSettings _glsSettings;
         private readonly ILogger _logger;
         private readonly StringBuilder _traceMessages;
+        private readonly IGLSService _glsService;
+        private readonly ICurrencyService _currencyService;
+        private readonly IOrderTotalCalculationService _orderTotalCalculationService;
 
-        public GLSComputationMethod(IWebHelper webHelper, ISettingService settingService, ILocalizationService localizationService, ICountryService countryService, GLSSettings glsSettings, ILogger logger)
+        public GLSComputationMethod(IWebHelper webHelper, ISettingService settingService, GLSSettings glsSettings, ILogger logger, IGLSService glsService, ICurrencyService currencyService, IWorkContext workContext, IOrderTotalCalculationService orderTotalCalculationService)
         {
             this._webHelper = webHelper;
-            this._settingService = settingService;
-            this._localizationService = localizationService;
-            this._countryService = countryService;
+            this._settingService = settingService;       
             this._glsSettings = glsSettings;
             this._logger = logger;
+            this._glsService = glsService;
+            this._currencyService = currencyService;
+            this._workContext = workContext;
+            this._orderTotalCalculationService = orderTotalCalculationService;
 
             this._traceMessages = new StringBuilder();
         }
@@ -68,11 +76,13 @@ namespace Nop.Plugin.Shipping.GLS
             }
         }
 
+        public object EndsWith { get; private set; }
+
         #endregion
 
         public decimal? GetFixedRate(GetShippingOptionRequest getShippingOptionRequest)
         {
-            return 0;
+            return null;
         }
 
         public GetShippingOptionResponse GetShippingOptions(GetShippingOptionRequest getShippingOptionRequest)
@@ -80,9 +90,10 @@ namespace Nop.Plugin.Shipping.GLS
             var response = new GetShippingOptionResponse();
 
             if (_glsSettings.Tracing)
-                _traceMessages.AppendLine("Ready to validate shipping input");            
+                _traceMessages.AppendLine("Ready to validate shipping input");
 
-            bool validInput = ValidateShippingInfo(getShippingOptionRequest, ref response);
+            AOGLSCountry glsCountry = null;
+            bool validInput = ValidateShippingInfo(getShippingOptionRequest, ref response, ref glsCountry);
             if(validInput == false && response.Errors != null && response.Errors.Count > 0)
             {
                 return response;
@@ -93,115 +104,76 @@ namespace Nop.Plugin.Shipping.GLS
                 if (_glsSettings.Tracing)
                     _traceMessages.Append("\r\nReady to prapare GLS call");
 
-                wsShopFinderSoapClient client = new wsShopFinderSoapClient(EndpointConfiguration.wsShopFinderSoap12, _glsSettings.EndpointAddress);
-                string zip = getShippingOptionRequest.ShippingAddress.ZipPostalCode;
-                string street = getShippingOptionRequest.ShippingAddress.Address1;
-                string glsCountryCode = Associations.GLSCountryCode[getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode.ToUpper()];               
-
-                if (_glsSettings.Tracing)
-                    _traceMessages.Append("\r\nReady to call GLS at: '" + _glsSettings.EndpointAddress + "'");
-
-                List<PakkeshopData> parcelShops = null;
-                try
+                if (glsCountry.SupportParcelShop)
                 {
-                    // First try to find a number of shops near the address
-                    parcelShops = client.GetParcelShopDropPointAsync(street, zip, glsCountryCode, _glsSettings.AmountNearestShops).Result.parcelshops.ToList();
-                }
-                catch { }
+                    wsShopFinderSoapClient client = new wsShopFinderSoapClient(EndpointConfiguration.wsShopFinderSoap12, _glsSettings.EndpointAddress);
+                    string zip = getShippingOptionRequest.ShippingAddress.ZipPostalCode;
+                    string street = getShippingOptionRequest.ShippingAddress.Address1;
 
-                if (parcelShops == null || parcelShops.Count == 0)
-                {
+                    if (_glsSettings.Tracing)
+                        _traceMessages.Append("\r\nReady to call GLS at: '" + _glsSettings.EndpointAddress + "'");
+
+                    List<PakkeshopData> parcelShops = null;
                     try
                     {
-                        // If any errors or no shop found, try to find shops from only zip code
-                        parcelShops = client.GetParcelShopsInZipcodeAsync(zip, glsCountryCode).Result.GetParcelShopsInZipcodeResult.ToList();                        
+                        // First try to find a number of shops near the address
+                        parcelShops = client.GetParcelShopDropPointAsync(street, zip, glsCountry.TwoLetterGLSCode, _glsSettings.AmountNearestShops).Result.parcelshops.ToList();
                     }
-                    catch (Exception ex)
+                    catch { }
+
+                    if (parcelShops == null || parcelShops.Count == 0)
                     {
-                        response.AddError(ex.ToString());
-                        if (_glsSettings.Tracing)
-                            _traceMessages.Append("\r\nError finding parcelshops: " + ex.ToString());
+                        try
+                        {
+                            // If any errors or no shop found, try to find shops from only zip code
+                            parcelShops = client.GetParcelShopsInZipcodeAsync(zip, glsCountry.TwoLetterGLSCode).Result.GetParcelShopsInZipcodeResult.ToList();
+                        }
+                        catch (Exception ex)
+                        {
+                            response.AddError(ex.ToString());
+                            if (_glsSettings.Tracing)
+                                _traceMessages.Append("\r\nError finding parcelshops: " + ex.ToString());
+                        }
+                    }
+
+                    if (parcelShops == null || parcelShops.Count == 0)
+                    {
+                        response.AddError($"GLS Service could not find any shops with the given information: {street} {zip} {glsCountry.TwoLetterGLSCode}");
+                        return response;
+                    }
+
+                    if (_glsSettings.Tracing && parcelShops != null && parcelShops.Count > 0)
+                    {
+                        _traceMessages.Append("\r\n" + parcelShops.Count + " parcelshops found");
+                    }
+
+                    foreach (var parcelShop in parcelShops)
+                    {
+                        ShippingOption shippingOption = new ShippingOption()
+                        {
+                            Name = BuildGLSName(parcelShop),
+                            Description = "",
+                            ShippingRateComputationMethodSystemName = "GLS",
+                            Rate = GetRate(glsCountry.ShippingPrice_0_1)
+                        };
+
+                        response.ShippingOptions.Add(shippingOption);
                     }
                 }
-
-                if(parcelShops == null || parcelShops.Count == 0)
+                else
                 {
-                    response.AddError($"GLS Service could not find any shops with the given information: {street} {zip} {glsCountryCode}");
-                    return response;
-                }
-
-                if (_glsSettings.Tracing && parcelShops != null && parcelShops.Count > 0)
-                {
-                    _traceMessages.Append("\r\n" + parcelShops.Count + " parcelshops found");
-                }
-
-                foreach (var parcelShop in parcelShops)
-                {
+                    Address address = getShippingOptionRequest.ShippingAddress;
                     ShippingOption shippingOption = new ShippingOption()
                     {
-                        Name = BuildGLSName(parcelShop), 
-                        Description = BuildGLSDescription(parcelShop),                        
+                        Name = address.FirstName + " " + address.LastName,
+                        Description = address.Address1 + " " + address.Country.Name,
                         ShippingRateComputationMethodSystemName = "GLS",
-                        Rate = _glsSettings.SwedishRate                        
+                        Rate = GetRate(glsCountry.ShippingPrice_0_1)
                     };
-                    
-                    response.ShippingOptions.Add(shippingOption);                    
+
+                    response.ShippingOptions.Add(shippingOption);
                 }
-
-                //var requestString = CreateRequest(_glsSettings.AccessKey, _glsSettings.Username, _glsSettings.Password, getShippingOptionRequest,
-                //    _upsSettings.CustomerClassification, _upsSettings.PickupType, _upsSettings.PackagingType, false);
-                //if (_upsSettings.Tracing)
-                //    _traceMessages.AppendLine("Request:").AppendLine(requestString);
-
-                //var responseXml = DoRequest(_upsSettings.Url, requestString);
-                //if (_upsSettings.Tracing)
-                //    _traceMessages.AppendLine("Response:").AppendLine(responseXml);
-
-                //var error = "";
-                //var shippingOptions = ParseResponse(responseXml, ref error);
-                //if (string.IsNullOrEmpty(error))
-                //{
-                //    foreach (var shippingOption in shippingOptions)
-                //    {
-                //        if (!shippingOption.Name.ToLower().StartsWith("ups"))
-                //            shippingOption.Name = $"UPS {shippingOption.Name}";
-                //        shippingOption.Rate += _upsSettings.AdditionalHandlingCharge;
-                //        response.ShippingOptions.Add(shippingOption);
-                //    }
-                //}
-                //else
-                //{
-                //    response.AddError(error);
-                //}
-
-                ////Saturday delivery
-                //if (_upsSettings.CarrierServicesOffered.Contains("[sa]"))
-                //{
-                //    requestString = CreateRequest(_upsSettings.AccessKey, _upsSettings.Username, _upsSettings.Password, getShippingOptionRequest,
-                //        _upsSettings.CustomerClassification, _upsSettings.PickupType, _upsSettings.PackagingType, true);
-                //    if (_upsSettings.Tracing)
-                //        _traceMessages.AppendLine("Request:").AppendLine(requestString);
-
-                //    responseXml = DoRequest(_upsSettings.Url, requestString);
-                //    if (_upsSettings.Tracing)
-                //        _traceMessages.AppendLine("Response:").AppendLine(responseXml);
-
-                //    error = string.Empty;
-                //    var saturdayDeliveryShippingOptions = ParseResponse(responseXml, ref error);
-                //    if (string.IsNullOrEmpty(error))
-                //    {
-                //        foreach (var shippingOption in saturdayDeliveryShippingOptions)
-                //        {
-                //            shippingOption.Name =
-                //                $"{(shippingOption.Name.ToLower().StartsWith("ups") ? string.Empty : "UPS ")}{shippingOption.Name} - Saturday Delivery";
-                //            shippingOption.Rate += _upsSettings.AdditionalHandlingCharge;
-                //            response.ShippingOptions.Add(shippingOption);
-                //        }
-                //    }
-                //    else
-                //        response.AddError(error);
-                //}
-
+                
                 if (response.ShippingOptions.Any())
                 {
                     response.Errors.Clear();
@@ -226,33 +198,23 @@ namespace Nop.Plugin.Shipping.GLS
             }
 
             return response;
-        }        
+        }
 
-        private string BuildGLSDescription(PakkeshopData parcelShop)
+        private decimal GetRate(decimal price)
         {
-            string desc = "";
+            var cartItems = _workContext.CurrentCustomer.ShoppingCartItems.Where(sci => sci.ShoppingCartType == ShoppingCartType.ShoppingCart).ToList();
 
-            //if (string.IsNullOrEmpty(parcelShop.Telephone) == false)
-            //{
-            //    desc += " Phone: " + parcelShop.Telephone;
-            //}
+            _orderTotalCalculationService.GetShoppingCartSubTotal(cartItems, true, out var orderSubTotalDiscountAmount, out var orderSubTotalAppliedDiscounts, out var subTotalWithoutDiscountBase, out var _);
 
-            //if (string.IsNullOrEmpty(parcelShop.Latitude) == false)
-            //{
-            //    desc += " Latitude: " + parcelShop.Latitude;
-            //}
+            if (_glsSettings.FreeShippingLimit > 0 && subTotalWithoutDiscountBase > _glsSettings.FreeShippingLimit)
+            {
+                return 0;
+            }
 
-            //if (string.IsNullOrEmpty(parcelShop.Longitude) == false)
-            //{
-            //    desc += " Longitude: " + parcelShop.Longitude;
-            //}
+            Currency eurCurrency = _currencyService.GetCurrencyByCode("EUR", true);
+            decimal storePrice = _currencyService.ConvertToPrimaryStoreCurrency(price, eurCurrency);
 
-            //if (parcelShop.DistanceMetersAsTheCrowFlies > 0)
-            //{
-            //    desc += " Distance Meters As The Crow Flies: " + parcelShop.DistanceMetersAsTheCrowFlies;
-            //}
-
-            return desc;
+            return storePrice.AdjustPriceToPresentation(_glsSettings.PricesEndsWith);
         }
 
         private string BuildGLSName(PakkeshopData parcelShop)
@@ -264,7 +226,7 @@ namespace Nop.Plugin.Shipping.GLS
             return name;
         }
 
-        private bool ValidateShippingInfo(GetShippingOptionRequest getShippingOptionRequest, ref GetShippingOptionResponse response)
+        private bool ValidateShippingInfo(GetShippingOptionRequest getShippingOptionRequest, ref GetShippingOptionResponse response, ref AOGLSCountry glsCountry)
         {
             if (getShippingOptionRequest == null)
             {
@@ -295,7 +257,8 @@ namespace Nop.Plugin.Shipping.GLS
                 return false;
             }
 
-            if (!Associations.GLSCountryCode.ContainsKey(getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode))
+            glsCountry = _glsService.GetCountryByThreeLetterCode(getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode);
+            if (glsCountry == null)
             {
                 response.AddError("Not possible to send to " + getShippingOptionRequest.ShippingAddress.Country.Name + " (" + getShippingOptionRequest.ShippingAddress.Country.ThreeLetterIsoCode + ")");                
                 return false;

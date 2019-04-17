@@ -7,5 +7,6 @@ namespace Nop.Plugin.Shipping.GLS.Services
     {
         List<AOGLSCountry> GetAllCountries();
         void UpdateCountries(List<AOGLSCountry> glsCountries);
+        AOGLSCountry GetCountryByThreeLetterCode(string threeLetterISOCode);
     }
 }
