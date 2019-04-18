@@ -29,7 +29,7 @@ namespace Nop.Plugin.Shipping.GLS.Controller
 
         [AuthorizeAdmin]
         [Area(AreaNames.Admin)]
-        public async Task<IActionResult> Configure()
+        public IActionResult Configure()
         {
             GLSModel model = null;
             try
@@ -45,7 +45,7 @@ namespace Nop.Plugin.Shipping.GLS.Controller
                 model.ErrorMessage += "<br />" + inner.Message;
             }
 
-            return await Task.Run(() => View("~/Plugins/Shipping.GLS/Views/Configure.cshtml", model));
+            return View("~/Plugins/Shipping.GLS/Views/Configure.cshtml", model);
         }
 
         [HttpPost]

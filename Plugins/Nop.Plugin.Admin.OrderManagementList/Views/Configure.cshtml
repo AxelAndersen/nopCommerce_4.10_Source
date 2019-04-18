@@ -4,6 +4,7 @@
 }
 @inject Nop.Core.IWebHelper webHelper
 
+
 <form asp-controller="OrderManagement" asp-action="Configure" method="post">
     <div class="panel-group">
         <div class="panel panel-default">
@@ -20,6 +21,7 @@
                         <nop-label asp-for="FTPHost" />
                     </div>
                     <div class="col-md-9">
+                        <span>Ex.:  ftp://5.189.157.82</span>
                         <nop-editor asp-for="FTPHost" />
                         <span asp-validation-for="FTPHost"></span>
                     </div>
@@ -27,6 +29,7 @@
 
                 <div class="form-group">
                     <div class="col-md-3">
+                        <span>ftptest</span>
                         <nop-label asp-for="FTPUsername" />
                     </div>
                     <div class="col-md-9">
@@ -37,6 +40,7 @@
 
                 <div class="form-group">
                     <div class="col-md-3">
+                        <span>123456</span>
                         <nop-label asp-for="FTPPassword" />
                     </div>
                     <div class="col-md-9">
@@ -50,6 +54,7 @@
                         <nop-label asp-for="FTPLocalFilePath" />
                     </div>
                     <div class="col-md-9">
+                        <span>C:\\GLSTest</span>
                         <nop-editor asp-for="FTPLocalFilePath" />
                         <span asp-validation-for="FTPLocalFilePath"></span>
                     </div>
@@ -60,6 +65,7 @@
                         <nop-label asp-for="FTPLocalFileName" />
                     </div>
                     <div class="col-md-9">
+                        <span>GLS-Label-Info.txt</span>
                         <nop-editor asp-for="FTPLocalFileName" />
                         <span asp-validation-for="FTPLocalFileName"></span>
                     </div>
@@ -70,6 +76,7 @@
                         <nop-label asp-for="FTPRemoteFolderPath" />
                     </div>
                     <div class="col-md-9">
+                        <span>C:\GLSTest\Labels\GLS</span>
                         <nop-editor asp-for="FTPRemoteFolderPath" />
                         <span asp-validation-for="FTPRemoteFolderPath"></span>
                     </div>
