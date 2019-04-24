@@ -127,7 +127,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
                 var manufacturer = _manufacturerService.GetProductManufacturersByProductId(product.Id).FirstOrDefault();
                 if (manufacturer != null)
                 {
-                    manufacturerId = manufacturer.Id;
+                    manufacturerId = manufacturer.ManufacturerId;
                 }
 
                 if (string.IsNullOrEmpty(comb.Gtin) == false)

@@ -24,13 +24,12 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         [Area(AreaNames.Admin)]
         public IActionResult ReOrderList(string searchphrase = "")
         {
-            ReOrderListModel model = new ReOrderListModel();
+            PresentationReOrderListModel model = new PresentationReOrderListModel();
 
             try
             {
                 int markedProductId = 0;
                 model.ReOrderItems = _reOrderService.GetCurrentReOrderList(ref markedProductId, searchphrase);
-                model.MarkedProductId = markedProductId;
                 model.SearchPhrase = searchphrase;
             }
             catch (Exception ex)
@@ -42,6 +41,14 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             }
 
             return View("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Views/ReOrderList.cshtml", model);
+        }
+
+        [HttpGet]
+        [AuthorizeAdmin(false)]
+        public IActionResult ReOrderItemCountDown(int reOrderItemId)
+        {
+            int newQuantity = _reOrderService.CountDown(reOrderItemId);
+            return Json(newQuantity);
         }
     }
 }

@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
-using Nop.Plugin.Admin.OrderManagementList.Domain;
+﻿using Nop.Plugin.Admin.OrderManagementList.Models;
+using System.Collections.Generic;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Services
 {
     public interface IReOrderService
     {
-        List<AOReOrderItem> GetCurrentReOrderList(ref int markedProductId, string searchphrase = "");
+        List<PresentationReOrderItem> GetCurrentReOrderList(ref int markedProductId, string searchphrase = "");
+
+        int CountDown(int reOrderItemId);
     }
 }

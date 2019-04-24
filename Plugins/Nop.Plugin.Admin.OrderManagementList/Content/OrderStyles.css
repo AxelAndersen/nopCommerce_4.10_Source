@@ -37,10 +37,15 @@ div.singleLineError { display: none; color: red; font-weight: bold; font-size: 1
 #divSearch { height: 50px; }
     #divSearch .divSearchBox{ float:left; width: 320px; margin: 0 0 0 20px; }
 
+.divSingleReOrderItem { padding: 10px 0 0 0; }
+    .divSingleReOrderItem div { float: left; margin: 0 0 0 20px; }
+    .divSingleReOrderItem .divDecrease { width: 140px; }
+    .divSingleReOrderItem .divVendor { width: 200px; }
+    .divSingleReOrderItem .divManufacturer { width: 200px; }
+    .divSingleReOrderItem .divProduct { width: 400px; }
+    .divSingleReOrderItem .divQuantity { width: 100px; }
 
-@media only screen and (max-width: 1400px) 
-{
-    .divSingleOrderHeader > div { margin: 0 5px 0 5px; font-size: 12px; }
+@media only screen and (max-width: 1400px) { .divSingleOrderHeader > div { margin: 0 5px 0 5px; font-size: 12px; }
     .divSingleOrderHeader .divProductInfo { width: 20%; }
     .divSingleOrderHeader .divShippingInfo { width: 18%; }
     .divSingleOrderHeader .divCustomerInfo { width: 15%; }

@@ -2,7 +2,7 @@
 @using Nop.Plugin.Admin.OrderManagementList.Domain
 @using Nop.Web.Framework.UI;
 
-@model ReOrderListModel
+@model PresentationReOrderListModel
 @{
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     Html.AddCssFileParts("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Content/OrderStyles.css");
@@ -10,51 +10,104 @@
     Html.SetActiveMenuItemSystemName("Sales");
 }
 
-<form asp-controller="ReOrderController" asp-action="ReOrderList" method="post">
-    <div class="panel-group">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <h1>Bestillingsliste</h1>
-            </div>
-        </div>
-    </div>
-
-    <hr />
-    @if (string.IsNullOrEmpty(Model.ErrorMessage) == false)
-    {
-        <div id="divErrorMessage">
-            <h3>Error occurred:</h3>
-            <h4>@Model.ErrorMessage</h4>
-        </div>
-    }
-    else
-    {
-        <div id="divSearch">
-            <div class="divSearchBox">
-                <input id="txtSearch" type="text" value="@Model.SearchPhrase" autofocus />
-                <button value="1" onclick="javascript: return DoSearch();">Søg</button>                                
+    <form asp-controller="ReOrderController" asp-action="ReOrderList" method="post">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h1>Bestillingsliste</h1>
+                </div>
             </div>
         </div>
 
-        <hr class="hrOrderManagement" />
-
-        @foreach (AOReOrderItem reOrderItem in Model.ReOrderItems)
+        <hr />
+        @if (string.IsNullOrEmpty(Model.ErrorMessage) == false)
         {
-        <div class="divSingleOrder">
-            <div class="singleLineError">
-                <span id="@reOrderItem.Id-error-spn"></span>
+            <div id="divErrorMessage">
+                <h3>Error occurred:</h3>
+                <h4>@Model.ErrorMessage</h4>
             </div>
-           
-            <div>VendorId: @reOrderItem.VendorId</div>
-           
-            <div class="divCustomerInfo">
-                @Html.Raw(reOrderItem.ProductName)
-                <br />
-                @reOrderItem.Quantity
-            </div>            
-        </div>
-            <div style="clear:both;"></div>
-            <hr class="hrOrderManagement" />
         }
-    }
-</form>
+        else
+        {
+            <div id="divSearch">
+                <div class="divSearchBox">
+                    <input id="txtSearch" type="text" value="@Model.SearchPhrase" autofocus />
+                    <button value="1" onclick="javascript: return DoSearch();">Søg</button>
+                </div>
+            </div>
+
+            <hr class="hrOrderManagement" />
+
+            @foreach (PresentationReOrderItem reOrderItem in Model.ReOrderItems)
+            {
+                <div class="divSingleReOrderItem">
+                    <div class="singleLineError">
+                        <span id="@reOrderItem.Id-error-spn"></span>
+                    </div>
+
+                    <div class="divDecrease">
+                        <a class="btn bg-green large-text" onclick="javascript:ReOrderItemCountDown(@reOrderItem.Id);">Decrease quantity</a>
+                    </div>
+                    <div class="divVendor">
+                        @reOrderItem.Vendor
+                    </div>
+                    <div class="divManufacturer">
+                        @reOrderItem.Manufacturer
+                        <br />
+                        @reOrderItem.ManufacturerProductId
+                    </div>
+                    <div class="divProduct">
+                        @Html.Raw(reOrderItem.ProductName)
+                    </div>
+                    <div class="divQuantity">
+                        Quantity: 
+                        <span id="spn-quantity-@reOrderItem.Id">@reOrderItem.Quantity</span>
+                    </div>
+                </div>
+                <div style="clear:both;"></div>
+                <hr class="hrSmall" />
+            }
+        }
+
+        <script type="text/javascript">
+
+        function ReOrderItemCountDown(reOrderItemId)
+        {
+            $.ajax({
+                cache: false,
+                type: 'GET',
+                url: '@Url.Action("ReOrderItemCountDown", "ReOrder")',
+                data: { reOrderItemId: reOrderItemId },
+                dataType: 'json',
+                success: function (data)
+                {                    
+                    var spnId = "#spn-quantity-" + reOrderItemId;
+                    $(spnId).html(data);
+                    $(spnId).css("font-weight", "bold");                    
+                },
+                error: function (xhr, ajaxOptions, thrownError)
+                {
+                    if (xhr && xhr.responseText)
+                    {
+                        var err = eval("(" + xhr.responseText + ")");
+                        ShowError(orderId, err.Message);
+                    }
+                    else
+                    {
+                        ShowError(orderId, "Error while saving.");
+                    }
+                }
+            });
+            return false;
+        }
+
+        function ShowError(orderId, msg)
+        {
+            $("#" + orderId + "-error-spn").html(msg);
+            $("#" + orderId + "-error-spn").parent().css("display", "block");
+        }
+
+        </script>
+
+    </form>
+
