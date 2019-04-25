@@ -13,6 +13,7 @@ using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Mvc.Filters;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
@@ -71,6 +72,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 model.PresentationOrders = _orderManagementService.GetCurrentOrders(ref markedProductId, searchphrase);
                 model.MarkedProductId = markedProductId;
                 model.SearchPhrase = searchphrase;
+                model.TotalCount = model.PresentationOrders.Count;
+                model.TotalAmount = GetTotalAmount(model.PresentationOrders);
             }
             catch (Exception ex)
             {
@@ -81,6 +84,16 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             }
 
             return View("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Views/List.cshtml", model);
+        }
+
+        private decimal GetTotalAmount(List<AOPresentationOrder> presentationOrders)
+        {
+            decimal totalAmount = 0;
+            foreach(AOPresentationOrder o in presentationOrders)
+            {
+                totalAmount += o.TotalOrderAmount;
+            }
+            return totalAmount;
         }
 
         [AuthorizeAdmin]

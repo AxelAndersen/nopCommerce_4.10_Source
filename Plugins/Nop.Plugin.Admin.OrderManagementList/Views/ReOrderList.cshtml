@@ -36,6 +36,11 @@
                 </div>
             </div>
 
+            <div id="divCount">
+                <div class="divTotalCount">Ialt:&nbsp;@Model.TotalCount</div>
+            </div>
+            <div style="clear:both;"></div>
+
             <hr class="hrOrderManagement" />
 
             @foreach (PresentationReOrderItem reOrderItem in Model.ReOrderItems)
@@ -60,7 +65,7 @@
                         @Html.Raw(reOrderItem.ProductName)
                     </div>
                     <div class="divQuantity">
-                        Quantity: 
+                        Quantity:
                         <span id="spn-quantity-@reOrderItem.Id">@reOrderItem.Quantity</span>
                     </div>
                 </div>
@@ -80,10 +85,10 @@
                 data: { reOrderItemId: reOrderItemId },
                 dataType: 'json',
                 success: function (data)
-                {                    
+                {
                     var spnId = "#spn-quantity-" + reOrderItemId;
                     $(spnId).html(data);
-                    $(spnId).css("font-weight", "bold");                    
+                    $(spnId).css("font-weight", "bold");
                 },
                 error: function (xhr, ajaxOptions, thrownError)
                 {

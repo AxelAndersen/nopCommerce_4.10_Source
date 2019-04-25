@@ -251,7 +251,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 OrderNotes = GetOrderNotes(order),
                 OrderDateTime = order.OrderDateTime.ToString("dd-MM-yy H:mm"),
                 ShippingInfo = GetShippingInfo(order),
-                TotalOrderAmount = GetTotal(order),
+                TotalOrderAmountStr = GetTotal(order),
+                TotalOrderAmount = order.TotalOrderAmount,
                 PresentationOrderItems = GetProductInfo(order),
                 FormattedPaymentStatus = GetPaymentStatus(order.PaymentStatusId)
             }).ToList();

@@ -31,6 +31,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 int markedProductId = 0;
                 model.ReOrderItems = _reOrderService.GetCurrentReOrderList(ref markedProductId, searchphrase);
                 model.SearchPhrase = searchphrase;
+                model.TotalCount = model.ReOrderItems.Count;
             }
             catch (Exception ex)
             {

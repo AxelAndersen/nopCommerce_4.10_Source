@@ -10,110 +10,116 @@
     Html.SetActiveMenuItemSystemName("Sales");
 }
 
-<form asp-controller="OrderManagement" asp-action="List" method="post">
-    <div class="panel-group">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <h1>Ordrehåndtering</h1>
-            </div>
-        </div>
-    </div>
-
-    <hr />
-    @if (string.IsNullOrEmpty(Model.ErrorMessage) == false)
-    {
-        <div id="divErrorMessage">
-            <h3>Error occurred:</h3>
-            <h4>@Model.ErrorMessage</h4>
-        </div>
-    }
-    else
-    {
-
-        <div id="divSearch">
-            <div class="divSearchBox">
-                <input id="txtSearch" type="text" value="@Model.SearchPhrase" autofocus />
-                <button value="1" onclick="javascript: return DoSearch();">Søg</button>                                
-            </div>
-        </div>
-
-        <div class="divSingleOrderHeader">
-            <div class="divOrderInfo">
-                Ordre info
-            </div>
-            <div class="divProductInfo">
-                Produkt info
-            </div>
-            <div class="divCustomerComment">
-                Kundens kommentar
-            </div>
-            <div class="divShippingInfo">
-                Forsendelse
-            </div>
-            <div class="divCustomerInfo">
-                Kunde info
-            </div>
-            <div class="divOrderNote">
-                Noter
-            </div>
-        </div>
-        <div style="clear:both;"></div>
-        <hr class="hrOrderManagement" />
-
-        @foreach (AOPresentationOrder order in Model.PresentationOrders)
-        {
-        <div class="divSingleOrder">
-            <div class="singleLineError">
-                <span id="@order.OrderId-error-spn"></span>
-            </div>
-            <div class="divOrderInfo">
-                <a class="btn bg-yellow large-text" href="/Admin/Order/Edit/@order.OrderId">Ordrenr.:&nbsp;@order.OrderId</a>
-                <br /><br />
-                <a class="btn bg-purple large-text" onclick="javascript: ResetMessages();" href="/Admin/Order/PdfPackagingSlip?shipmentId=6">Følgeseddel</a>
-                <br /><br />
-                <a class="btn bg-green large-text" onclick="javascript:CompleteOrderAjax(@order.OrderId);">Afslut ordre</a>
-                <br /><br />
-                @order.OrderDateTime
-                <br />
-                <span class="large-text"><b>@order.TotalOrderAmount</b></span>
-                <br /><br />
-                @Html.Raw(order.FormattedPaymentStatus)
-            </div>
-            <div class="divProductInfo">
-                @foreach (AOOrderItem item in order.PresentationOrderItems)
-                {
-                <div>
-                    <input type="checkbox" name="chkIsTakenAside" @(item.IstakenAside ? "checked" : "") onclick="javascript:UpdateProductTakenAsideAjax(@order.OrderId, @item.OrderItemId, @item.ProductId, this.checked);" />&nbsp;Er taget fra&nbsp;&nbsp;
-                    <input type="checkbox" name="chkOrdered" @(item.IsOrdered ? "checked" : "") onclick="javascript:UpdateProductOrderedAjax(@order.OrderId, @item.OrderItemId, @item.ProductId, this.checked, @item.Quantity);" value="@item.ProductId" />&nbsp;Er bestilt
-                    <span id="spn-@order.OrderId-@item.OrderItemId-@item.ProductId" class="success" style="display:none;"></span>
-                    <br />
-                    @if (Model.MarkedProductId > 0 && Model.MarkedProductId == item.ProductId)
-                    {
-                        <span class="spnMarkedProduct">@Html.Raw(item.ProductName)</span>
-                    }
-                    else
-                    {
-                        <span>@Html.Raw(item.ProductName)</span>
-                    }                    
-                    <hr class="hrSmall" />
+    <form asp-controller="OrderManagement" asp-action="List" method="post">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h1>Ordrehåndtering</h1>
                 </div>
-                }
             </div>
-            <div class="divCustomerComment">@Html.Raw(order.CustomerComment)</div>
-            <div class="divShippingInfo">@Html.Raw(order.ShippingInfo)</div>
-            <div class="divCustomerInfo">
-                @Html.Raw(order.CustomerInfo)
-                <br />
-                @order.CustomerEmail
-            </div>
-            <div class="divOrderNote">@Html.Raw(order.OrderNotes)</div>
         </div>
+
+        <hr />
+        @if (string.IsNullOrEmpty(Model.ErrorMessage) == false)
+        {
+            <div id="divErrorMessage">
+                <h3>Error occurred:</h3>
+                <h4>@Model.ErrorMessage</h4>
+            </div>
+        }
+        else
+        {
+
+            <div id="divSearch">
+                <div class="divSearchBox">
+                    <input id="txtSearch" type="text" value="@Model.SearchPhrase" autofocus />
+                    <button value="1" onclick="javascript: return DoSearch();">Søg</button>
+                </div>
+            </div>
+
+            <div id="divCount">
+                <div class="divTotalCount">Antal ordrer:&nbsp;@Model.TotalCount</div>
+                <div class="divTotalAmount">Beløb ialt:&nbsp;@Model.TotalAmount.ToString("N2")</div>
+            </div>
+            <div style="clear:both;"></div>
+
+            <div class="divSingleOrderHeader">
+                <div class="divOrderInfo">
+                    Ordre info
+                </div>
+                <div class="divProductInfo">
+                    Produkt info
+                </div>
+                <div class="divCustomerComment">
+                    Kundens kommentar
+                </div>
+                <div class="divShippingInfo">
+                    Forsendelse
+                </div>
+                <div class="divCustomerInfo">
+                    Kunde info
+                </div>
+                <div class="divOrderNote">
+                    Noter
+                </div>
+            </div>
             <div style="clear:both;"></div>
             <hr class="hrOrderManagement" />
-        }
-    }
 
-    <script type="text/javascript">
+            @foreach (AOPresentationOrder order in Model.PresentationOrders)
+            {
+                <div class="divSingleOrder">
+                    <div class="singleLineError">
+                        <span id="@order.OrderId-error-spn"></span>
+                    </div>
+                    <div class="divOrderInfo">
+                        <a class="btn bg-yellow large-text" href="/Admin/Order/Edit/@order.OrderId">Ordrenr.:&nbsp;@order.OrderId</a>
+                        <br /><br />
+                        <a class="btn bg-purple large-text" onclick="javascript: ResetMessages();" href="/Admin/Order/PdfPackagingSlip?shipmentId=6">Følgeseddel</a>
+                        <br /><br />
+                        <a class="btn bg-green large-text" onclick="javascript:CompleteOrderAjax(@order.OrderId);">Afslut ordre</a>
+                        <br /><br />
+                        @order.OrderDateTime
+                        <br />
+                        <span class="large-text"><b>@order.TotalOrderAmountStr</b></span>
+                        <br /><br />
+                        @Html.Raw(order.FormattedPaymentStatus)
+                    </div>
+                    <div class="divProductInfo">
+                        @foreach (AOOrderItem item in order.PresentationOrderItems)
+                        {
+                            <div>
+                                <input type="checkbox" name="chkIsTakenAside" @(item.IstakenAside ? "checked" : "") onclick="javascript:UpdateProductTakenAsideAjax(@order.OrderId, @item.OrderItemId, @item.ProductId, this.checked);" />&nbsp;Er taget fra&nbsp;&nbsp;
+                                <input type="checkbox" name="chkOrdered" @(item.IsOrdered ? "checked" : "") onclick="javascript:UpdateProductOrderedAjax(@order.OrderId, @item.OrderItemId, @item.ProductId, this.checked, @item.Quantity);" value="@item.ProductId" />&nbsp;Er bestilt
+                                <span id="spn-@order.OrderId-@item.OrderItemId-@item.ProductId" class="success" style="display:none;"></span>
+                                <br />
+                                @if (Model.MarkedProductId > 0 && Model.MarkedProductId == item.ProductId)
+                                {
+                                    <span class="spnMarkedProduct">@Html.Raw(item.ProductName)</span>
+                                }
+                                else
+                                {
+                                    <span>@Html.Raw(item.ProductName)</span>
+                                }
+                                <hr class="hrSmall" />
+                            </div>
+                        }
+                    </div>
+                    <div class="divCustomerComment">@Html.Raw(order.CustomerComment)</div>
+                    <div class="divShippingInfo">@Html.Raw(order.ShippingInfo)</div>
+                    <div class="divCustomerInfo">
+                        @Html.Raw(order.CustomerInfo)
+                        <br />
+                        @order.CustomerEmail
+                    </div>
+                    <div class="divOrderNote">@Html.Raw(order.OrderNotes)</div>
+                </div>
+                <div style="clear:both;"></div>
+                <hr class="hrOrderManagement" />
+            }
+        }
+
+        <script type="text/javascript">
 
         function UpdateProductTakenAsideAjax(orderId, orderItemId, productId, checked)
         {
@@ -181,7 +187,7 @@
                 url: '@Url.Action("CompleteOrder", "OrderManagement")',
                 data: { orderId: orderId },
                 dataType: 'json',
-                success: function (data) 
+                success: function (data)
                 {
                     if (data.indexOf("Error:") > -1)
                     {
@@ -194,7 +200,7 @@
                     else
                     {
                         // SUCCESS, now reload page to remove handled order
-                        location.reload(); 
+                        location.reload();
                     }
                 },
                 error: function (xhr, ajaxOptions, thrownError)
@@ -211,7 +217,7 @@
                 }
             });
             return false;
-        }     
+        }
 
         function HandleResult(data, infoId)
         {
@@ -248,7 +254,7 @@
         }
 
         function DoSearch()
-        {            
+        {
             var loc = location.href;
             if (loc.indexOf("?searchphrase=") > -1)
             {
@@ -263,10 +269,10 @@
         }
 
         function ResetMessages()
-        {            
-            $("[id$=error-spn]").hide();                               
+        {
+            $("[id$=error-spn]").hide();
             return true;
         }
-    </script>
+        </script>
 
-</form>
+    </form>

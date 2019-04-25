@@ -45,6 +45,11 @@ div.singleLineError { display: none; color: red; font-weight: bold; font-size: 1
     .divSingleReOrderItem .divProduct { width: 400px; }
     .divSingleReOrderItem .divQuantity { width: 100px; }
 
+#divCount { height: 30px; margin: 0 0 10px 20px; font-size: 16px; font-weight:bold; }
+    #divCount div { float: left; }
+    #divCount .divTotalCount { width: 120px; }
+    #divCount .divTotalAmount { width: 300px; }
+
 @media only screen and (max-width: 1400px) { .divSingleOrderHeader > div { margin: 0 5px 0 5px; font-size: 12px; }
     .divSingleOrderHeader .divProductInfo { width: 20%; }
     .divSingleOrderHeader .divShippingInfo { width: 18%; }
