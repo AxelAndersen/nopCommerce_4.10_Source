@@ -98,7 +98,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             return orders;
         }
 
-        public void SetProductIsTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside, ref string errorMessage)
+        public void SetProductIsTakenAside(int orderItemId, int productId, bool isTakenAside, ref string errorMessage)
         {
             try
             {
@@ -131,7 +131,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             }
         }
 
-        public void SetProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered, ref string errorMessage)
+        public void SetProductOrdered(int orderItemId, int productId, bool isOrdered, ref string errorMessage)
         {
             try
             {
@@ -203,15 +203,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             }
 
             _workflowMessageService.SendShipmentSentCustomerNotification(_shipment, _workContext.WorkingLanguage.Id);
-        }
-
-        //public List<AOPresentationOrder> SearchList(string searchPhrase)
-        //{
-        //    List<AOPresentationOrder> orders = GetOrders();
-        //    orders = orders.Where(o => o.PresentationOrderItems.Any(p => p.ProductName.Contains(searchPhrase))).ToList();
-
-        //    return orders;
-        //}        
+        }  
 
         public void ChangeOrderStatus(int orderId)
         {
@@ -356,7 +348,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         {
             List<AOOrderItem> orderItems = new List<AOOrderItem>();
 
-            var items = orderItemsStr.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+            var items = orderItemsStr.Split(new string[] { "#" }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string s in items)
             {
                 var itemContent = s.Split(';');
@@ -364,13 +356,30 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 {
                     ProductId = Convert.ToInt32(itemContent[0]),
                     OrderItemId = Convert.ToInt32(itemContent[1]),
-                    ProductName = itemContent[2].ToString() + GetAttributeInfo(itemContent[3].ToString()) + " <span class='spnQuantity'>(" + itemContent[6] + " stk.)</span>",
-                    IstakenAside = itemContent[4] == "1" ? true : false,
-                    IsOrdered = itemContent[5] == "1" ? true : false
+                    ProductName = GetProductName(itemContent), 
+                    IstakenAside = itemContent.Length > 4 ? ( itemContent[4] == "1" ? true : false) : false,
+                    IsOrdered = itemContent.Length > 5 ? (itemContent[5] == "1" ? true : false) : false,
+                    Quantity = itemContent.Length > 6 ? (Convert.ToInt32(itemContent[6])) : 0
                 });
             }
 
             return orderItems;
+        }
+
+        private string GetProductName(string[] itemContent)
+        {
+            string productName = itemContent[2].ToString();
+            if (itemContent.Length > 3)
+            {
+                productName += GetAttributeInfo(itemContent[3].ToString());
+            }
+            
+            if(itemContent.Length > 6)
+            {
+                productName += " <span class='spnQuantity'>(" + itemContent[6] + " stk.)</span>";
+            }
+
+            return productName;
         }
 
         private string GetAttributeInfo(string attributeXml)

@@ -9,9 +9,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
     {
         List<AOPresentationOrder> GetCurrentOrders(ref int markedProductId, string searchphrase = "");
 
-        void SetProductIsTakenAside(int orderId, int orderItemId, int productId, bool isTakenAside, ref string errorMessage);
+        void SetProductIsTakenAside(int orderItemId, int productId, bool isTakenAside, ref string errorMessage);
 
-        void SetProductOrdered(int orderId, int orderItemId, int productId, bool isOrdered, ref string errorMessage);
+        void SetProductOrdered(int orderItemId, int productId, bool isOrdered, ref string errorMessage);
 
         AOOrder GetOrder(int orderId);
 

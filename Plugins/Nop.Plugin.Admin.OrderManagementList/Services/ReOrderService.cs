@@ -29,7 +29,12 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 
         public List<PresentationReOrderItem> GetCurrentReOrderList(ref int markedProductId, string searchphrase = "")
         {
-            List<AOReOrderItem> reOrders = _context.AOReOrderItems.OrderBy(o => o.VendorId).ThenBy(o => o.ManufacturerId).ThenBy(o => o.ManufacturerProductId).ToList();
+            List<AOReOrderItem> reOrders = _context.AOReOrderItems
+                                                .Where(o => o.Quantity > 0)
+                                                .OrderBy(o => o.VendorId)
+                                                .ThenBy(o => o.ManufacturerId)
+                                                .ThenBy(o => o.ManufacturerProductId)
+                                                .ToList();
 
             List<PresentationReOrderItem> presentationReOrderItems = new List<PresentationReOrderItem>();
             foreach (AOReOrderItem item in reOrders)
@@ -50,6 +55,57 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             }
 
             return presentationReOrderItems;
+        }
+
+        public int CountDown(int reOrderItemId)
+        {
+            AOReOrderItem reOrderItem = _context.AOReOrderItems.Where(r => r.Id == reOrderItemId).FirstOrDefault();
+            if(reOrderItem == null)
+            {
+                throw new ArgumentException("No AOReOrderItem found with id: " + reOrderItemId);
+            }
+
+            reOrderItem.Quantity -= 1;
+            _context.Update(reOrderItem);
+            _context.SaveChanges();
+
+            return reOrderItem.Quantity;
+        }
+
+        public void RemoveFromReOrderList(int quantityToOrder, int orderItemId)
+        {
+            AOReOrderItem reOrderItem = _context.AOReOrderItems.Where(r => r.OrderItemId == orderItemId).FirstOrDefault();
+            if (reOrderItem == null)
+            {
+                throw new ArgumentException("Intet fundet på bestillingslisten");
+            }
+            
+            if(quantityToOrder > reOrderItem.Quantity)
+            {
+                // If we wanna reduce with more than is on reorderlist.
+                // This can happen if we had some in stock on order time
+                // But we only have the total quantity from the orderitem here.
+                quantityToOrder = reOrderItem.Quantity;
+            }
+
+            reOrderItem.Quantity -= quantityToOrder;            
+            reOrderItem.OrderedQuantity = quantityToOrder;
+            _context.AOReOrderItems.Update(reOrderItem);
+            _context.SaveChanges();
+        }
+
+        public void ReAddToReOrderList(int orderItemId)
+        {
+            AOReOrderItem reOrderItem = _context.AOReOrderItems.Where(r => r.OrderItemId == orderItemId).FirstOrDefault();
+            if (reOrderItem == null)
+            {
+                throw new ArgumentException("Intet fundet på bestillingslisten");
+            }
+
+            reOrderItem.Quantity = (reOrderItem.OrderedQuantity.HasValue && reOrderItem.OrderedQuantity.Value > 0) ? reOrderItem.OrderedQuantity.Value : 1;
+            reOrderItem.OrderedQuantity = 0;
+            _context.AOReOrderItems.Update(reOrderItem);
+            _context.SaveChanges();
         }
 
         private string GetVendor(int vendorId)
@@ -94,21 +150,6 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 manufacturerName = ex.Message;
             }
             return manufacturerName;
-        }
-
-        public int CountDown(int reOrderItemId)
-        {
-            AOReOrderItem reOrderItem = _context.AOReOrderItems.Where(r => r.Id == reOrderItemId).FirstOrDefault();
-            if(reOrderItem == null)
-            {
-                throw new ArgumentException("No AOReOrderItem found with id: " + reOrderItemId);
-            }
-
-            reOrderItem.Quantity -= 1;
-            _context.Update(reOrderItem);
-            _context.SaveChanges();
-
-            return reOrderItem.Quantity;
         }
     }
 }

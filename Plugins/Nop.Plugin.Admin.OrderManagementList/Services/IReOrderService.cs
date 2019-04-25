@@ -8,5 +8,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         List<PresentationReOrderItem> GetCurrentReOrderList(ref int markedProductId, string searchphrase = "");
 
         int CountDown(int reOrderItemId);
+
+        void RemoveFromReOrderList(int orquantityToOrderderId, int orderItemId);
+
+        void ReAddToReOrderList(int orderItemId);
     }
 }
