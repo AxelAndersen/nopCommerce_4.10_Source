@@ -1,5 +1,4 @@
-﻿using Nop.Core.Domain.Payments;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Domain
 {

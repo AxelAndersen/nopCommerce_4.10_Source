@@ -8,7 +8,6 @@ using Nop.Services.Vendors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Services
 {

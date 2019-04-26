@@ -65,9 +65,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Components\" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="FluentFTP" Version="23.1.0" />
   </ItemGroup>
 </Project>

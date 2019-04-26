@@ -1,5 +1,4 @@
 ﻿using Nop.Core.Domain.Catalog;
-using Nop.Core.Domain.Shipping;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
 using System.Collections.Generic;
 

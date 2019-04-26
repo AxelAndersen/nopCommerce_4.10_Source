@@ -412,14 +412,6 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             return attributeInfo;
         }
 
-        //private static string[] NoOrderItem(string message)
-        //{
-        //    string[] item = new string[2];
-        //    item[0] = "0";
-        //    item[1] = message;
-        //    return item;
-        //}
-
         private string GetPaymentStatus(int paymentStatusId)
         {
             PaymentStatus paymentStatus = (PaymentStatus)paymentStatusId;

@@ -38,8 +38,6 @@ namespace Nop.Plugin.Admin.OrderManagementList.Domain
         /// </summary>
         public virtual string Shipment { get; set; }
 
-        public virtual string AuthorizationTransactionId { get; set; }
-
-        //public string EAN { get; set; }
+        public virtual string AuthorizationTransactionId { get; set; }        
     }
 }

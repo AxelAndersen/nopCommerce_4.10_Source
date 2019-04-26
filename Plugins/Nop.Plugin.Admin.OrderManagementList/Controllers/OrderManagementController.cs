@@ -8,12 +8,10 @@ using Nop.Plugin.Payments.QuickPayV10.Services;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
-using Nop.Services.Messages;
 using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Mvc.Filters;
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
