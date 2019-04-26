@@ -73,7 +73,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 model.MarkedProductId = markedProductId;
                 model.SearchPhrase = searchphrase;
                 model.TotalCount = model.PresentationOrders.Count;
-                model.TotalAmount = GetTotalAmount(model.PresentationOrders);
+                model.TotalAmount = _orderManagementService.GetTotalAmount();                
             }
             catch (Exception ex)
             {
@@ -84,16 +84,6 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             }
 
             return View("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Views/List.cshtml", model);
-        }
-
-        private decimal GetTotalAmount(List<AOPresentationOrder> presentationOrders)
-        {
-            decimal totalAmount = 0;
-            foreach(AOPresentationOrder o in presentationOrders)
-            {
-                totalAmount += o.TotalOrderAmount;
-            }
-            return totalAmount;
         }
 
         [AuthorizeAdmin]

@@ -7,7 +7,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Models
     {
         public int TotalCount { get; set; }
 
-        public decimal TotalAmount { get; set; }
+        public string TotalAmount { get; set; }        
 
         public string ErrorMessage { get; set; }
 

@@ -22,5 +22,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         void SendShipmentMail(AOOrder order);
 
         ProductAttributeCombination GetProductAttributeCombinationByGtin(string ean);
+
+        string GetTotalAmount();
     }
 }

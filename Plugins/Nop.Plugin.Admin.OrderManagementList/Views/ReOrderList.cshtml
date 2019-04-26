@@ -1,5 +1,4 @@
 ﻿@using Nop.Plugin.Admin.OrderManagementList.Models
-@using Nop.Plugin.Admin.OrderManagementList.Domain
 @using Nop.Web.Framework.UI;
 
 @model PresentationReOrderListModel
@@ -7,6 +6,7 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     Html.AddCssFileParts("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Content/OrderStyles.css");
     ViewData["Title"] = "Bestillingsliste";
+    ViewBag.Title = "Bestillingsliste";
     Html.SetActiveMenuItemSystemName("Sales");
 }
 

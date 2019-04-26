@@ -9,7 +9,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Domain
 
         public string TotalOrderAmountStr { get; set; }
 
-        public decimal TotalOrderAmount { get; set; }
+        public decimal TotalOrderAmount { get; set; }        
 
         public string OrderDateTime { get; set; }
 

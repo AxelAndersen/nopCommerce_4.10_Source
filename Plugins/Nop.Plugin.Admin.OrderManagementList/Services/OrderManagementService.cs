@@ -33,6 +33,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         private readonly IWorkflowMessageService _workflowMessageService;
         private readonly IRepository<ProductAttributeCombination> _productAttributeCombinationRepository;
         private Shipment _shipment;
+        private List<AOPresentationOrder> _presentationOrders;
 
         public OrderManagementService(IRepository<Order> aoOrderRepository, 
                                       OrderManagementContext context, 
@@ -59,10 +60,10 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         #region Public methods
         public List<AOPresentationOrder> GetCurrentOrders(ref int markedProductId, string searchphrase = "")
         {
-            List<AOPresentationOrder> orders = GetOrders();
+            _presentationOrders = GetOrders();
             if (string.IsNullOrEmpty(searchphrase))
             {
-                return orders;
+                return _presentationOrders;
             }
 
             long num = 0;
@@ -71,7 +72,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             {
                 if(searchphrase.Length <= 8)
                 {
-                    orders = orders.Where(o => o.OrderId == num).ToList();
+                    _presentationOrders = _presentationOrders.Where(o => o.OrderId == num).ToList();
                 }
                 else
                 {
@@ -79,7 +80,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                     if (productAttributeCombination != null)
                     {
                         markedProductId = productAttributeCombination.ProductId;
-                        orders = orders.Where(o => o.PresentationOrderItems.Any(p => p.ProductId == productAttributeCombination.ProductId)).ToList();
+                        _presentationOrders = _presentationOrders.Where(o => o.PresentationOrderItems.Any(p => p.ProductId == productAttributeCombination.ProductId)).ToList();
                     }
                     else
                     {
@@ -89,13 +90,13 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             }
             else
             {
-                orders = orders
+                _presentationOrders = _presentationOrders
                     .Where(o => o.PresentationOrderItems
                     .Any(p => p.ProductName.ToLower().Contains(searchphrase.ToLower())))
                     .ToList();
             }
 
-            return orders;
+            return _presentationOrders;
         }
 
         public void SetProductIsTakenAside(int orderItemId, int productId, bool isTakenAside, ref string errorMessage)
@@ -237,6 +238,16 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             var combination = query.FirstOrDefault();
             return combination;
         }
+
+        public string GetTotalAmount()
+        {
+            decimal totalAmount = 0;
+            foreach (AOPresentationOrder o in _presentationOrders)
+            {
+                totalAmount += o.TotalOrderAmount;
+            }
+            return totalAmount.ToString("N", _workikngCultureInfo) + " " + _workContext.WorkingCurrency.CurrencyCode;
+        }
         #endregion
 
         #region Private methods
@@ -252,7 +263,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 OrderDateTime = order.OrderDateTime.ToString("dd-MM-yy H:mm"),
                 ShippingInfo = GetShippingInfo(order),
                 TotalOrderAmountStr = GetTotal(order),
-                TotalOrderAmount = order.TotalOrderAmount,
+                TotalOrderAmount = order.TotalOrderAmount,                
                 PresentationOrderItems = GetProductInfo(order),
                 FormattedPaymentStatus = GetPaymentStatus(order.PaymentStatusId)
             }).ToList();
