@@ -54,6 +54,14 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 );
             }
 
+            if (string.IsNullOrEmpty(searchphrase) == false)
+            {
+                presentationReOrderItems = presentationReOrderItems
+                    .Where(o => o.ProductName.ToLower().Contains(searchphrase.ToLower())
+                    || o.Vendor.ToLower().Contains(searchphrase.ToLower()))
+                    .ToList();
+            }
+
             return presentationReOrderItems;
         }
 

@@ -74,7 +74,7 @@
             }
         }
 
-        <script type="text/javascript">
+    <script type="text/javascript">
 
         function ReOrderItemCountDown(reOrderItemId)
         {
@@ -104,15 +104,28 @@
                 }
             });
             return false;
-        }
+    }
 
-        function ShowError(orderId, msg)
+    function DoSearch()
+    {
+        var loc = location.href;
+        if (loc.indexOf("?searchphrase=") > -1)
         {
-            $("#" + orderId + "-error-spn").html(msg);
-            $("#" + orderId + "-error-spn").parent().css("display", "block");
+            loc = loc.substring(0, loc.indexOf("?searchphrase=")) + "?searchphrase=" + $("#txtSearch").val();
+            location.href = loc;
         }
+        else
+        {
+            location.href = location.href + "?searchphrase=" + $("#txtSearch").val();
+        }
+        return false;
+    }
 
-        </script>
+    function ShowError(orderId, msg)
+    {
+        $("#" + orderId + "-error-spn").html(msg);
+        $("#" + orderId + "-error-spn").parent().css("display", "block");
+    }
 
+    </script>
     </form>
-
