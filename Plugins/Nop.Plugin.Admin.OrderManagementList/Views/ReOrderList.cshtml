@@ -31,8 +31,11 @@
         {
             <div id="divSearch">
                 <div class="divSearchBox">
-                    <input id="txtSearch" type="text" value="@Model.SearchPhrase" autofocus />
+                    <input id="txtSearch" type="text" value="@Model.SearchPhrase" autofocus />&nbsp;&nbsp;
                     <button value="1" onclick="javascript: return DoSearch();">Søg</button>
+                </div>
+                <div class="ico-help searchHelp" title="Der søges i:&#13;Navn på leverandør&#13;Mærkenavn&#13;Produktnavn&#13;og leverandør produktid">
+                    <i class="fa fa-question-circle"></i>
                 </div>
             </div>
 
@@ -43,6 +46,23 @@
 
             <hr class="hrOrderManagement" />
 
+            <div class="divSingleReOrderItem">
+                <div class="divDecrease">&nbsp;</div>
+                <div class="divDecrease">&nbsp;</div>
+                <div class="divVendor">
+                    <b>Leverandør (id i parantes)</b>
+                </div>
+                <div class="divManufacturer">
+                    <b>Mærke og leverandør produktid</b>
+                </div>
+                <div class="divProduct">
+                    <b>Fulde produktnavn</b>
+                </div>
+                <div class="divQuantity"><b>Antal</b></div>
+            </div>
+            <div style="clear:both;"></div>
+            <hr class="hrSmall" />
+            <br />
             @foreach (PresentationReOrderItem reOrderItem in Model.ReOrderItems)
             {
                 <div class="divSingleReOrderItem">
@@ -51,7 +71,10 @@
                     </div>
 
                     <div class="divDecrease">
-                        <a class="btn bg-green large-text" onclick="javascript:ReOrderItemCountDown(@reOrderItem.Id);">Decrease quantity</a>
+                        <a class="btn bg-red large-text" onclick="javascript:JSReOrderItemChangeQuantity(@reOrderItem.Id, -1);">Tæl ned</a>
+                    </div>
+                    <div class="divDecrease">
+                        <a class="btn bg-green large-text" onclick="javascript:JSReOrderItemChangeQuantity(@reOrderItem.Id, 1);">Tæl op</a>
                     </div>
                     <div class="divVendor">
                         @reOrderItem.Vendor
@@ -65,7 +88,6 @@
                         @Html.Raw(reOrderItem.ProductName)
                     </div>
                     <div class="divQuantity">
-                        Quantity:
                         <span id="spn-quantity-@reOrderItem.Id">@reOrderItem.Quantity</span>
                     </div>
                 </div>
@@ -74,15 +96,15 @@
             }
         }
 
-    <script type="text/javascript">
+        <script type="text/javascript">
 
-        function ReOrderItemCountDown(reOrderItemId)
+        function JSReOrderItemChangeQuantity(reOrderItemId, quantity)
         {
             $.ajax({
                 cache: false,
                 type: 'GET',
-                url: '@Url.Action("ReOrderItemCountDown", "ReOrder")',
-                data: { reOrderItemId: reOrderItemId },
+                url: '@Url.Action("ReOrderItemChangeQuantity", "ReOrder")',
+                data: { reOrderItemId: reOrderItemId, quantity: quantity },
                 dataType: 'json',
                 success: function (data)
                 {
@@ -127,5 +149,5 @@
         $("#" + orderId + "-error-spn").parent().css("display", "block");
     }
 
-    </script>
+        </script>
     </form>

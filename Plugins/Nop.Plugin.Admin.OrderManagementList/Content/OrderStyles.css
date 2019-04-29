@@ -1,4 +1,4 @@
-﻿.divSingleOrderHeader { margin: 0 10px 0 10px; }
+﻿.divSingleOrderHeader { margin: 20px 10px 0 10px; min-height: 40px; }
     .divSingleOrderHeader > div { float: left; margin: 0 10px 0 10px; font-size: 16px; font-weight: bold; }
     .divSingleOrderHeader .divOrderInfo { width: 10%; min-width: 140px; }
     .divSingleOrderHeader .divProductInfo { width: 28%; }    
@@ -7,7 +7,7 @@
     .divSingleOrderHeader .divCustomerInfo { width: 12%; }
     .divSingleOrderHeader .divOrderNote { width: 12%; }
 
-.divSingleOrder { margin: 40px 10px 2px 10px; }
+.divSingleOrder { margin: 40px 10px 2px 10px; min-height: 310px; }
     .divSingleOrder > div { float: left; margin: 0 10px 0 10px; min-height: 100px; }
     .divSingleOrder .divOrderInfo { width: 10%; min-width: 140px; }
     .divSingleOrder .divProductInfo { width: 28%; }
@@ -34,12 +34,14 @@
 
 div.singleLineError { display: none; color: red; font-weight: bold; font-size: 16px; float: none; height: 40px; min-height: 40px; }
 
-#divSearch { height: 50px; }
-    #divSearch .divSearchBox{ float:left; width: 320px; margin: 0 0 0 20px; }
+#divSearch { height: 40px; }
+    #divSearch .divSearchBox{ float:left; width: 240px; margin: 0 0 0 20px; }
+    #divSearch .searchHelp{ float: left; width: 20px; }
 
 .divSingleReOrderItem { padding: 10px 0 0 0; }
     .divSingleReOrderItem div { float: left; margin: 0 0 0 20px; }
-    .divSingleReOrderItem .divDecrease { width: 140px; }
+
+    .divSingleReOrderItem .divDecrease { width: 60px; }
     .divSingleReOrderItem .divVendor { width: 200px; }
     .divSingleReOrderItem .divManufacturer { width: 200px; }
     .divSingleReOrderItem .divProduct { width: 400px; }
@@ -50,7 +52,9 @@ div.singleLineError { display: none; color: red; font-weight: bold; font-size: 1
     #divCount .divTotalCount { width: 120px; }
     #divCount .divTotalAmount { width: 300px; }
 
-@media only screen and (max-width: 1400px) { .divSingleOrderHeader > div { margin: 0 5px 0 5px; font-size: 12px; }
+@media only screen and (max-width: 1400px) { 
+    
+    .divSingleOrderHeader > div { margin: 0 5px 0 5px; font-size: 12px; }
     .divSingleOrderHeader .divProductInfo { width: 20%; }
     .divSingleOrderHeader .divShippingInfo { width: 18%; }
     .divSingleOrderHeader .divCustomerInfo { width: 15%; }
@@ -61,4 +65,19 @@ div.singleLineError { display: none; color: red; font-weight: bold; font-size: 1
     .divSingleOrder .divShippingInfo { width: 18%; }
     .divSingleOrder .divCustomerInfo { width: 15%; }
     .divSingleOrder .divOrderNote { width: 12%; }
+
+    .divSingleReOrderItem .divDecrease { width: 54px; }
+    .divSingleReOrderItem .divVendor { width: 160px; }
+    .divSingleReOrderItem .divManufacturer { width: 200px; }
+    .divSingleReOrderItem .divProduct { width: 300px; }
+    .divSingleReOrderItem .divQuantity { width: 60px; }
+}
+
+@media only screen and (max-width: 1200px) {
+
+    .divSingleReOrderItem .divDecrease { width: 54px; }
+    .divSingleReOrderItem .divVendor { width: 160px; }
+    .divSingleReOrderItem .divManufacturer { width: 160px; }
+    .divSingleReOrderItem .divProduct { width: 240px; }
+    .divSingleReOrderItem .divQuantity { width: 60px; }
 }

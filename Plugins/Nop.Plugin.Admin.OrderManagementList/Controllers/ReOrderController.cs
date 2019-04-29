@@ -46,9 +46,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
         [HttpGet]
         [AuthorizeAdmin(false)]
-        public IActionResult ReOrderItemCountDown(int reOrderItemId)
+        public IActionResult ReOrderItemChangeQuantity(int reOrderItemId, int quantity)
         {
-            int newQuantity = _reOrderService.CountDown(reOrderItemId);
+            int newQuantity = _reOrderService.ChangeQuantity(reOrderItemId, quantity);
             return Json(newQuantity);
         }
     }

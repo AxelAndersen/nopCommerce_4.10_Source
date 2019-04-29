@@ -57,14 +57,16 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             {
                 presentationReOrderItems = presentationReOrderItems
                     .Where(o => o.ProductName.ToLower().Contains(searchphrase.ToLower())
-                    || o.Vendor.ToLower().Contains(searchphrase.ToLower()))
+                    || o.Vendor.ToLower().Contains(searchphrase.ToLower())
+                    || o.Manufacturer.ToLower().Contains(searchphrase.ToLower())
+                    || o.ManufacturerProductId.ToLower().Contains(searchphrase.ToLower()))
                     .ToList();
             }
 
             return presentationReOrderItems;
         }
 
-        public int CountDown(int reOrderItemId)
+        public int ChangeQuantity(int reOrderItemId, int quantity)
         {
             AOReOrderItem reOrderItem = _context.AOReOrderItems.Where(r => r.Id == reOrderItemId).FirstOrDefault();
             if(reOrderItem == null)
@@ -72,7 +74,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 throw new ArgumentException("No AOReOrderItem found with id: " + reOrderItemId);
             }
 
-            reOrderItem.Quantity -= 1;
+            reOrderItem.Quantity += quantity; // When negative we decrease
             _context.Update(reOrderItem);
             _context.SaveChanges();
 
