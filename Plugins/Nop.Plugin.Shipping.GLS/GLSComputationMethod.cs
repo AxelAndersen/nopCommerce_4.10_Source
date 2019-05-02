@@ -104,6 +104,8 @@ namespace Nop.Plugin.Shipping.GLS
                 if (_glsSettings.Tracing)
                     _traceMessages.Append("\r\nReady to prapare GLS call");
 
+                List<PakkeshopData> parcelShops = null;
+
                 if (glsCountry.SupportParcelShop)
                 {
                     wsShopFinderSoapClient client = new wsShopFinderSoapClient(EndpointConfiguration.wsShopFinderSoap12, _glsSettings.EndpointAddress);
@@ -112,14 +114,17 @@ namespace Nop.Plugin.Shipping.GLS
 
                     if (_glsSettings.Tracing)
                         _traceMessages.Append("\r\nReady to call GLS at: '" + _glsSettings.EndpointAddress + "'");
-
-                    List<PakkeshopData> parcelShops = null;
+                    
                     try
                     {
                         // First try to find a number of shops near the address
                         parcelShops = client.GetParcelShopDropPointAsync(street, zip, glsCountry.TwoLetterGLSCode, _glsSettings.AmountNearestShops).Result.parcelshops.ToList();
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        if (_glsSettings.Tracing)
+                            _traceMessages.Append("\r\nError finding parcelshops: " + ex.ToString());
+                    }
 
                     if (parcelShops == null || parcelShops.Count == 0)
                     {
@@ -130,16 +135,9 @@ namespace Nop.Plugin.Shipping.GLS
                         }
                         catch (Exception ex)
                         {
-                            response.AddError(ex.ToString());
                             if (_glsSettings.Tracing)
                                 _traceMessages.Append("\r\nError finding parcelshops: " + ex.ToString());
                         }
-                    }
-
-                    if (parcelShops == null || parcelShops.Count == 0)
-                    {
-                        response.AddError($"GLS Service could not find any shops with the given information: {street} {zip} {glsCountry.TwoLetterGLSCode}");
-                        return response;
                     }
 
                     if (_glsSettings.Tracing && parcelShops != null && parcelShops.Count > 0)
@@ -147,26 +145,30 @@ namespace Nop.Plugin.Shipping.GLS
                         _traceMessages.Append("\r\n" + parcelShops.Count + " parcelshops found");
                     }
 
-                    foreach (var parcelShop in parcelShops)
+                    if (parcelShops != null && parcelShops.Count > 0)
                     {
-                        ShippingOption shippingOption = new ShippingOption()
+                        foreach (var parcelShop in parcelShops)
                         {
-                            Name = BuildGLSName(parcelShop),
-                            Description = "",
-                            ShippingRateComputationMethodSystemName = "GLS",
-                            Rate = GetRate(glsCountry.ShippingPrice_0_1)
-                        };
+                            ShippingOption shippingOption = new ShippingOption()
+                            {
+                                Name = BuildGLSName(parcelShop),
+                                Description = "",
+                                ShippingRateComputationMethodSystemName = "GLS",
+                                Rate = GetRate(glsCountry.ShippingPrice_0_1)
+                            };
 
-                        response.ShippingOptions.Add(shippingOption);
+                            response.ShippingOptions.Add(shippingOption);
+                        }
                     }
                 }
-                else
+
+                if (parcelShops == null || parcelShops.Count == 0)
                 {
                     Address address = getShippingOptionRequest.ShippingAddress;
                     ShippingOption shippingOption = new ShippingOption()
                     {
                         Name = address.FirstName + " " + address.LastName,
-                        Description = address.Address1 + " " + address.Country.Name,
+                        Description = BuildDescription(address),
                         ShippingRateComputationMethodSystemName = "GLS",
                         Rate = GetRate(glsCountry.ShippingPrice_0_1)
                     };
@@ -198,6 +200,28 @@ namespace Nop.Plugin.Shipping.GLS
             }
 
             return response;
+        }
+
+        private string BuildDescription(Address address)
+        {
+            string description = address.Address1;
+
+            if (string.IsNullOrEmpty(address.ZipPostalCode) == false)
+            {
+                description += ", " + address.ZipPostalCode;
+            }
+
+            if (string.IsNullOrEmpty(address.City) == false)
+            {
+                description += " " + address.City;
+            }
+
+            if (string.IsNullOrEmpty(address.Country?.Name) == false)
+            {
+                description += ", " + address.Country.Name;
+            }
+
+            return description;
         }
 
         private decimal GetRate(decimal price)
