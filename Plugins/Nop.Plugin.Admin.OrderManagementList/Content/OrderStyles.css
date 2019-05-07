@@ -40,16 +40,22 @@ div.singleLineError { display: none; color: red; font-weight: bold; font-size: 1
 
 .divSingleReOrderItem { padding: 10px 0 0 0; }
     .divSingleReOrderItem div { float: left; margin: 0 0 0 20px; }
-
     .divSingleReOrderItem .divDecrease { width: 60px; }
     .divSingleReOrderItem .divVendor { width: 200px; }
     .divSingleReOrderItem .divManufacturer { width: 200px; }
     .divSingleReOrderItem .divProduct { width: 400px; }
     .divSingleReOrderItem .divQuantity { width: 100px; }
+    .divSingleReOrderItem .spacing{ height: 30px; width: 100%; font-size: 16px; font-weight:bold; margin-top: 30px; }
 
-#divCount { height: 30px; margin: 0 0 10px 20px; font-size: 16px; font-weight:bold; }
+.divSingleReOrderItemNote { padding: 10px 0 0 0; }
+    .divSingleReOrderItemNote div { float: left; margin: 0 0 0 20px; }
+    .divSingleReOrderItemNote .divManufacturer { width: 400px; }
+    .divSingleReOrderItemNote .divProduct { width: 400px; margin: 0; }
+    .divSingleReOrderItemNote .divQuantity { width: 40px; }
+
+#divCount { height: 30px; margin: 0 0 10px 20px; font-size: 16px; font-weight: bold; }
     #divCount div { float: left; }
-    #divCount .divTotalCount { width: 120px; }
+    #divCount .divTotalCount { width: 140px; }
     #divCount .divTotalAmount { width: 300px; }
 
 @media only screen and (max-width: 1400px) { 

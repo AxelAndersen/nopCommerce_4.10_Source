@@ -8,6 +8,7 @@ using Nop.Services.Vendors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Services
 {
@@ -26,29 +27,73 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             this._allVendors = vendorService.GetAllVendors().ToList();
         }
 
-        public List<PresentationReOrderItem> GetCurrentReOrderList(ref int markedProductId, string searchphrase = "")
+        public List<PresentationReOrderItem> GetCurrentReOrderList(ref int markedProductId, string searchphrase = "", int vendorId = 0)
         {
-            List<AOReOrderItem> reOrders = _context.AOReOrderItems
-                                                .Where(o => o.Quantity > 0)
-                                                .OrderBy(o => o.VendorId)
-                                                .ThenBy(o => o.ManufacturerId)
-                                                .ThenBy(o => o.ManufacturerProductId)
-                                                .ToList();
+            List<AOReOrderItem> reOrders = null;
 
+            if (vendorId == 0)
+            {
+                reOrders = _context.AOReOrderItems
+                            .Where(o => o.Quantity > 0)
+                            .OrderBy(o => o.VendorId)
+                            .ThenBy(o => o.ManufacturerId)
+                            .ThenBy(o => o.ManufacturerProductId)
+                            .ToList();
+            }
+            else
+            {
+                reOrders = _context.AOReOrderItems
+                            .Where(o => o.Quantity > 0 && o.VendorId == vendorId)
+                            .OrderBy(o => o.VendorId)
+                            .ThenBy(o => o.ManufacturerId)
+                            .ThenBy(o => o.ManufacturerProductId)
+                            .ToList();
+            }
+
+            int currentVendorId = 0;
             List<PresentationReOrderItem> presentationReOrderItems = new List<PresentationReOrderItem>();
             foreach (AOReOrderItem item in reOrders)
             {
+                Manufacturer manufacturer = GetManufacturer(item.ManufacturerId);
+                Vendor vendor = GetVendor(item.VendorId);
+
+                if (vendorId == 0) // This is only for ReOrderList with all vendors.
+                {
+                    if (currentVendorId != item.VendorId)
+                    {
+                        currentVendorId = item.VendorId;
+
+                        // Add space with vendor details
+                        presentationReOrderItems.Add(new PresentationReOrderItem()
+                        {
+                            Id = 0,
+                            EAN = "",
+                            ManufacturerId = manufacturer.Id,
+                            ManufacturerName = manufacturer.Name,
+                            ManufacturerProductId = "",
+                            VendorName = vendor.Name,
+                            VendorId = vendor.Id,
+                            VendorEmail = vendor.Email,
+                            OrderItemId = 0,
+                            ProductId = 0,
+                            ProductName = "Spacing",
+                            Quantity = 0
+                        });
+                    }
+                }
+
                 presentationReOrderItems.Add(new PresentationReOrderItem()
                 {
                     Id = item.Id,
                     OrderItemId = item.OrderItemId,
-                    ManufacturerProductId = item.ManufacturerProductId,
+                    ManufacturerProductId = GetManufacturerProductId(item),
                     ProductId = item.ProductId,
                     EAN = item.EAN,
                     ProductName = item.ProductName,
                     Quantity = item.Quantity,
-                    Manufacturer = GetManufacturer(item.ManufacturerId),
-                    Vendor = GetVendor(item.VendorId)
+                    ManufacturerId = manufacturer.Id,
+                    ManufacturerName = manufacturer.Name,
+                    VendorName = vendor.Name
                 }
                 );
             }
@@ -57,8 +102,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             {
                 presentationReOrderItems = presentationReOrderItems
                     .Where(o => o.ProductName.ToLower().Contains(searchphrase.ToLower())
-                    || o.Vendor.ToLower().Contains(searchphrase.ToLower())
-                    || o.Manufacturer.ToLower().Contains(searchphrase.ToLower())
+                    || o.VendorName.ToLower().Contains(searchphrase.ToLower())
+                    || o.ManufacturerName.ToLower().Contains(searchphrase.ToLower())
                     || o.ManufacturerProductId.ToLower().Contains(searchphrase.ToLower()))
                     .ToList();
             }
@@ -66,10 +111,27 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             return presentationReOrderItems;
         }
 
+        private string GetManufacturerProductId(AOReOrderItem item)
+        {
+            string mId = item.ManufacturerProductId;
+
+            if (mId.Contains("-FrilivId:("))
+            {
+                mId = mId.Substring(0, mId.IndexOf("-FrilivId:("));
+            }
+
+            if (string.IsNullOrEmpty(item.EAN) == false)
+            {
+                mId += "&nbsp;&nbsp;&nbsp;EAN: " + item.EAN;
+            }
+
+            return mId;
+        }
+
         public int ChangeQuantity(int reOrderItemId, int quantity)
         {
             AOReOrderItem reOrderItem = _context.AOReOrderItems.Where(r => r.Id == reOrderItemId).FirstOrDefault();
-            if(reOrderItem == null)
+            if (reOrderItem == null)
             {
                 throw new ArgumentException("No AOReOrderItem found with id: " + reOrderItemId);
             }
@@ -88,8 +150,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             {
                 throw new ArgumentException("Intet fundet på bestillingslisten");
             }
-            
-            if(quantityToOrder > reOrderItem.Quantity)
+
+            if (quantityToOrder > reOrderItem.Quantity)
             {
                 // If we wanna reduce with more than is on reorderlist.
                 // This can happen if we had some in stock on order time
@@ -97,7 +159,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 quantityToOrder = reOrderItem.Quantity;
             }
 
-            reOrderItem.Quantity -= quantityToOrder;            
+            reOrderItem.Quantity -= quantityToOrder;
             reOrderItem.OrderedQuantity = quantityToOrder;
             _context.AOReOrderItems.Update(reOrderItem);
             _context.SaveChanges();
@@ -117,48 +179,71 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             _context.SaveChanges();
         }
 
-        private string GetVendor(int vendorId)
+        public string GetCompleteVendorEmail(List<PresentationReOrderItem> reOrderItems, int vendorId)
         {
-            string vendorName = string.Empty;
-            try
+            Vendor vendor = GetVendor(vendorId);
+            if(vendor == null || vendor.Id == 0)
             {
-                Vendor vendor = _allVendors.Where(v => v.Id == vendorId).FirstOrDefault();
-                if (vendor == null)
-                {
-                    vendorName = "Vendor not found (Id: " + vendorId + ")";
-                }
-                else
-                {
-                    vendorName = vendor.Name + " (" + vendorId + ")";
-                }
+                throw new ArgumentException("No vendor found with id: " + vendorId);
             }
-            catch (Exception ex)
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("mailto:");
+            sb.Append(vendor.Email);
+            sb.Append("?subject=Bestilling af varer&");
+            sb.Append("body=Hej%0D%0A%0D%0AHermed bestilling på følgende:%0D%0A%0D%0A");
+            foreach (PresentationReOrderItem item in reOrderItems)
             {
-                vendorName = ex.Message;
+                sb.Append("Produkt-id: " + item.ManufacturerProductId + ", ");
+                sb.Append("Produktnavn: " + item.ProductName);                
+                sb.Append(item.Quantity.ToString() + " stk.");
+                sb.Append("%0D%0A");
             }
-            return vendorName;
+            sb.Append("%0D%0A%0D%0A");
+            sb.Append("Med venlig hilsen");
+         
+            sb.Append("%0D%0AFriliv.dk"); // friliv.dk
+            sb.Append("%0D%0AJuelstrupparken 26"); // Juelstrupparken 26
+            sb.Append("%0D%0A9530 Støvring"); // 9533 Støvring
+
+            return sb.ToString();
         }
 
-        private string GetManufacturer(int manufacturerId)
+        private Vendor GetVendor(int vendorId)
         {
-            string manufacturerName = string.Empty;
+            Vendor vendor = null;
             try
             {
-                Manufacturer manufacturer = _allManufacturers.Where(m => m.Id == manufacturerId).FirstOrDefault();
-                if (manufacturer == null)
+                vendor = _allVendors.Where(v => v.Id == vendorId).FirstOrDefault();
+                if (vendor == null)
                 {
-                    manufacturerName = "Manufacturer not found (Id: " + manufacturerId + ")";
-                }
-                else
-                {
-                    manufacturerName = manufacturer.Name + " (" + manufacturerId + ")";
+                    vendor = new Vendor() { Name = "Vendor not found (Id: " + vendorId + ")" };
                 }
             }
             catch (Exception ex)
             {
-                manufacturerName = ex.Message;
+                vendor = new Vendor() { Name = ex.Message };
             }
-            return manufacturerName;
+            return vendor;
+        }
+
+        private Manufacturer GetManufacturer(int manufacturerId)
+        {
+            Manufacturer manufacturer = null;
+            try
+            {
+                manufacturer = _allManufacturers.Where(m => m.Id == manufacturerId).FirstOrDefault();
+                if (manufacturer == null)
+                {
+                    manufacturer = new Manufacturer() { Name = "Manufacturer not found (Id: " + manufacturerId + ")" };
+                }
+            }
+            catch (Exception ex)
+            {
+                manufacturer = new Manufacturer() { Name = ex.Message };
+            }
+
+            return manufacturer;
         }
     }
 }

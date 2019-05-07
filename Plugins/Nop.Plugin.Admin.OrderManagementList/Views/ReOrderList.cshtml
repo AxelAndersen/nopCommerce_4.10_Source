@@ -10,66 +10,78 @@
     Html.SetActiveMenuItemSystemName("Sales");
 }
 
-    <form asp-controller="ReOrderController" asp-action="ReOrderList" method="post">
-        <div class="panel-group">
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <h1>Bestillingsliste</h1>
-                </div>
+<form asp-controller="ReOrderController" asp-action="ReOrderList" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h1>Bestillingsliste</h1>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+    @if (string.IsNullOrEmpty(Model.ErrorMessage) == false)
+    {
+        <div id="divErrorMessage">
+            <h3>Error occurred:</h3>
+            <h4>@Model.ErrorMessage</h4>
+        </div>
+    }
+    else
+    {
+        <div id="divSearch">
+            <div class="divSearchBox">
+                <input id="txtSearch" type="text" value="@Model.SearchPhrase" autofocus />&nbsp;&nbsp;
+                <button value="1" onclick="javascript: return DoSearch();">Søg</button>
+            </div>
+            <div class="ico-help searchHelp" title="Der søges i:&#13;Navn på leverandør&#13;Mærkenavn&#13;Produktnavn&#13;og leverandør produktid">
+                <i class="fa fa-question-circle"></i>
             </div>
         </div>
 
-        <hr />
-        @if (string.IsNullOrEmpty(Model.ErrorMessage) == false)
+        <div id="divCount">
+            <div class="divTotalCount">Ialt:&nbsp;@Model.TotalCount</div>
+        </div>
+        <div style="clear:both;"></div>
+
+        <hr class="hrOrderManagement" />
+
+        <div class="divSingleReOrderItem">
+            <div class="divDecrease">&nbsp;</div>
+            <div class="divDecrease">&nbsp;</div>
+            <div class="divVendor">
+                <b>Leverandør (id i parantes)</b>
+            </div>
+            <div class="divManufacturer">
+                <b>Mærke og leverandør produktid</b>
+            </div>
+            <div class="divProduct">
+                <b>Fulde produktnavn</b>
+            </div>
+            <div class="divQuantity"><b>Antal</b></div>
+        </div>
+        <div style="clear:both;"></div>
+        <hr class="hrSmall" />
+        <br />
+        @foreach (PresentationReOrderItem reOrderItem in Model.ReOrderItems)
         {
-            <div id="divErrorMessage">
-                <h3>Error occurred:</h3>
-                <h4>@Model.ErrorMessage</h4>
-            </div>
-        }
-        else
-        {
-            <div id="divSearch">
-                <div class="divSearchBox">
-                    <input id="txtSearch" type="text" value="@Model.SearchPhrase" autofocus />&nbsp;&nbsp;
-                    <button value="1" onclick="javascript: return DoSearch();">Søg</button>
-                </div>
-                <div class="ico-help searchHelp" title="Der søges i:&#13;Navn på leverandør&#13;Mærkenavn&#13;Produktnavn&#13;og leverandør produktid">
-                    <i class="fa fa-question-circle"></i>
-                </div>
-            </div>
-
-            <div id="divCount">
-                <div class="divTotalCount">Ialt:&nbsp;@Model.TotalCount</div>
-            </div>
-            <div style="clear:both;"></div>
-
-            <hr class="hrOrderManagement" />
-
             <div class="divSingleReOrderItem">
-                <div class="divDecrease">&nbsp;</div>
-                <div class="divDecrease">&nbsp;</div>
-                <div class="divVendor">
-                    <b>Leverandør (id i parantes)</b>
+                <div class="singleLineError">
+                    <span id="@reOrderItem.Id-error-spn"></span>
                 </div>
-                <div class="divManufacturer">
-                    <b>Mærke og leverandør produktid</b>
-                </div>
-                <div class="divProduct">
-                    <b>Fulde produktnavn</b>
-                </div>
-                <div class="divQuantity"><b>Antal</b></div>
-            </div>
-            <div style="clear:both;"></div>
-            <hr class="hrSmall" />
-            <br />
-            @foreach (PresentationReOrderItem reOrderItem in Model.ReOrderItems)
-            {
-                <div class="divSingleReOrderItem">
-                    <div class="singleLineError">
-                        <span id="@reOrderItem.Id-error-spn"></span>
-                    </div>
 
+                @if (reOrderItem.ProductName == "Spacing")
+                {            
+                    <hr class="hrOrderManagement" />
+                    <div class="spacing">                        
+                        <span>@reOrderItem.VendorName</span>
+                        &nbsp;
+                        &nbsp;                      
+                        <a href="/Admin/ReOrder/ReOrderNote?vendorId=@reOrderItem.VendorId&amp;vendorName=@reOrderItem.VendorName">Se liste til @reOrderItem.VendorName</a>
+                    </div>                       
+                }
+                else
+                {
                     <div class="divDecrease">
                         <a class="btn bg-red large-text" onclick="javascript:JSReOrderItemChangeQuantity(@reOrderItem.Id, -1);">Tæl ned</a>
                     </div>
@@ -77,12 +89,12 @@
                         <a class="btn bg-green large-text" onclick="javascript:JSReOrderItemChangeQuantity(@reOrderItem.Id, 1);">Tæl op</a>
                     </div>
                     <div class="divVendor">
-                        @reOrderItem.Vendor
+                        @reOrderItem.VendorName&nbsp;(@reOrderItem.VendorId)
                     </div>
                     <div class="divManufacturer">
-                        @reOrderItem.Manufacturer
+                        @reOrderItem.ManufacturerName&nbsp;(@reOrderItem.ManufacturerId)
                         <br />
-                        @reOrderItem.ManufacturerProductId
+                        @Html.Raw(reOrderItem.ManufacturerProductId)
                     </div>
                     <div class="divProduct">
                         @Html.Raw(reOrderItem.ProductName)
@@ -90,13 +102,14 @@
                     <div class="divQuantity">
                         <span id="spn-quantity-@reOrderItem.Id">@reOrderItem.Quantity</span>
                     </div>
-                </div>
-                <div style="clear:both;"></div>
-                <hr class="hrSmall" />
-            }
+                }
+            </div>
+            <div style="clear:both;"></div>
+            <hr class="hrSmall" />
         }
+    }
 
-        <script type="text/javascript">
+    <script type="text/javascript">
 
         function JSReOrderItemChangeQuantity(reOrderItemId, quantity)
         {
@@ -149,5 +162,5 @@
         $("#" + orderId + "-error-spn").parent().css("display", "block");
     }
 
-        </script>
-    </form>
+    </script>
+</form>

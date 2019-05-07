@@ -10,9 +10,15 @@
 
         public string ManufacturerProductId { get; set; }
 
-        public string Manufacturer { get; set; }
+        public int ManufacturerId { get; set; }
 
-        public string Vendor { get; set; }
+        public string ManufacturerName { get; set; }
+
+        public string VendorName { get; set; }
+
+        public int VendorId { get; set; }
+
+        public string VendorEmail { get; set; }
 
         public string EAN { get; set; }
 

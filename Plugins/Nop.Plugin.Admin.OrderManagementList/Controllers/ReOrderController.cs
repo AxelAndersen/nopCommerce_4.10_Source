@@ -6,6 +6,7 @@ using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Mvc.Filters;
 using System;
+using System.Collections.Generic;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 {
@@ -50,6 +51,41 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         {
             int newQuantity = _reOrderService.ChangeQuantity(reOrderItemId, quantity);
             return Json(newQuantity);
+        }
+
+        [AuthorizeAdmin]
+        [Area(AreaNames.Admin)]
+        public IActionResult ReOrderNote(int vendorId, string vendorName)
+        {
+            ReOrderNoteModel model = new ReOrderNoteModel();
+
+            try
+            {
+                int markedProductId = 0;
+                model.ReOrderItems = _reOrderService.GetCurrentReOrderList(ref markedProductId, "", vendorId);
+                model.VendorName = vendorName;
+                model.TotalCount = GetProductsCount(model.ReOrderItems);
+                model.CompleteVendorEmail = _reOrderService.GetCompleteVendorEmail(model.ReOrderItems, vendorId);
+            }
+            catch (Exception ex)
+            {
+                Exception inner = ex;
+                while (inner.InnerException != null) inner = inner.InnerException;
+                _logger.Error("List Order Management: " + inner.Message, ex);
+                model.ErrorMessage = ex.ToString();
+            }
+
+            return View("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Views/ReOrderNote.cshtml", model);
+        }
+
+        private int GetProductsCount(List<PresentationReOrderItem> reOrderItems)
+        {
+            int totalProductsCount = 0;
+            foreach(PresentationReOrderItem item in reOrderItems)
+            {
+                totalProductsCount += item.Quantity;
+            }
+            return totalProductsCount;
         }
     }
 }

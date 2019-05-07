@@ -1,0 +1,63 @@
+﻿@using Nop.Plugin.Admin.OrderManagementList.Models
+@model ReOrderNoteModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bestillingsliste</title>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link type="text/css" rel="stylesheet" href="~/Plugins/Nop.Plugin.Admin.OrderManagementList/Content/OrderStyles.css" />
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+
+    <form asp-controller="OrderManagement" asp-action="List" method="post">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h1>Bestillingsliste til @Model.VendorName</h1>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+        @if (string.IsNullOrEmpty(Model.ErrorMessage) == false)
+        {
+            <div id="divErrorMessage">
+                <h3>Error occurred:</h3>
+                <h4>@Model.ErrorMessage</h4>
+            </div>
+        }
+        else
+        {
+            <div id="divCount">
+                <div class="divTotalCount">Produkter ialt:&nbsp;@Model.TotalCount</div>
+            </div>
+            <hr />
+            <a href="@Model.CompleteVendorEmail" title="Mail til @Model.VendorName">Email til @Model.VendorName</a>
+            <br />
+            @foreach (PresentationReOrderItem reOrderItem in Model.ReOrderItems)
+            {
+                <div class="divSingleReOrderItemNote">
+                    <div class="singleLineError">
+                        <span id="@reOrderItem.Id-error-spn"></span>
+                    </div>
+                    <div class="divManufacturer">
+                        @reOrderItem.ManufacturerName
+                        &nbsp;
+                        @Html.Raw(reOrderItem.ManufacturerProductId)
+                    </div>
+                    <div class="divQuantity">
+                        @reOrderItem.Quantity&nbsp;stk.
+                    </div>
+                    <div class="divProduct">
+                        @Html.Raw(reOrderItem.ProductName)
+                    </div>
+                </div>
+                <div style="clear:both;"></div>
+                <hr class="hrSmall" />
+            }
+        }
+    </form>
+</body>
+</html>

@@ -5,12 +5,14 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 {
     public interface IReOrderService
     {
-        List<PresentationReOrderItem> GetCurrentReOrderList(ref int markedProductId, string searchphrase = "");        
+        List<PresentationReOrderItem> GetCurrentReOrderList(ref int markedProductId, string searchphrase = "", int vendorId = 0);        
 
         void RemoveFromReOrderList(int orquantityToOrderderId, int orderItemId);
 
         void ReAddToReOrderList(int orderItemId);
 
         int ChangeQuantity(int reOrderItemId, int quantity);
+
+        string GetCompleteVendorEmail(List<PresentationReOrderItem> reOrderItems, int vendorId);
     }
 }
