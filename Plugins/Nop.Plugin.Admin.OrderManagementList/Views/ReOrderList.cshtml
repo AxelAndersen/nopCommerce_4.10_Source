@@ -7,7 +7,7 @@
     Html.AddCssFileParts("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Content/OrderStyles.css");
     ViewData["Title"] = "Bestillingsliste";
     ViewBag.Title = "Bestillingsliste";
-    Html.SetActiveMenuItemSystemName("Sales");
+    Html.SetActiveMenuItemSystemName("ReOrderList");
 }
 
 <form asp-controller="ReOrderController" asp-action="ReOrderList" method="post">
@@ -161,6 +161,7 @@
         $("#" + orderId + "-error-spn").html(msg);
         $("#" + orderId + "-error-spn").parent().css("display", "block");
     }
+
 
     </script>
 </form>

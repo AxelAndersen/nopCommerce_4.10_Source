@@ -8,7 +8,7 @@
     Html.AddCssFileParts("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Content/OrderStyles.css");
     ViewData["Title"] = "Ordrehåndtering";
     ViewBag.Title = "Ordrehåndtering";
-    Html.SetActiveMenuItemSystemName("Sales");
+    Html.SetActiveMenuItemSystemName("OrderManagement");
 }
 
     <form asp-controller="OrderManagement" asp-action="List" method="post">
@@ -283,12 +283,6 @@
             $("[id$=error-spn]").hide();
             return true;
                 }
-
-    $('.top-menu li a').click(function(e) {
-        e.preventDefault();
-        $('a').removeClass('active');
-        $(this).addClass('active');
-    });
 
         </script>
 

@@ -9,5 +9,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         void Initialize(string host, string username, string password);
 
         string GetTrackingNumber(string localFolderPath, string remotePath, int orderId);
+
+        void CleanupGLSStatusFiles(string remotePath, int daysToKeep);
     }
 }

@@ -28,7 +28,7 @@ namespace Nop.Plugin.Admin.OrderManagementList
             // Add Reorder list            
             var menuItem = new SiteMapNode()
                 {
-                    SystemName = "Sales",
+                    SystemName = "ReOrderList",
                     Title = "Bestillingsliste",
                     ControllerName = "ReOrder",
                     ActionName = "ReOrderList",
@@ -44,7 +44,7 @@ namespace Nop.Plugin.Admin.OrderManagementList
             // Add order management list
             menuItem = new SiteMapNode()
             {
-                SystemName = "Sales",
+                SystemName = "OrderManagement",
                 Title = "Ordrehåndtering",
                 ControllerName = "OrderManagement",
                 ActionName = "List",
@@ -97,7 +97,10 @@ namespace Nop.Plugin.Admin.OrderManagementList
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoPrintLabel", "Print label");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoCapture", "Capture payment from list");
             _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoSendEmails", "Send email to customer");
-            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.ChangeOrderStatus", "Change order status");            
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.ChangeOrderStatus", "Change order status");
+
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoCleanup", "Do Cleanup");
+            _localizationService.AddOrUpdatePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DaysToKeepStatusFiles", "Days to keep Status files");
 
             base.Install();
         }
@@ -132,7 +135,10 @@ namespace Nop.Plugin.Admin.OrderManagementList
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoPrintLabel");
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoCapture");
             _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoSendEmails");
-            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.ChangeOrderStatus");            
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.ChangeOrderStatus");
+
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DoCleanup");
+            _localizationService.DeletePluginLocaleResource("Nop.Plugin.Admin.OrderManagementList.DaysToKeepStatusFiles");
 
             base.Uninstall();
         }

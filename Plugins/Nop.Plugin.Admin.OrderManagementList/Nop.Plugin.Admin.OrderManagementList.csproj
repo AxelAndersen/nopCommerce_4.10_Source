@@ -62,7 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Nop.Plugin.Payments.QuickPayV10">
-      <HintPath>..\..\..\..\..\tmp\Nop.Plugin.Payments.QuickPayV10.dll</HintPath>
+      <HintPath>..\..\Presentation\Nop.Web\Plugins\Payments.QuickPayV10\Nop.Plugin.Payments.QuickPayV10.dll</HintPath>
     </Reference>
     <Reference Include="System.Web">
       <HintPath>System.Web</HintPath>

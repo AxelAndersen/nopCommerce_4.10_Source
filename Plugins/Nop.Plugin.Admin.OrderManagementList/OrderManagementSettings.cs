@@ -57,6 +57,10 @@ namespace Nop.Plugin.Admin.OrderManagementList
 
         public bool ChangeOrderStatus { get; set; }
 
-        public bool DoPrintLabel { get; set; }
+        public bool DoPrintLabel { get; set; }        
+
+        public bool DoCleanup { get; set; }
+
+        public int DaysToKeepStatusFiles { get; set; }
     }
 }

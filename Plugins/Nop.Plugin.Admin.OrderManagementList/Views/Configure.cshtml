@@ -26,7 +26,7 @@
                         <span asp-validation-for="FTPHost"></span>
                     </div>
                 </div>
-
+                <br />
                 <div class="form-group">
                     <div class="col-md-3">
                         <span>ftptest</span>
@@ -37,7 +37,7 @@
                         <span asp-validation-for="FTPUsername"></span>
                     </div>
                 </div>
-
+                <br />
                 <div class="form-group">
                     <div class="col-md-3">
                         <span>123456</span>
@@ -48,72 +48,74 @@
                         <span asp-validation-for="FTPPassword"></span>
                     </div>
                 </div>
-
+                <br />
                 <div class="form-group">
                     <div class="col-md-3">
                         <nop-label asp-for="FTPLocalFilePath" />
                     </div>
                     <div class="col-md-9">
-                        <span>C:\\GLSTest</span>
+                        <span>Ex.: C:\\FTP\</span>
                         <nop-editor asp-for="FTPLocalFilePath" />
                         <span asp-validation-for="FTPLocalFilePath"></span>
                     </div>
                 </div>
-
+                <br />
                 <div class="form-group">
                     <div class="col-md-3">
                         <nop-label asp-for="FTPLocalFileName" />
                     </div>
                     <div class="col-md-9">
-                        <span>GLS-Label-Info.txt</span>
+                        <span>Ex.: GLS-Label-Info.txt</span>
                         <nop-editor asp-for="FTPLocalFileName" />
                         <span asp-validation-for="FTPLocalFileName"></span>
                     </div>
                 </div>
-
+                <br />
                 <div class="form-group">
                     <div class="col-md-3">
                         <nop-label asp-for="FTPRemoteFolderPath" />
                     </div>
                     <div class="col-md-9">
-                        <span>C:\GLSTest\Labels\GLS</span>
+                        <span>Ex.: Labels/GLS</span>
                         <nop-editor asp-for="FTPRemoteFolderPath" />
                         <span asp-validation-for="FTPRemoteFolderPath"></span>
                     </div>
                 </div>
-
+                <br />
                 <div class="form-group">
                     <div class="col-md-3">
                         <nop-label asp-for="FTPRemoteStatusFilePath" />
                     </div>
                     <div class="col-md-9">
+                        <span>Ex.: /Labels/GLS/Status/</span>
                         <nop-editor asp-for="FTPRemoteStatusFilePath" />
                         <span asp-validation-for="FTPRemoteStatusFilePath"></span>
                     </div>
                 </div>
-
+                <br />
                 <div class="form-group">
                     <div class="col-md-3">
                         <nop-label asp-for="FTPTempFolder" />
                     </div>
                     <div class="col-md-9">
+                        <span>Ex.: C:\\Temp\</span>
                         <nop-editor asp-for="FTPTempFolder" />
                         <span asp-validation-for="FTPTempFolder"></span>
                     </div>
                 </div>
-
+                <br />
                 <div class="form-group">
                     <div class="col-md-3">
                         <br />
                         <nop-label asp-for="FTPPrinterName" />
                     </div>
                     <div class="col-md-9">
-                        <span>Must start with P (etc. P002)</span>
+                        <span>Must start with P (ex. P002)</span>
                         <nop-editor asp-for="FTPPrinterName" />
                         <span asp-validation-for="FTPPrinterName"></span>
                     </div>
                 </div>
-
+                <br />
                 <div class="form-group">
                     <div class="col-md-3">
                         <br />
@@ -125,7 +127,7 @@
                         <span asp-validation-for="GLSStatusFileRetries"></span>
                     </div>
                 </div>
-
+                <br />
                 <div class="form-group">
                     <div class="col-md-3">
                         <br />
@@ -135,6 +137,32 @@
                         <span>Number of seconds to wait in each retry for the status file</span>
                         <nop-editor asp-for="GLSStatusFileWaitSeconds" />
                         <span asp-validation-for="GLSStatusFileWaitSeconds"></span>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <br />
+                        <nop-label asp-for="DoCleanup" />
+                    </div>
+                    <div class="col-md-9">
+                        <span>After printing label, delete all old status files</span>
+                        <br />
+                        <nop-editor asp-for="DoCleanup" />
+                        <span asp-validation-for="DoCleanup"></span>
+                    </div>
+                </div>
+                <br />
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <br />
+                        <nop-label asp-for="DaysToKeepStatusFiles" />
+                    </div>
+                    <div class="col-md-9">
+                        <span>How old can status files be before cleanup will delete them</span>
+                        <nop-editor asp-for="DaysToKeepStatusFiles" />
+                        <span asp-validation-for="DaysToKeepStatusFiles"></span>
                     </div>
                 </div>
 

@@ -12,6 +12,7 @@ using Nop.Web.Areas.Admin.Controllers;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Mvc.Filters;
 using System;
+using System.IO;
 using System.Text;
 using System.Threading;
 
@@ -134,6 +135,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 _settings.DoSendEmails = model.DoSendEmails;
                 _settings.ChangeOrderStatus = model.ChangeOrderStatus;
                 _settings.DoPrintLabel = model.DoPrintLabel;
+                _settings.DoCleanup = model.DoCleanup;
+                _settings.DaysToKeepStatusFiles = model.DaysToKeepStatusFiles;
 
                 _settingService.SaveSetting(_settings);
             }
@@ -263,7 +266,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 _glsStatusFileRetries = 0;
                 SetTrackingNumber(order);
 
-                ChangeOrderStatus(orderId);
+                ChangeOrderStatus(orderId);                
 
                 if (_anyChangesDone == false)
                 {
@@ -278,6 +281,25 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 return Json("Error: " + ex.Message);
             }
             return Json("Done");
+        }
+
+        private void CleanupGLSStatusFiles()
+        {
+            if (_settings.DoCleanup)
+            {
+                _ftpService.CleanupGLSStatusFiles(_settings.FTPRemoteStatusFilePath, _settings.DaysToKeepStatusFiles);
+
+                string[] files = Directory.GetFiles(_settings.FTPTempFolder);
+
+                foreach (string file in files)
+                {
+                    FileInfo fi = new FileInfo(file);
+                    if (fi.LastAccessTime < DateTime.Now.AddDays(-_settings.DaysToKeepStatusFiles))
+                    {
+                        fi.Delete();
+                    }
+                }
+            }
         }
         #endregion
 
@@ -335,6 +357,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                         _glsStatusFileRetries++;
                         SetTrackingNumber(order);
                     }
+
+                    CleanupGLSStatusFiles();
 
                     if (string.IsNullOrEmpty(_trackingNumber))
                     {
@@ -473,7 +497,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 DoCapture = _settings.DoCapture,
                 DoSendEmails = _settings.DoSendEmails,
                 ChangeOrderStatus = _settings.ChangeOrderStatus,
-                DoPrintLabel = _settings.DoPrintLabel
+                DoPrintLabel = _settings.DoPrintLabel,
+                DoCleanup = _settings.DoCleanup,
+                DaysToKeepStatusFiles = _settings.DaysToKeepStatusFiles
             };
         } 
         #endregion

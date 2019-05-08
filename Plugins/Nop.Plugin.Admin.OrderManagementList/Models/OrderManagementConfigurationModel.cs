@@ -77,6 +77,12 @@ namespace Nop.Plugin.Admin.OrderManagementList.Models
         public bool DoSendEmails { get; set; }
 
         [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.ChangeOrderStatus")]
-        public bool ChangeOrderStatus { get; set; }        
+        public bool ChangeOrderStatus { get; set; }
+
+        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.DoCleanup")]
+        public bool DoCleanup { get; set; }
+
+        [NopResourceDisplayName("Nop.Plugin.Admin.OrderManagementList.DaysToKeepStatusFiles")]
+        public int DaysToKeepStatusFiles { get; set; }
     }
 }
