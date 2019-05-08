@@ -18,6 +18,9 @@
                     <h1>Ordrehåndtering</h1>
                 </div>
             </div>
+            <div class="divRightConfig">
+                <a href="~/Admin/OrderManagement/Configure" title="Configure order management list">Konfiguration</a>
+            </div>
         </div>
 
         <hr />
@@ -279,7 +282,14 @@
         {
             $("[id$=error-spn]").hide();
             return true;
-        }
+                }
+
+    $('.top-menu li a').click(function(e) {
+        e.preventDefault();
+        $('a').removeClass('active');
+        $(this).addClass('active');
+    });
+
         </script>
 
     </form>
