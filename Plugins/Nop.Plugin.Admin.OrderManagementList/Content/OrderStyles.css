@@ -58,9 +58,9 @@ div.singleLineError { display: none; color: red; font-weight: bold; font-size: 1
     #divCount .divTotalCount { width: 140px; }
     #divCount .divTotalAmount { width: 300px; }
 
-@media only screen and (max-width: 1400px) { 
-    
-    .divSingleOrderHeader > div { margin: 0 5px 0 5px; font-size: 12px; }
+#divCountNote { height: 60px; margin: 0 0 10px 20px; font-size: 16px; font-weight: bold; }
+
+@media only screen and (max-width: 1400px) { .divSingleOrderHeader > div { margin: 0 5px 0 5px; font-size: 12px; }
     .divSingleOrderHeader .divProductInfo { width: 20%; }
     .divSingleOrderHeader .divShippingInfo { width: 18%; }
     .divSingleOrderHeader .divCustomerInfo { width: 15%; }

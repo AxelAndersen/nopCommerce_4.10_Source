@@ -30,25 +30,28 @@
         }
         else
         {
-            <div id="divCount">
+            <div id="divCountNote">
                 <div class="divTotalCount">Produkter ialt:&nbsp;@Model.TotalCount</div>
+                <div style="clear:both;"></div>
+                <br />
+                <a href="@Model.CompleteVendorEmail" title="Mail til @Model.VendorName">Email til @Model.VendorName</a>
+                <br />
             </div>
             <hr />
-            <a href="@Model.CompleteVendorEmail" title="Mail til @Model.VendorName">Email til @Model.VendorName</a>
-            <br />
+                       
             @foreach (PresentationReOrderItem reOrderItem in Model.ReOrderItems)
             {
                 <div class="divSingleReOrderItemNote">
                     <div class="singleLineError">
                         <span id="@reOrderItem.Id-error-spn"></span>
                     </div>
+                    <div class="divQuantity">
+                        @reOrderItem.Quantity&nbsp;stk.
+                    </div>
                     <div class="divManufacturer">
                         @reOrderItem.ManufacturerName
                         &nbsp;
                         @Html.Raw(reOrderItem.ManufacturerProductId)
-                    </div>
-                    <div class="divQuantity">
-                        @reOrderItem.Quantity&nbsp;stk.
                     </div>
                     <div class="divProduct">
                         @Html.Raw(reOrderItem.ProductName)

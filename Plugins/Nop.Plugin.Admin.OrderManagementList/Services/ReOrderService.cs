@@ -191,12 +191,15 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             sb.Append("mailto:");
             sb.Append(vendor.Email);
             sb.Append("?subject=Bestilling af varer&");
-            sb.Append("body=Hej%0D%0A%0D%0AHermed bestilling på følgende:%0D%0A%0D%0A");
+            sb.Append("body=Hej%0D%0A%0D%0AHermed bestilling på følgende:%0D%0A%0D%0A%0D%0A");
             foreach (PresentationReOrderItem item in reOrderItems)
             {
-                sb.Append("Produkt-id: " + item.ManufacturerProductId + ", ");
-                sb.Append("Produktnavn: " + item.ProductName);                
-                sb.Append(item.Quantity.ToString() + " stk.");
+                sb.Append(item.Quantity.ToString() + "%20stk.%20");
+                sb.Append(item.ManufacturerName + "%20%20%20");
+                sb.Append(item.ManufacturerProductId.Replace("&nbsp;", "%20") + "%20%20%20");                
+                sb.Append(item.ProductName);                
+                sb.Append("%0D%0A");
+                sb.Append("----------------------------------------------------------------------------------------------------------------------------------");
                 sb.Append("%0D%0A");
             }
             sb.Append("%0D%0A%0D%0A");
