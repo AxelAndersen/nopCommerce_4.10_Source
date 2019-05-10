@@ -16,6 +16,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Domain
 
         public string CustomerEmail { get; set; }
 
+        public int ShipmentId { get; set; }
+
         public string ShippingInfo { get; set; }
 
         public string CustomerComment { get; set; }

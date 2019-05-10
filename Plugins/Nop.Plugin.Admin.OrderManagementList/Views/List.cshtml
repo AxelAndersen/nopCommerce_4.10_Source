@@ -85,7 +85,14 @@
                     <div class="divOrderInfo">
                         <a class="btn bg-yellow large-text" href="/Admin/Order/Edit/@order.OrderId">Ordrenr.:&nbsp;@order.OrderId</a>
                         <br /><br />
-                        <a class="btn bg-purple large-text" onclick="javascript: ResetMessages();" href="/Admin/Order/PdfPackagingSlip?shipmentId=6">Følgeseddel</a>
+                        @if (order.ShipmentId == 0)
+                        {
+                            <span class="singleLineError">Mangler levering<br />Følgeseddel ikke mulig</span>
+                        }
+                        else
+                        {
+                            <a class="btn bg-purple large-text" onclick="javascript: ResetMessages();" href="/Admin/Order/PdfPackagingSlip?shipmentId=@order.ShipmentId">Følgeseddel</a>
+                        }
                         <br /><br />
                         <a class="btn bg-green large-text" onclick="javascript:CompleteOrderAjax(@order.OrderId);">Afslut ordre</a>
                         <br /><br />
@@ -189,43 +196,55 @@
             return false;
         }
 
+        var completeOrderClicked = false;
         function CompleteOrderAjax(orderId)
         {
-            $.ajax({
-                cache: false,
-                type: 'GET',
-                url: '@Url.Action("CompleteOrder", "OrderManagement")',
-                data: { orderId: orderId },
-                dataType: 'json',
-                success: function (data)
-                {
-                    if (data.indexOf("Error:") > -1)
+            if (completeOrderClicked === false)
+            {
+                completeOrderClicked = true;
+
+                $.ajax({
+                    cache: false,
+                    type: 'GET',
+                    url: '@Url.Action("CompleteOrder", "OrderManagement")',
+                    data: { orderId: orderId },
+                    dataType: 'json',
+                    success: function (data)
                     {
-                        ShowError(orderId, data);
-                    }
-                    else if (data.indexOf("Warning:") > -1)
+                        completeOrderClicked = false;
+                        if (data.indexOf("Error:") > -1)
+                        {
+                            ShowError(orderId, data);
+                        }
+                        else if (data.indexOf("Warning:") > -1)
+                        {
+                            ShowWarning(orderId, data);
+                        }
+                        else
+                        {
+                            // SUCCESS, now reload page to remove handled order
+                            location.reload();
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError)
                     {
-                        ShowWarning(orderId, data);
+                        if (xhr && xhr.responseText)
+                        {
+                            var err = eval("(" + xhr.responseText + ")");
+                            ShowError(orderId, err.Message);
+                        }
+                        else
+                        {
+                            ShowError(orderId, "Error while saving.");
+                        }
+                        completeOrderClicked = false;
                     }
-                    else
-                    {
-                        // SUCCESS, now reload page to remove handled order
-                        location.reload();
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError)
-                {
-                    if (xhr && xhr.responseText)
-                    {
-                        var err = eval("(" + xhr.responseText + ")");
-                        ShowError(orderId, err.Message);
-                    }
-                    else
-                    {
-                        ShowError(orderId, "Error while saving.");
-                    }
-                }
-            });
+                });
+            }
+            else
+            {                
+                e.preventDefault();
+            }
             return false;
         }
 

@@ -200,6 +200,10 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             if(_shipment == null)
             {
                 int shipmentId = GetShipmentId(order.Shipment);
+                if(shipmentId == 0)
+                {
+                    throw new ArgumentException("No shipment found when sending mail to customer!");
+                }
                 _shipment = _shipmentService.GetShipmentById(shipmentId);
             }
 
@@ -261,6 +265,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 CustomerInfo = GetCustomerInfo(order),
                 OrderNotes = GetOrderNotes(order),
                 OrderDateTime = order.OrderDateTime.ToString("dd-MM-yy H:mm"),
+                ShipmentId = GetShipmentId(order.Shipment),
                 ShippingInfo = GetShippingInfo(order),
                 TotalOrderAmountStr = GetTotal(order),
                 TotalOrderAmount = order.TotalOrderAmount,                
@@ -271,18 +276,31 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             return presentationOrders;
         }
 
-        private static int GetShipmentId(string shipmentStr)
+        private int GetShipmentId(string shipmentStr)
         {
-            if (shipmentStr.Contains(";") == false)
-            {
-                throw new ArgumentException("Shipment string missing shipmentId: '" + shipmentStr + "'");
-            }
-
             int shipmentId = 0;
-            bool ok = int.TryParse(shipmentStr.Substring(0, shipmentStr.IndexOf(";")), out shipmentId);
-            if (ok == false || shipmentId == 0)
+
+            try
             {
-                throw new ArgumentException("Shipment string missing proper shipmentId: '" + shipmentStr + "'");
+                if (string.IsNullOrEmpty(shipmentStr))
+                {
+                    throw new ArgumentException("Shipment string null or empty");
+                }
+
+                if (shipmentStr.Contains(";") == false)
+                {
+                    throw new ArgumentException("Shipment string missing shipmentId: '" + shipmentStr + "'");
+                }
+                
+                bool ok = int.TryParse(shipmentStr.Substring(0, shipmentStr.IndexOf(";")), out shipmentId);
+                if (ok == false || shipmentId == 0)
+                {
+                    throw new ArgumentException("Shipment string missing proper shipmentId: '" + shipmentStr + "'");
+                }
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
             }
 
             return shipmentId;
