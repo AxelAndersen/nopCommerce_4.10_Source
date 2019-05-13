@@ -5,7 +5,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 {
     public interface IReOrderService
     {
-        List<PresentationReOrderItem> GetCurrentReOrderList(ref int markedProductId, string searchphrase = "", int vendorId = 0);        
+        List<PresentationReOrderItem> GetCurrentReOrderList(ref int markedProductId, ref int totalCount, string searchphrase = "", int vendorId = 0);        
 
         void RemoveFromReOrderList(int orquantityToOrderderId, int orderItemId);
 

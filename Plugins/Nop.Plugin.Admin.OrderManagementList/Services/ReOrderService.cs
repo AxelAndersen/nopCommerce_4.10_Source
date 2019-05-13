@@ -27,7 +27,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             this._allVendors = vendorService.GetAllVendors().ToList();
         }
 
-        public List<PresentationReOrderItem> GetCurrentReOrderList(ref int markedProductId, string searchphrase = "", int vendorId = 0)
+        public List<PresentationReOrderItem> GetCurrentReOrderList(ref int markedProductId, ref int totalCount, string searchphrase = "", int vendorId = 0)
         {
             List<AOReOrderItem> reOrders = null;
 
@@ -50,6 +50,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                             .ToList();
             }
 
+            totalCount = reOrders.Count;
             int currentVendorId = 0;
             List<PresentationReOrderItem> presentationReOrderItems = new List<PresentationReOrderItem>();
             foreach (AOReOrderItem item in reOrders)
@@ -93,7 +94,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                     Quantity = item.Quantity,
                     ManufacturerId = manufacturer.Id,
                     ManufacturerName = manufacturer.Name,
-                    VendorName = vendor.Name
+                    VendorName = vendor.Name,
+                    VendorId = vendor.Id,
                 }
                 );
             }

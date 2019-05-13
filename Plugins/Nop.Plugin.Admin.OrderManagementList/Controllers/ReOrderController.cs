@@ -29,10 +29,10 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
             try
             {
-                int markedProductId = 0;
-                model.ReOrderItems = _reOrderService.GetCurrentReOrderList(ref markedProductId, searchphrase);
+                int markedProductId = 0, totalCount = 0;
+                model.ReOrderItems = _reOrderService.GetCurrentReOrderList(ref markedProductId, ref totalCount, searchphrase);
                 model.SearchPhrase = searchphrase;
-                model.TotalCount = model.ReOrderItems.Count;
+                model.TotalCount = totalCount;
             }
             catch (Exception ex)
             {
@@ -61,8 +61,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
             try
             {
-                int markedProductId = 0;
-                model.ReOrderItems = _reOrderService.GetCurrentReOrderList(ref markedProductId, "", vendorId);
+                int markedProductId = 0, totalcount = 0;
+                model.ReOrderItems = _reOrderService.GetCurrentReOrderList(ref markedProductId, ref totalcount, "", vendorId);
                 model.VendorName = vendorName;
                 model.TotalCount = GetProductsCount(model.ReOrderItems);
                 model.CompleteVendorEmail = _reOrderService.GetCompleteVendorEmail(model.ReOrderItems, vendorId);

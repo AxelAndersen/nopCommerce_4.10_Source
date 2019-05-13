@@ -61,51 +61,61 @@
             <div class="divQuantity"><b>Antal</b></div>
         </div>
         <div style="clear:both;"></div>
-        <hr class="hrSmall" />
-        <br />
-        @foreach (PresentationReOrderItem reOrderItem in Model.ReOrderItems)
-        {
-            <div class="divSingleReOrderItem">
-                <div class="singleLineError">
-                    <span id="@reOrderItem.Id-error-spn"></span>
-                </div>
 
-                @if (reOrderItem.ProductName == "Spacing")
-                {            
-                    <hr class="hrOrderManagement" />
-                    <div class="spacing">                        
-                        <span>@reOrderItem.VendorName</span>
-                        &nbsp;
-                        &nbsp;                      
-                        <a href="/Admin/ReOrder/ReOrderNote?vendorId=@reOrderItem.VendorId&amp;vendorName=@reOrderItem.VendorName">Se liste til @reOrderItem.VendorName</a>
-                    </div>                       
-                }
-                else
-                {
-                    <div class="divDecrease">
-                        <a class="btn bg-red large-text" onclick="javascript:JSReOrderItemChangeQuantity(@reOrderItem.Id, -1);">Tæl ned</a>
+        {
+            bool first = true;
+
+            foreach (PresentationReOrderItem reOrderItem in Model.ReOrderItems)
+            {
+                <div class="divSingleReOrderItem">
+                    <div class="singleLineError">
+                        <span id="@reOrderItem.Id-error-spn"></span>
                     </div>
-                    <div class="divDecrease">
-                        <a class="btn bg-green large-text" onclick="javascript:JSReOrderItemChangeQuantity(@reOrderItem.Id, 1);">Tæl op</a>
-                    </div>
-                    <div class="divVendor">
-                        @reOrderItem.VendorName&nbsp;(@reOrderItem.VendorId)
-                    </div>
-                    <div class="divManufacturer">
-                        @reOrderItem.ManufacturerName&nbsp;(@reOrderItem.ManufacturerId)
-                        <br />
-                        @Html.Raw(reOrderItem.ManufacturerProductId)
-                    </div>
-                    <div class="divProduct">
-                        @Html.Raw(reOrderItem.ProductName)
-                    </div>
-                    <div class="divQuantity">
-                        <span id="spn-quantity-@reOrderItem.Id">@reOrderItem.Quantity</span>
-                    </div>
-                }
-            </div>
-            <div style="clear:both;"></div>
-            <hr class="hrSmall" />
+
+                    @if (reOrderItem.ProductName == "Spacing")
+                    {
+                        if (first == false)
+                        {
+                            <br /><br />
+                            <hr class="hrOrderManagement" />
+                        }
+                        { first = false; }
+
+                        <div class="spacing">
+                            <span>@reOrderItem.VendorName</span>
+                            &nbsp;
+                            &nbsp;
+                            <a href="/Admin/ReOrder/ReOrderNote?vendorId=@reOrderItem.VendorId&amp;vendorName=@reOrderItem.VendorName">Se liste til @reOrderItem.VendorName</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="divDecrease">
+                            <a class="btn bg-red large-text" onclick="javascript:JSReOrderItemChangeQuantity(@reOrderItem.Id, -1);">Tæl ned</a>
+                        </div>
+                        <div class="divDecrease">
+                            <a class="btn bg-green large-text" onclick="javascript:JSReOrderItemChangeQuantity(@reOrderItem.Id, 1);">Tæl op</a>
+                        </div>
+                        <div class="divVendor">
+                            @reOrderItem.VendorName&nbsp;(@reOrderItem.VendorId)
+                        </div>
+                        <div class="divManufacturer">
+                            @reOrderItem.ManufacturerName&nbsp;(@reOrderItem.ManufacturerId)
+                            <br />
+                            @Html.Raw(reOrderItem.ManufacturerProductId)
+                        </div>
+                        <div class="divProduct">
+                            @Html.Raw(reOrderItem.ProductName)
+                        </div>
+                        <div class="divQuantity">
+                            <span id="spn-quantity-@reOrderItem.Id">@reOrderItem.Quantity</span>
+                        </div>
+                    }
+
+                </div>
+                <div style="clear:both;"></div>
+                <hr class="hrSmall" />
+            }
         }
     }
 
