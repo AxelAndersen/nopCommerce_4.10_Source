@@ -26,6 +26,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Domain
 
         public List<AOOrderItem> PresentationOrderItems { get; set; }
 
-        public string FormattedPaymentStatus { get; set; }        
+        public string FormattedPaymentStatus { get; set; }
+
+        public virtual string PaymentMethodSystemName { get; set; }
     }
 }

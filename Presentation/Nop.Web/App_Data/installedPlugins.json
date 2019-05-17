@@ -21,5 +21,6 @@
   "Shipping.GLS",
   "POS.Kaching",
   "Payments.QuickPayV10",
-  "Admin.OrderManagementList"
+  "Admin.OrderManagementList",
+  "Payments.KlarnaCheckout"
 ]

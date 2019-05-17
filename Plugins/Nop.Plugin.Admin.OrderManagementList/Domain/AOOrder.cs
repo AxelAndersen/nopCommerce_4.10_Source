@@ -33,6 +33,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Domain
 
         public virtual int PaymentStatusId { get; set; }
 
+        public virtual string PaymentMethodSystemName { get; set; }
+
         /// <summary>
         /// Contains the first shipment for the order in this format (ShipmentId;AdminComment)
         /// </summary>

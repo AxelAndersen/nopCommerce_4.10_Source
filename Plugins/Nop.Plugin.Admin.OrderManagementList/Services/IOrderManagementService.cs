@@ -1,4 +1,5 @@
 ﻿using Nop.Core.Domain.Catalog;
+using Nop.Core.Domain.Shipping;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
 using System.Collections.Generic;
 
@@ -6,6 +7,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 {
     public interface IOrderManagementService
     {
+        Shipment OrderShipment { get; }
+
         List<AOPresentationOrder> GetCurrentOrders(ref int markedProductId, string searchphrase = "");
 
         void SetProductIsTakenAside(int orderItemId, int productId, bool isTakenAside, ref string errorMessage);

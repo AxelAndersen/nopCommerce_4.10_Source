@@ -65,7 +65,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 model.ReOrderItems = _reOrderService.GetCurrentReOrderList(ref markedProductId, ref totalcount, "", vendorId);
                 model.VendorName = vendorName;
                 model.TotalCount = GetProductsCount(model.ReOrderItems);
-                model.CompleteVendorEmail = _reOrderService.GetCompleteVendorEmail(model.ReOrderItems, vendorId);
+                model.CompleteVendorEmail = _reOrderService.GetCompleteVendorEmail(model.ReOrderItems, vendorId, model.TotalCount);
             }
             catch (Exception ex)
             {

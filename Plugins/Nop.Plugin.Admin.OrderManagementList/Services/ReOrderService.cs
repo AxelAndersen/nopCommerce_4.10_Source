@@ -181,7 +181,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             _context.SaveChanges();
         }
 
-        public string GetCompleteVendorEmail(List<PresentationReOrderItem> reOrderItems, int vendorId)
+        public string GetCompleteVendorEmail(List<PresentationReOrderItem> reOrderItems, int vendorId, int totalCount)
         {
             Vendor vendor = GetVendor(vendorId);
             if(vendor == null || vendor.Id == 0)
@@ -193,7 +193,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             sb.Append("mailto:");
             sb.Append(vendor.Email);
             sb.Append("?subject=Bestilling af varer&");
-            sb.Append("body=Hej%0D%0A%0D%0AHermed bestilling på følgende:%0D%0A%0D%0A%0D%0A");
+            sb.Append("body=Hej%0D%0A%0D%0AHermed bestilling på følgende:%20(Ialt%20" + totalCount + "%20produkter)%0D%0A%0D%0A%0D%0A");
             foreach (PresentationReOrderItem item in reOrderItems)
             {
                 sb.Append(item.Quantity.ToString() + "%20stk.%20");

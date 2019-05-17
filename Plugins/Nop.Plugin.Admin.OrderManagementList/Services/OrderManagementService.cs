@@ -33,6 +33,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         private readonly IWorkflowMessageService _workflowMessageService;
         private readonly IRepository<ProductAttributeCombination> _productAttributeCombinationRepository;
         private Shipment _shipment;
+        private AOOrder _order;
         private List<AOPresentationOrder> _presentationOrders;
 
         public OrderManagementService(IRepository<Order> aoOrderRepository, 
@@ -55,6 +56,24 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             this._orderService = orderService;
             this._workflowMessageService = workflowMessageService;
             this._productAttributeCombinationRepository = productAttributeCombinationRepository;
+        }
+
+        public Shipment OrderShipment
+        {
+            get
+            {
+                if (_shipment == null)
+                {
+                    int shipmentId = GetShipmentId(_order.Shipment);
+                    if (shipmentId == 0)
+                    {
+                        throw new ArgumentException("No shipment found when sending mail to customer!");
+                    }
+                    _shipment = _shipmentService.GetShipmentById(shipmentId);
+                }
+
+                return _shipment;
+            }
         }
 
         #region Public methods
@@ -172,13 +191,14 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 throw new ArgumentException("No proper orderId: " + orderId);
             }
 
-            AOOrder order =  _context.AoOrders.Where(o => o.Id == orderId).FirstOrDefault();
-            if(order == null)
+            _order =  _context.AoOrders.Where(o => o.Id == orderId).FirstOrDefault();
+
+            if(_order == null)
             {
                 throw new ArgumentException("No order found with id: " + orderId);
             }
 
-            return order;
+            return _order;
         }
 
         public void SetTrackingNumberOnShipment(string shipmentStr, string trackingNumber)
@@ -197,17 +217,9 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 
         public void SendShipmentMail(AOOrder order)
         {
-            if(_shipment == null)
-            {
-                int shipmentId = GetShipmentId(order.Shipment);
-                if(shipmentId == 0)
-                {
-                    throw new ArgumentException("No shipment found when sending mail to customer!");
-                }
-                _shipment = _shipmentService.GetShipmentById(shipmentId);
-            }
+            
 
-            _workflowMessageService.SendShipmentSentCustomerNotification(_shipment, _workContext.WorkingLanguage.Id);
+            _workflowMessageService.SendShipmentSentCustomerNotification(OrderShipment, _workContext.WorkingLanguage.Id);
         }  
 
         public void ChangeOrderStatus(int orderId)
@@ -270,7 +282,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 TotalOrderAmountStr = GetTotal(order),
                 TotalOrderAmount = order.TotalOrderAmount,                
                 PresentationOrderItems = GetProductInfo(order),
-                FormattedPaymentStatus = GetPaymentStatus(order.PaymentStatusId)
+                FormattedPaymentStatus = GetPaymentStatus(order.PaymentStatusId),
+                PaymentMethodSystemName = order.PaymentMethodSystemName
             }).ToList();
 
             return presentationOrders;

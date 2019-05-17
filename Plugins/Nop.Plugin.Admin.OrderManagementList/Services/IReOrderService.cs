@@ -13,6 +13,6 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 
         int ChangeQuantity(int reOrderItemId, int quantity);
 
-        string GetCompleteVendorEmail(List<PresentationReOrderItem> reOrderItems, int vendorId);
+        string GetCompleteVendorEmail(List<PresentationReOrderItem> reOrderItems, int vendorId, int totalCount);
     }
 }

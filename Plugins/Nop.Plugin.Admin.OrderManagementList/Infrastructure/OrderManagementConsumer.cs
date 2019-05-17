@@ -51,6 +51,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
                 Order order = eventMessage.Entity;
                 if (order == null)
                 {
+                    _logger.Error("OrderManagementConsumer HandleEvent, Order is null");
                     return;
                 }
 
@@ -221,7 +222,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
                 {
                     OrderId = order.Id,
                     AdminComment = "Shipment added automatically",
-                    TotalWeight = 1
+                    TotalWeight = 1,
+                    CreatedOnUtc = DateTime.Now
                 };
 
                 _shipmentService.InsertShipment(shipment);

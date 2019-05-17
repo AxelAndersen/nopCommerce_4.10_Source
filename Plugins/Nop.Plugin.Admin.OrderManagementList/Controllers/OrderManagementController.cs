@@ -1,5 +1,6 @@
 ﻿using GLSReference;
 using Microsoft.AspNetCore.Mvc;
+using Nop.Core.Domain.Shipping;
 using Nop.Plugin.Admin.OrderManagementList.Domain;
 using Nop.Plugin.Admin.OrderManagementList.Models;
 using Nop.Plugin.Admin.OrderManagementList.Services;
@@ -15,6 +16,8 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading;
+using Nop.Services.Events;
+using Nop.Services.Shipping;
 
 namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 {
@@ -32,6 +35,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         private readonly IFTPService _ftpService;
         private readonly IGLSService _glsService;
         private readonly IQuickPayApiServices _quickPayService;
+        private readonly IEventPublisher _eventPublisher;
         private int _glsStatusFileRetries = 0;
         private string _trackingNumber;
         private bool _anyChangesDone; 
@@ -45,7 +49,8 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                                          IFTPService ftpService, 
                                          IGLSService glsService, 
                                          IQuickPayApiServices quickPayService,
-                                         IReOrderService reOrderService)
+                                         IReOrderService reOrderService,
+                                         IEventPublisher eventPublisher)
         {
             this._logger = logger;
             this._settings = orderManagementSettings;
@@ -56,6 +61,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             this._glsService = glsService;
             this._quickPayService = quickPayService;
             this._reOrderService = reOrderService;
+            this._eventPublisher = eventPublisher;
         }
 
         #region Public methods
@@ -246,16 +252,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             try
             {
                 _anyChangesDone = false;
-                AOOrder order = _orderManagementService.GetOrder(orderId);
-                if (order == null)
-                {
-                    throw new ArgumentException("No order found with id: " + orderId);
-                }
-
-                if (string.IsNullOrEmpty(order.AuthorizationTransactionId))
-                {
-                    throw new ArgumentException("No payment id found with orderid: " + orderId);
-                }
+                AOOrder order = _orderManagementService.GetOrder(orderId);                
 
                 HandleGLSLabel(order);
 
@@ -326,19 +323,40 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         {
             if (_settings.DoCapture)
             {
-                PaymentApiStatus paymentApiStatus = _quickPayService.GetPayment(order.AuthorizationTransactionId);
-                if (paymentApiStatus.Payment == null || paymentApiStatus.HttpResponse.StatusCode != System.Net.HttpStatusCode.OK)
+                switch(order.PaymentMethodSystemName)
                 {
-                    throw new ArgumentException("No payment found with orderid: " + order.Id + " and AuthorizationTransactionId: " + order.AuthorizationTransactionId);
+                    case "Payments.QuickPayV10":
+                        {
+                            PaymentApiStatus paymentApiStatus = _quickPayService.GetPayment(order.AuthorizationTransactionId);
+                            if (paymentApiStatus.Payment == null || paymentApiStatus.HttpResponse.StatusCode != System.Net.HttpStatusCode.OK)
+                            {
+                                throw new ArgumentException("No payment found with orderid: " + order.Id + " and AuthorizationTransactionId: " + order.AuthorizationTransactionId);
+                            }
+
+                            PaymentApiStatus captureStatus = _quickPayService.CapturePayment(order.AuthorizationTransactionId, Convert.ToInt32(order.TotalOrderAmount));
+
+                            if (captureStatus.HttpResponse.IsSuccessStatusCode == false)
+                            {
+                                throw new ArgumentException("Error capturing money on orderid: " + order.Id + ", Error: " + captureStatus.HttpResponse.ReasonPhrase);
+                            }
+                            break;
+                        }
+                    case "Payments.KlarnaCheckout":
+                        {
+                            Shipment shipment = _orderManagementService.OrderShipment;
+                            if(shipment == null)
+                            {
+                                throw new ArgumentNullException("Shipment is null in Capture of Klarna Checkout");
+                            }
+                            _eventPublisher.PublishShipmentSent(shipment);
+                            break;
+                        }
+                    default:
+                        {
+                            throw new ArgumentException("Payment system not recognized: '" + order.PaymentMethodSystemName + "'");
+                        }
                 }
-
-                PaymentApiStatus captureStatus = _quickPayService.CapturePayment(order.AuthorizationTransactionId, Convert.ToInt32(order.TotalOrderAmount));
-
-                if (captureStatus.HttpResponse.IsSuccessStatusCode == false)
-                {
-                    throw new ArgumentException("Error capturing money on orderid: " + order.Id + ", Error: " + captureStatus.HttpResponse.ReasonPhrase);
-                }
-
+                
                 _anyChangesDone = true;
             }
         }
