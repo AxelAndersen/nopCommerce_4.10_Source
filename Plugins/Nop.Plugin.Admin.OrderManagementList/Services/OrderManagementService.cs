@@ -67,9 +67,14 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                     int shipmentId = GetShipmentId(_order.Shipment);
                     if (shipmentId == 0)
                     {
-                        throw new ArgumentException("No shipment found when sending mail to customer!");
+                        throw new ArgumentException("No shipmentId found!");
                     }
+
                     _shipment = _shipmentService.GetShipmentById(shipmentId);
+                    if (_shipment == null)
+                    {
+                        throw new ArgumentException("No shipment found with shipmentId: " + shipmentId + "!");
+                    }
                 }
 
                 return _shipment;
@@ -201,14 +206,11 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
             return _order;
         }
 
-        public void SetTrackingNumberOnShipment(string shipmentStr, string trackingNumber)
+        public void SetTrackingNumberOnShipment(string trackingNumber)
         {
-            int shipmentId = GetShipmentId(shipmentStr);
-            _shipment = _shipmentService.GetShipmentById(shipmentId);
-
             if (_shipment == null)
             {
-                throw new ArgumentException("No Shipment found with shipmentId: " + shipmentId);
+                throw new ArgumentException("No Shipment found in SetTrackingNumberOnShipment");
             }
 
             _shipment.TrackingNumber = trackingNumber;
@@ -216,9 +218,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
         }
 
         public void SendShipmentMail(AOOrder order)
-        {
-            
-
+        {            
             _workflowMessageService.SendShipmentSentCustomerNotification(OrderShipment, _workContext.WorkingLanguage.Id);
         }  
 

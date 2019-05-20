@@ -323,7 +323,13 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         {
             if (_settings.DoCapture)
             {
-                switch(order.PaymentMethodSystemName)
+                Shipment shipment = _orderManagementService.OrderShipment;
+                if (shipment == null)
+                {
+                    throw new ArgumentNullException("Shipment is null in Capture");
+                }
+
+                switch (order.PaymentMethodSystemName)
                 {
                     case "Payments.QuickPayV10":
                         {
@@ -339,15 +345,11 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                             {
                                 throw new ArgumentException("Error capturing money on orderid: " + order.Id + ", Error: " + captureStatus.HttpResponse.ReasonPhrase);
                             }
+                            _eventPublisher.PublishShipmentSent(shipment);
                             break;
                         }
                     case "Payments.KlarnaCheckout":
-                        {
-                            Shipment shipment = _orderManagementService.OrderShipment;
-                            if(shipment == null)
-                            {
-                                throw new ArgumentNullException("Shipment is null in Capture of Klarna Checkout");
-                            }
+                        {                            
                             _eventPublisher.PublishShipmentSent(shipment);
                             break;
                         }
@@ -385,7 +387,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                     }
                 }
 
-                _orderManagementService.SetTrackingNumberOnShipment(order.Shipment, _trackingNumber);
+                _orderManagementService.SetTrackingNumberOnShipment(_trackingNumber);
                 _anyChangesDone = true;
             }
         }

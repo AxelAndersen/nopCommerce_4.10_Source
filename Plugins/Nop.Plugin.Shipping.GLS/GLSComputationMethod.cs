@@ -2,6 +2,7 @@
 using GLSReference;
 using Nop.Core;
 using Nop.Core.Domain.Common;
+using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Shipping;
@@ -91,6 +92,12 @@ namespace Nop.Plugin.Shipping.GLS
 
             if (_glsSettings.Tracing)
                 _traceMessages.AppendLine("Ready to validate shipping input");
+
+            Customer customer = getShippingOptionRequest.Customer;
+            if (customer == null || customer.BillingAddressId == null || customer.BillingAddressId.Value == 0)
+            {
+                return null;
+            }
 
             AOGLSCountry glsCountry = null;
             bool validInput = ValidateShippingInfo(getShippingOptionRequest, ref response, ref glsCountry);
