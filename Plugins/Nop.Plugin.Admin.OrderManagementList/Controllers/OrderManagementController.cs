@@ -82,10 +82,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             }
             catch (Exception ex)
             {
-                Exception inner = ex;
-                while (inner.InnerException != null) inner = inner.InnerException;
-                _logger.Error("List Order Management: " + inner.Message, ex);
-                model.ErrorMessage = ex.ToString();
+                return HandleException(ex);
             }
 
             return View("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Views/List.cshtml", model);
@@ -102,10 +99,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             }
             catch (Exception ex)
             {
-                Exception inner = ex;
-                while (inner.InnerException != null) inner = inner.InnerException;
-                _logger.Error("Configure Order Management: " + inner.Message, ex);
-                model.ErrorMessage += "<br />" + inner.Message;
+                return HandleException(ex);
             }
             return View("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Views/Configure.cshtml", model);
         }
@@ -148,10 +142,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             }
             catch (Exception ex)
             {
-                Exception inner = ex;
-                while (inner.InnerException != null) inner = inner.InnerException;
-                _logger.Error("Configure Order Management: " + inner.Message, ex);
-                model.ErrorMessage += "<br />" + inner.Message;
+                return HandleException(ex);
             }
             return Configure();
         }
@@ -192,11 +183,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             }
             catch (Exception ex)
             {
-                Exception inner = ex;
-                while (inner.InnerException != null) inner = inner.InnerException;
-
-                _logger.Error(inner.Message, ex);
-                return Json("Error: " + inner.Message);
+                return HandleException(ex);
             }
         }
 
@@ -237,11 +224,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             }
             catch (Exception ex)
             {
-                Exception inner = ex;
-                while (inner.InnerException != null) inner = inner.InnerException;
-
-                _logger.Error(inner.Message, ex);
-                return Json("Error: " + inner.Message);
+                return HandleException(ex);
             }
         }
 
@@ -258,6 +241,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
 
                 Capture(order);
 
+
                 SendMails(order);
 
                 _glsStatusFileRetries = 0;
@@ -272,14 +256,13 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             }
             catch (Exception ex)
             {
-                while (ex.InnerException != null) ex = ex.InnerException;
-
-                _logger.Error(ex.Message, ex);
-                return Json("Error: " + ex.Message);
+                return HandleException(ex);
             }
             return Json("Done");
         }
+        #endregion
 
+        #region Private methods
         private void CleanupGLSStatusFiles()
         {
             if (_settings.DoCleanup)
@@ -298,9 +281,16 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 }
             }
         }
-        #endregion
 
-        #region Private methods
+        private IActionResult HandleException(Exception ex)
+        {
+            Exception inner = ex;
+            while (inner.InnerException != null) inner = inner.InnerException;
+
+            _logger.Error(inner.Message, ex);
+            return Json("Error: " + inner.Message);
+        }
+
         private void ChangeOrderStatus(int orderId)
         {
             if (_settings.ChangeOrderStatus)
@@ -414,13 +404,27 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         private string CreateSingleLine(AOOrder order)
         {
             string glsShopnumber = "";
+
+            if(string.IsNullOrEmpty(order.ShippingInfo))
+            {
+                throw new ArgumentException("No shipping info on order");
+            }
+
             if (order.ShippingInfo.Contains("("))
             {
                 glsShopnumber = order.ShippingInfo.Substring(order.ShippingInfo.IndexOf("(") + 1);
-                glsShopnumber = glsShopnumber.Substring(0, glsShopnumber.IndexOf(")"));
+                if (glsShopnumber.Contains(")"))
+                {
+                    glsShopnumber = glsShopnumber.Substring(0, glsShopnumber.IndexOf(")"));
+                }
             }
 
             PakkeshopData pakkeshopData = _glsService.GetParcelShopData(glsShopnumber);
+            if(pakkeshopData == null)
+            {
+                throw new ArgumentException("No Parcel shop found with number: '" + glsShopnumber + "'");
+            }
+
             StringBuilder sb = new StringBuilder();
 
             sb.Append("\"" + order.Id.ToString() + "\"");               // 1 Order number            

@@ -13,5 +13,7 @@ namespace Nop.Plugin.Shipping.GLS.Settings
         public string PricesEndsWith { get; set; }
 
         public decimal FreeShippingLimit { get; set; }
+
+        public string Separator { get; set; }
     }
 }

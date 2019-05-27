@@ -2,7 +2,6 @@
 using GLSReference;
 using Nop.Core;
 using Nop.Core.Domain.Common;
-using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Shipping;
@@ -91,25 +90,20 @@ namespace Nop.Plugin.Shipping.GLS
             var response = new GetShippingOptionResponse();
 
             if (_glsSettings.Tracing)
-                _traceMessages.AppendLine("Ready to validate shipping input");
-
-            Customer customer = getShippingOptionRequest.Customer;
-            if (customer == null || customer.BillingAddressId == null || customer.BillingAddressId.Value == 0)
-            {
-                return null;
-            }
+                _traceMessages.AppendLine("\r\nReady to validate shipping input");            
 
             AOGLSCountry glsCountry = null;
             bool validInput = ValidateShippingInfo(getShippingOptionRequest, ref response, ref glsCountry);
             if(validInput == false && response.Errors != null && response.Errors.Count > 0)
             {
+                var test = _workContext;
                 return response;
             }
 
             try
             {
                 if (_glsSettings.Tracing)
-                    _traceMessages.Append("\r\nReady to prapare GLS call");
+                    _traceMessages.AppendLine("Ready to prapare GLS call");
 
                 List<PakkeshopData> parcelShops = null;
 
@@ -120,7 +114,7 @@ namespace Nop.Plugin.Shipping.GLS
                     string street = getShippingOptionRequest.ShippingAddress.Address1;
 
                     if (_glsSettings.Tracing)
-                        _traceMessages.Append("\r\nReady to call GLS at: '" + _glsSettings.EndpointAddress + "'");
+                        _traceMessages.AppendLine("Ready to call GLS at: '" + _glsSettings.EndpointAddress + "'");
                     
                     try
                     {
@@ -130,7 +124,7 @@ namespace Nop.Plugin.Shipping.GLS
                     catch (Exception ex)
                     {
                         if (_glsSettings.Tracing)
-                            _traceMessages.Append("\r\nError finding parcelshops: " + ex.ToString());
+                            _traceMessages.AppendLine("Error finding parcelshops: " + ex.ToString());
                     }
 
                     if (parcelShops == null || parcelShops.Count == 0)
@@ -143,13 +137,13 @@ namespace Nop.Plugin.Shipping.GLS
                         catch (Exception ex)
                         {
                             if (_glsSettings.Tracing)
-                                _traceMessages.Append("\r\nError finding parcelshops: " + ex.ToString());
+                                _traceMessages.AppendLine("Error finding parcelshops: " + ex.ToString());
                         }
                     }
 
                     if (_glsSettings.Tracing && parcelShops != null && parcelShops.Count > 0)
                     {
-                        _traceMessages.Append("\r\n" + parcelShops.Count + " parcelshops found");
+                        _traceMessages.AppendLine(parcelShops.Count + " parcelshops found:");
                     }
 
                     if (parcelShops != null && parcelShops.Count > 0)
@@ -163,8 +157,13 @@ namespace Nop.Plugin.Shipping.GLS
                                 ShippingRateComputationMethodSystemName = "GLS",
                                 Rate = GetRate(glsCountry.ShippingPrice_0_1)
                             };
-
+                            
                             response.ShippingOptions.Add(shippingOption);
+
+                            if (_glsSettings.Tracing)
+                            {
+                                _traceMessages.AppendLine(" - " + shippingOption.Name);
+                            }
                         }
                     }
                 }
@@ -194,14 +193,14 @@ namespace Nop.Plugin.Shipping.GLS
                 response.AddError($"GLS Service is currently unavailable, try again later. {exc.ToString()}");
 
                 if (_glsSettings.Tracing)
-                    _traceMessages.Append($"\r\nGLS Service is currently unavailable, try again later. {exc.ToString()}");
+                    _traceMessages.AppendLine($"GLS Service is currently unavailable, try again later. {exc.ToString()}");
             }
             finally
             {
                 if (_glsSettings.Tracing && _traceMessages.Length > 0)
                 {
                     var shortMessage =
-                        $"GLS Shipping Options for customer {getShippingOptionRequest.Customer.Email}.  {getShippingOptionRequest.Items.Count} item(s) in cart";
+                        $"GLS Shipping Options for customer {getShippingOptionRequest.Customer.Email}.  {getShippingOptionRequest.Items.Count} item(s) in cart (See more in full message)";
                     _logger.Information(shortMessage, new Exception(_traceMessages.ToString()), getShippingOptionRequest.Customer);
                 }
             }
@@ -250,9 +249,14 @@ namespace Nop.Plugin.Shipping.GLS
 
         private string BuildGLSName(PakkeshopData parcelShop)
         {
-            string name = parcelShop.CompanyName + " (" + parcelShop.Number + ")<br />"
-                + parcelShop.Streetname + "<br />"
-                + parcelShop.ZipCode + " " + parcelShop.CityName + "<br />";            
+            string separator = Environment.NewLine;
+            if(string.IsNullOrEmpty(_glsSettings.Separator) == false)
+            {
+                separator = _glsSettings.Separator;
+            }
+            string name = parcelShop.CompanyName + " (" + parcelShop.Number + ")" + separator
+                + parcelShop.Streetname + separator
+                + parcelShop.ZipCode + " " + parcelShop.CityName;            
 
             return name;
         }

@@ -36,10 +36,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
             }
             catch (Exception ex)
             {
-                Exception inner = ex;
-                while (inner.InnerException != null) inner = inner.InnerException;
-                _logger.Error("List Order Management: " + inner.Message, ex);
-                model.ErrorMessage = ex.ToString();
+                return HandleException(ex);
             }
 
             return View("~/Plugins/Nop.Plugin.Admin.OrderManagementList/Views/ReOrderList.cshtml", model);
@@ -49,7 +46,15 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
         [AuthorizeAdmin(false)]
         public IActionResult ReOrderItemChangeQuantity(int reOrderItemId, int quantity)
         {
-            int newQuantity = _reOrderService.ChangeQuantity(reOrderItemId, quantity);
+            int newQuantity = 0;
+            try
+            {
+                newQuantity = _reOrderService.ChangeQuantity(reOrderItemId, quantity);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(ex);
+            }
             return Json(newQuantity);
         }
 
@@ -86,6 +91,15 @@ namespace Nop.Plugin.Admin.OrderManagementList.Controllers
                 totalProductsCount += item.Quantity;
             }
             return totalProductsCount;
+        }
+
+        private IActionResult HandleException(Exception ex)
+        {
+            Exception inner = ex;
+            while (inner.InnerException != null) inner = inner.InnerException;
+
+            _logger.Error(inner.Message, ex);
+            return Json("Error: " + inner.Message);
         }
     }
 }

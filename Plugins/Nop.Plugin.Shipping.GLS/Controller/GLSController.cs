@@ -64,6 +64,7 @@ namespace Nop.Plugin.Shipping.GLS.Controller
                 _glsSettings.Tracing = model.Tracing;
                 _glsSettings.PricesEndsWith = model.PricesEndsWith;
                 _glsSettings.FreeShippingLimit = model.FreeShippingLimit;
+                _glsSettings.Separator = model.Separator;
 
                 _settingService.SaveSetting(_glsSettings);                
 
@@ -89,7 +90,8 @@ namespace Nop.Plugin.Shipping.GLS.Controller
                 GLSCountries = _glsService.GetAllCountries(),
                 Tracing = _glsSettings.Tracing,
                 PricesEndsWith = _glsSettings.PricesEndsWith,
-                FreeShippingLimit = _glsSettings.FreeShippingLimit
+                FreeShippingLimit = _glsSettings.FreeShippingLimit,
+                Separator = _glsSettings.Separator
             };
         }
     }

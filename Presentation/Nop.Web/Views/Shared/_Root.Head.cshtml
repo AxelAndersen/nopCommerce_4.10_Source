@@ -74,9 +74,17 @@
     <!--Powered by nopCommerce - https://www.nopCommerce.com-->
 </head>
 <body>
+    <script async src="https://eu-library.klarnaservices.com/merchant.js?uci=0930727e-ac7a-4e48-a554-9db00d3a189c&country=SE"></script>
+
+    <!-- Placement v1 -->
+    <klarna-placement data-id="9ec71ed7-a6d2-4e01-bddf-4cf8d12515ad"
+                      data-purchase_amount=""></klarna-placement>
+    <!-- end Placement -->
+
     @RenderBody()
     @Html.NopCssFiles(this.Url, ResourceLocation.Footer)
     @Html.NopScripts(this.Url, ResourceLocation.Footer)
     @Html.NopInlineScripts(this.Url, ResourceLocation.Footer)
+
 </body>
 </html>

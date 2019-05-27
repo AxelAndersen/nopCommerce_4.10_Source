@@ -22,5 +22,8 @@ namespace Nop.Plugin.Shipping.GLS.Models
         public bool Tracing { get; set; }
 
         public string ErrorMessage { get; set; }
+
+        [Display(Name = "Separator between GLS Shop name and address etc.")]
+        public string Separator { get; set; }
     }
 }

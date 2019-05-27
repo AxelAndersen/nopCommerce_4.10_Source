@@ -99,8 +99,10 @@
                         @order.OrderDateTime
                         <br />
                         <span class="large-text"><b>@order.TotalOrderAmountStr</b></span>
-                        <br /><br />
+                        <br />
                         @Html.Raw(order.FormattedPaymentStatus)
+                        <br />
+                        @Html.Raw(order.PaymentMethodSystemName)
                     </div>
                     <div class="divProductInfo">
                         @foreach (AOOrderItem item in order.PresentationOrderItems)

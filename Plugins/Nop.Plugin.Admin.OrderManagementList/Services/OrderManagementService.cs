@@ -283,10 +283,41 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                 TotalOrderAmount = order.TotalOrderAmount,                
                 PresentationOrderItems = GetProductInfo(order),
                 FormattedPaymentStatus = GetPaymentStatus(order.PaymentStatusId),
-                PaymentMethodSystemName = order.PaymentMethodSystemName
+                PaymentMethodSystemName = GetPaymentMethodName(order.PaymentMethodSystemName)
             }).ToList();
 
             return presentationOrders;
+        }
+
+        private string GetPaymentMethodName(string paymentMethodSystemName)
+        {
+            string result = paymentMethodSystemName;
+            switch(paymentMethodSystemName)
+            {
+                case "Payments.QuickPayV10":
+                    {
+                        result = "QuickPay";
+                        break;
+                    }
+                case "Payments.KlarnaCheckout":
+                    {
+                        result = "Klarna";
+                        break;
+                    }
+                default:
+                    {
+                        if(paymentMethodSystemName.ToLower().Contains("quickpay"))
+                        {
+                            result = "QuickPay";
+                        }
+                        else if(paymentMethodSystemName.ToLower().Contains("klarna"))
+                        {
+                            result = "Klarna";
+                        }
+                        break;
+                    }
+            }
+            return result;
         }
 
         private int GetShipmentId(string shipmentStr)
@@ -463,7 +494,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
                     }
                 case PaymentStatus.Paid:
                     {
-                        formattedStatus = string.Format(mask, "paymentstatus-green", "Betalt og captured");
+                        formattedStatus = string.Format(mask, "paymentstatus-green", "Betalt");
                         break;
                     }
                 case PaymentStatus.PartiallyRefunded:

@@ -142,6 +142,10 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
 
                 AddOrUpdateItem(orderItem, reOrderItem, product, attributeInfo, comb, manufacturerId);
             }
+            else
+            {
+                _logger.Warning("attributeInfoComb != attributeInfo: " + attributeInfoComb + " != " + attributeInfo);
+            }
         }
 
         private void AddOrUpdateItem(OrderItem orderItem, Domain.AOReOrderItem reOrderItem, Product product, string attributeInfo, ProductAttributeCombination comb, int manufacturerId)
