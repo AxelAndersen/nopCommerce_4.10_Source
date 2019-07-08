@@ -80,7 +80,7 @@ namespace Nop.Plugin.Admin.OrderManagementList.Infrastructure
         #region Private methods
         private void AddToReOrderList(Order order)
         {
-            if (order.PaymentStatus == Core.Domain.Payments.PaymentStatus.Pending) // Pending is only for testing. should be Paid
+            if (order.PaymentStatus == Core.Domain.Payments.PaymentStatus.Authorized)
             {
                 _handledOrderItems = 0;
                 foreach (OrderItem orderItem in order.OrderItems)

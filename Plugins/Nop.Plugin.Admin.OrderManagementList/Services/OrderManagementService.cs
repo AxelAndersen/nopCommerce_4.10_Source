@@ -208,13 +208,13 @@ namespace Nop.Plugin.Admin.OrderManagementList.Services
 
         public void SetTrackingNumberOnShipment(string trackingNumber)
         {
-            if (_shipment == null)
+            if (OrderShipment == null)
             {
-                throw new ArgumentException("No Shipment found in SetTrackingNumberOnShipment");
+                throw new ArgumentException("No Shipment found in SetTrackingNumberOnShipment. Add shipment on order directly.");
             }
 
             _shipment.TrackingNumber = trackingNumber;
-            _shipmentService.UpdateShipment(_shipment);
+            _shipmentService.UpdateShipment(OrderShipment);
         }
 
         public void SendShipmentMail(AOOrder order)

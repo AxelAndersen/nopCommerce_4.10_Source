@@ -15,7 +15,7 @@ namespace AO.Services.Extensions
 
             string tmpPrice = price.ToString("F0");
             tmpPrice = tmpPrice.Substring(0, tmpPrice.Length - 1);
-            tmpPrice = tmpPrice + endsWith;
+            tmpPrice += endsWith;
 
             price = Convert.ToDecimal(tmpPrice);
             if (price.ToString().EndsWith("0" + endsWith) && price.ToString().Length > 2)
